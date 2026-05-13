@@ -303,7 +303,7 @@
       margin-bottom: 4px;
     }
 
-    .aha-moment {
+    .insight-box {
       background: linear-gradient(135deg, #e8f0fe 0%, #f0e6ff 100%);
       border: 1px solid #c5cae9;
       border-radius: 8px;
@@ -312,7 +312,7 @@
       font-size: 14px;
     }
 
-    .aha-moment .aha-title {
+    .insight-box .insight-title {
       font-weight: 600;
       color: #5c6bc0;
       margin-bottom: 4px;
@@ -473,7 +473,7 @@
     <div class="meta-bar">
       <div class="meta-item">&#9202; 60分</div>
       <div class="meta-item">&#128187; VSCode + Python Flask</div>
-      <div class="meta-item">&#127919; 中上級エンジニア向け</div>
+      <div class="meta-item">&#127919; エンジニア向け中級</div>
     </div>
   </div>
 </div>
@@ -603,8 +603,8 @@ python app.py
         Gemini がヘルスチェック関数を提案します。<strong>Tab キー</strong>で Accept してください。
       </div>
 
-      <div class="aha-moment">
-        <div class="aha-title">Point</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
         Gemini は現在開いているファイルだけでなく、プロジェクト全体のコードパターンを読み取って補完を生成します。既存エンドポイントのスタイル（<code>jsonify</code> の使い方、レスポンス形式など）に合わせた提案になっていることを確認してみてください。
       </div>
     </div>
@@ -663,8 +663,8 @@ python app.py
         Gemini が <code>get_tickets()</code> を直接編集する差分を提案します。内容を確認して <strong>Accept</strong> してください。
       </div>
 
-      <div class="aha-moment">
-        <div class="aha-title">Point</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
         <strong>チャットパネル</strong>は議論・質問向き、<strong>インラインチャット</strong>はコードの直接編集向きです。用途に応じて使い分けましょう。
       </div>
     </div>
@@ -821,8 +821,8 @@ Flask と SQLite を使用したチケット管理 REST API です。
         </div>
       </div>
 
-      <div class="aha-moment">
-        <div class="aha-title">Aha moment</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
         同じプロンプトでも、<code>GEMINI.md</code> があるだけで出力品質が劇的に変わります。<strong>GEMINI.md は、プロジェクトに追加できる最もレバレッジの高いファイルです。</strong>一度書けば、チームメンバー全員の AI インタラクションが改善されます。
       </div>
     </div>
@@ -998,8 +998,8 @@ flowchart TD
         計画に問題がなければ <strong>承認</strong> してください。Gemini がコードを自動生成します。
       </div>
 
-      <div class="aha-moment">
-        <div class="aha-title">Aha moment</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
         単一のプロンプトから、データベーステーブルの設計・マイグレーション・API エンドポイント・ビジネスロジック（SLA 期限計算）まで、一貫したコードが生成されます。<strong>計画のレビューステップが「あなたの価値を発揮する場所」です。</strong>アーキテクチャの問題はコードが書かれた後ではなく、計画段階で指摘しましょう。
       </div>
     </div>
@@ -1121,8 +1121,8 @@ curl http://localhost:5000/tickets/overdue</pre>
         Gemini の検出結果を確認してください。上記の5つの脆弱性が全て検出されるか確認しましょう。
       </div>
 
-      <div class="aha-moment">
-        <div class="aha-title">Aha moment</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
         Gemini は SQL インジェクションのような技術的な脆弱性だけでなく、設定ミス（debug=True）やハードコードされた秘密鍵なども検出します。<strong>AI はセキュリティの専門家を代替しませんが、最初のパスのコストを劇的に下げます。</strong>
       </div>
     </div>
@@ -1202,8 +1202,8 @@ db.execute(sql, (f'%{q}%',))</pre>
 - エラーメッセージに内部情報（スタックトレース等）を含めないこと
 </pre>
 
-      <div class="aha-moment">
-        <div class="aha-title">Aha moment</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
         セキュリティの知識をエンジニアの頭の中だけでなく、<strong>プロジェクトのコードとして定着</strong>させることが重要です。<code>styleguide.md</code> に書いたルールは、GitHub 上で Pull Request が作成されるたびに自動的にチェックされます。
       </div>
     </div>
