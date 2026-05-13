@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Code Assist ハンズオン</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+          primaryColor: '#e8f0fe',
+          primaryBorderColor: '#4285f4',
+          primaryTextColor: '#202124',
+          lineColor: '#5f6368',
+          secondaryColor: '#e6f4ea',
+          tertiaryColor: '#fef7e0',
+          fontFamily: 'Google Sans, Noto Sans JP, sans-serif',
+          fontSize: '13px'
+        },
+        flowchart: { curve: 'basis', padding: 16 }
+      });
+    });
+  </script>
+  <style>
+    :root {
+      --google-blue: #4285F4;
+      --google-red: #EA4335;
+      --google-yellow: #FBBC04;
+      --google-green: #34A853;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #dadce0;
+      --code-bg: #f1f3f4;
+      --accent: #1a73e8;
+      --warning-bg: #fef7e0;
+      --warning-border: #f9ab00;
+      --danger-bg: #fce8e6;
+      --danger-border: #ea4335;
+      --success-bg: #e6f4ea;
+      --success-border: #34a853;
+      --info-bg: #e8f0fe;
+      --info-border: #4285f4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Google Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #4285f4 50%, #669df6 100%);
+      color: white;
+      padding: 48px 0 40px;
+      text-align: center;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .meta-bar {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 32px 0;
+    }
+
+    .toc h2 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.15s;
+    }
+
+    .toc-item:hover { background: var(--code-bg); }
+
+    .toc-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .toc-text { font-size: 14px; }
+    .toc-time { font-size: 12px; color: var(--text-secondary); }
+
+    .chapter {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .chapter-header {
+      padding: 24px 32px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chapter-num {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .chapter-header h2 {
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .chapter-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .chapter-body { padding: 24px 32px 32px; }
+
+    .exercise {
+      margin: 20px 0;
+      padding: 20px 24px;
+      background: var(--bg);
+      border-radius: 10px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .exercise-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .exercise-title .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    .step {
+      margin: 12px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', 'Source Code Pro', monospace;
+      font-size: 13px;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Source Code Pro', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 12px 0;
+    }
+
+    pre .comment { color: #6a9955; }
+    pre .keyword { color: #569cd6; }
+    pre .string { color: #ce9178; }
+    pre .function { color: #dcdcaa; }
+    pre .decorator { color: #d7ba7d; }
+    pre .variable { color: #9cdcfe; }
+    pre .prompt-label { color: #4ec9b0; }
+
+    .callout {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+      border-left: 4px solid;
+    }
+
+    .callout-warning {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+    }
+
+    .callout-danger {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+    }
+
+    .callout-success {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+    }
+
+    .callout-info {
+      background: var(--info-bg);
+      border-color: var(--info-border);
+    }
+
+    .callout-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .aha-moment {
+      background: linear-gradient(135deg, #e8f0fe 0%, #f0e6ff 100%);
+      border: 1px solid #c5cae9;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    .aha-moment .aha-title {
+      font-weight: 600;
+      color: #5c6bc0;
+      margin-bottom: 4px;
+    }
+
+    .prompt-box {
+      background: #fff3e0;
+      border: 1px solid #ffe0b2;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 12px 0;
+    }
+
+    .prompt-box .prompt-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e65100;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .prompt-box .prompt-text {
+      font-size: 14px;
+      color: #bf360c;
+      font-style: italic;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-col {
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 13px;
+    }
+
+    .comparison-before {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+    }
+
+    .comparison-after {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+
+    .comparison-label {
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .comparison-before .comparison-label { color: var(--google-red); }
+    .comparison-after .comparison-label { color: var(--google-green); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--code-bg);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 8px 0 8px 28px;
+      position: relative;
+      font-size: 14px;
+    }
+
+    .checklist li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 3px;
+    }
+
+    .architecture-diagram {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .time-tag {
+      display: inline-block;
+      background: var(--code-bg);
+      color: var(--text-secondary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .vuln-tag {
+      display: inline-block;
+      background: var(--danger-bg);
+      color: var(--google-red);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+      .comparison { grid-template-columns: 1fr; }
+      .meta-bar { flex-direction: column; align-items: center; }
+      .chapter-body, .chapter-header { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="container">
+    <div class="header-badge">Hands-on Workshop</div>
+    <h1>Gemini Code Assist ハンズオン</h1>
+    <p>Context Engineering / Agentic Coding / Secure Development</p>
+    <div class="meta-bar">
+      <div class="meta-item">&#9202; 60分</div>
+      <div class="meta-item">&#128187; VSCode + Python Flask</div>
+      <div class="meta-item">&#127919; 中上級エンジニア向け</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h2>Workshop Agenda</h2>
+  <div class="toc-grid">
+    <a href="#ch0" class="toc-item">
+      <div class="toc-badge" style="background:#9e9e9e;">0</div>
+      <div><div class="toc-text">セットアップ確認</div><div class="toc-time">2分</div></div>
+    </a>
+    <a href="#ch1" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-blue);">1</div>
+      <div><div class="toc-text">基本操作</div><div class="toc-time">10分</div></div>
+    </a>
+    <a href="#ch2" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-green);">2</div>
+      <div><div class="toc-text">Context Engineering</div><div class="toc-time">15分</div></div>
+    </a>
+    <a href="#ch3" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-yellow); color:#333;">3</div>
+      <div><div class="toc-text">Agentic Coding</div><div class="toc-time">18分</div></div>
+    </a>
+    <a href="#ch4" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-red);">4</div>
+      <div><div class="toc-text">セキュア開発</div><div class="toc-time">13分</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- ===== CHAPTER 0: SETUP ===== -->
+<div class="chapter" id="ch0">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#9e9e9e;">Chapter 0</div>
+    <h2>セットアップ確認</h2>
+    <p>事前準備の確認（インストールは事前作業として完了済み）<span class="time-tag" style="margin-left:8px;">2分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <h3>事前準備チェックリスト</h3>
+    <ul class="checklist">
+      <li>VSCode がインストールされている</li>
+      <li>Gemini Code Assist 拡張機能がインストール・ログイン済み</li>
+      <li>Python 3.9 以上がインストールされている</li>
+      <li><code>starter/</code> フォルダを作業ディレクトリにコピーし、VSCode で開いている</li>
+      <li>仮想環境のセットアップが完了している（下記参照）</li>
+      <li><code>python app.py</code> でサーバーが起動し <code>http://localhost:5000/tickets</code> にアクセスできる</li>
+    </ul>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">環境のセットアップ</div>
+      お使いの環境を汚さないよう、<strong>venv（仮想環境）</strong>を使用してセットアップしてください。
+    </div>
+
+<pre><span class="comment"># 1. starter/ を作業ディレクトリにコピー</span>
+cp -r starter/ my-handson/
+<span class="keyword">cd</span> my-handson/
+
+<span class="comment"># 2. Python 仮想環境を作成・有効化</span>
+python3 -m venv .venv
+<span class="keyword">source</span> .venv/bin/activate   <span class="comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="comment"># 3. 依存パッケージをインストール</span>
+pip install -r requirements.txt
+
+<span class="comment"># 4. アプリを起動して動作確認</span>
+python app.py
+<span class="comment"># http://localhost:5000/tickets にアクセスできればOK</span>
+</pre>
+
+    <h3 style="margin-top:20px;">題材アプリ: お問い合わせ管理 API</h3>
+    <p>Flask + SQLite で構築したシンプルなチケット管理 REST API です。</p>
+
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>説明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>GET</code></td><td><code>/tickets</code></td><td>チケット一覧取得（status, priority でフィルタ可）</td></tr>
+        <tr><td><code>GET</code></td><td><code>/tickets/&lt;id&gt;</code></td><td>チケット詳細取得</td></tr>
+        <tr><td><code>POST</code></td><td><code>/tickets</code></td><td>チケット作成</td></tr>
+        <tr><td><code>PUT</code></td><td><code>/tickets/&lt;id&gt;</code></td><td>チケット更新</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/tickets/&lt;id&gt;/status</code></td><td>ステータス変更</td></tr>
+        <tr><td><code>GET</code></td><td><code>/tickets/search?q=</code></td><td>チケット検索</td></tr>
+      </tbody>
+    </table>
+
+    <div class="architecture-diagram">starter/
+├── app.py              # Flask アプリケーション本体
+├── requirements.txt    # 依存パッケージ
+├── test_api.sh         # curl テストスクリプト
+└── .gitignore</div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 1: BASICS ===== -->
+<div class="chapter" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-blue);">Chapter 1</div>
+    <h2>基本操作</h2>
+    <p>コード補完・チャットパネル・インラインチャットの3つのインタラクション <span class="time-tag">10分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <!-- Exercise 1-1 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        1-1. コード補完（Tab）
+        <span class="badge">3分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        <code>app.py</code> をエディタで開き、ファイル末尾（<code>if __name__</code> の直前）に移動します。
+      </div>
+
+      <div class="step" data-step="2">
+        以下のコードを入力し始めてください：
+<pre><span class="decorator">@app.route</span>(<span class="string">'/health'</span>)
+<span class="keyword">def</span> </pre>
+      </div>
+
+      <div class="step" data-step="3">
+        Gemini がヘルスチェック関数を提案します。<strong>Tab キー</strong>で Accept してください。
+      </div>
+
+      <div class="aha-moment">
+        <div class="aha-title">Point</div>
+        Gemini は現在開いているファイルだけでなく、プロジェクト全体のコードパターンを読み取って補完を生成します。既存エンドポイントのスタイル（<code>jsonify</code> の使い方、レスポンス形式など）に合わせた提案になっていることを確認してみてください。
+      </div>
+    </div>
+
+    <!-- Exercise 1-2 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        1-2. チャットパネル + <code>@</code> ファイル参照
+        <span class="badge">4分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        サイドバーの <strong>Gemini アイコン</strong> をクリックしてチャットパネルを開きます。
+      </div>
+
+      <div class="step" data-step="2">
+        チャット欄に <code>@</code> を入力すると、ファイル一覧のドロップダウンが表示されます。<code>app.py</code> を選択してください。
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Gemini に入力するプロンプト</div>
+        <div class="prompt-text">@app.py の get_db() 関数と init_db() 関数を説明して、改善点を提案してください</div>
+      </div>
+
+      <div class="step" data-step="3">
+        Gemini の回答を確認してください。データベース接続の管理方法、シード データの投入ロジック、改善提案（コンテキストマネージャの使用など）が含まれているはずです。
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-title">@ メンションの種類</div>
+        <code>@</code> を入力すると、ファイルだけでなくフォルダも指定できます。複数のファイルを <code>@</code> で指定することで、Gemini に適切なコンテキストを与えることができます。
+      </div>
+    </div>
+
+    <!-- Exercise 1-3 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        1-3. インラインチャット
+        <span class="badge">3分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        <code>app.py</code> の <code>get_tickets()</code> 関数内にカーソルを置きます。
+      </div>
+
+      <div class="step" data-step="2">
+        <strong>Ctrl+I</strong>（Mac: <strong>Cmd+I</strong>）でインラインチャットを起動します。
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">インラインチャットに入力</div>
+        <div class="prompt-text">limit と offset のクエリパラメータでページネーションを追加して</div>
+      </div>
+
+      <div class="step" data-step="3">
+        Gemini が <code>get_tickets()</code> を直接編集する差分を提案します。内容を確認して <strong>Accept</strong> してください。
+      </div>
+
+      <div class="aha-moment">
+        <div class="aha-title">Point</div>
+        <strong>チャットパネル</strong>は議論・質問向き、<strong>インラインチャット</strong>はコードの直接編集向きです。用途に応じて使い分けましょう。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 2: CONTEXT ENGINEERING ===== -->
+<div class="chapter" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-green);">Chapter 2</div>
+    <h2>Context Engineering</h2>
+    <p>GEMINI.md でプロジェクトの規約を AI に伝え、出力品質を劇的に変える <span class="time-tag">15分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">Context Engineering とは</div>
+      AI に渡すコンテキスト（指示・背景情報・規約）を設計・最適化すること。プロンプトだけでなく、<strong>プロジェクトレベルの設定ファイル</strong>で一貫した品質を確保するのがポイントです。
+    </div>
+
+    <!-- Exercise 2-1 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        2-1. Before: GEMINI.md なしでコード生成
+        <span class="badge">3分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        チャットパネルを開き、以下のプロンプトを入力します：
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Gemini に入力するプロンプト</div>
+        <div class="prompt-text">@app.py チケットにカテゴリ分類機能を追加してください。カテゴリはマスターテーブルで管理し、チケット作成時にカテゴリを指定できるようにしてください。また、カテゴリ別のチケット集計APIも作成してください。</div>
+      </div>
+
+      <div class="step" data-step="2">
+        生成されたコードの以下の点を<strong>観察してください</strong>（まだ Accept しないでください）：
+      </div>
+
+      <ul style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li>変数名の命名規則は統一されているか？</li>
+        <li>エラーハンドリングはあるか？形式は？</li>
+        <li>SQL クエリにパラメータ化クエリが使われているか？</li>
+        <li>docstring やコメントはあるか？</li>
+      </ul>
+    </div>
+
+    <!-- Exercise 2-2 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        2-2. GEMINI.md を作成する
+        <span class="badge">4分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        プロジェクトのルートディレクトリに <code>GEMINI.md</code> を作成し、以下の内容をコピーしてください：
+      </div>
+
+<pre><span class="comment"># お問い合わせ管理 API</span>
+
+<span class="comment">## プロジェクト概要</span>
+Flask と SQLite を使用したチケット管理 REST API です。
+顧客からのお問い合わせをチケットとして管理し、
+ステータス管理・検索・集計機能を提供します。
+
+<span class="comment">## コーディング規約</span>
+
+<span class="comment">### 命名規則</span>
+- 変数名・関数名: snake_case
+- 定数: UPPER_SNAKE_CASE
+- HTTPステータスコード: 定数で定義せず数値リテラルを使用
+
+<span class="comment">### ドキュメント</span>
+- 全ての関数に Google Style の docstring を記述すること
+- 複雑なロジックには日本語でコメントを付けること
+- API エンドポイントの docstring には HTTP メソッドとパスを含めること
+
+<span class="comment">### エラーハンドリング</span>
+- API レスポンスは必ず JSON 形式で返すこと
+- エラー時は {"error": "説明"} の形式で適切な HTTP ステータスコードを返す
+- 400: バリデーションエラー、404: リソース未検出、500: サーバーエラー
+
+<span class="comment">### データベース</span>
+- SQL クエリには必ずパラメータ化クエリ（? プレースホルダー）を使用
+- f-string や % 演算子で SQL を組み立てることは禁止
+- データベース接続は使用後に必ず close すること
+
+<span class="comment">### バリデーション</span>
+- 全てのユーザー入力に対してバリデーションを実施すること
+- 文字列フィールドには最大長制限を設けること
+- ステータスは許可された値のみ受け付けること（enum パターン）
+
+<span class="comment">### セキュリティ</span>
+- 秘密鍵やパスワードをハードコードしてはならない
+- 本番環境では debug モードを無効にすること
+</pre>
+
+      <div class="step" data-step="2">
+        ファイルを保存します。Gemini は次のプロンプトから自動的にこのファイルを読み込みます。
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-title">GEMINI.md の階層構造</div>
+        <code>~/.gemini/GEMINI.md</code>（グローバル）、プロジェクトルートの <code>GEMINI.md</code>、サブディレクトリの <code>GEMINI.md</code> の順に読み込まれます。会社全体の規約をグローバルに、プロジェクト固有のルールをプロジェクトルートに置くことで、チーム全体で一貫した AI 出力を得られます。
+      </div>
+    </div>
+
+    <!-- Exercise 2-3 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        2-3. After: GEMINI.md ありでコード生成
+        <span class="badge">3分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        <strong>新しいチャットセッション</strong>を開始してください（チャットパネル上部の「+」ボタン）。
+      </div>
+
+      <div class="step" data-step="2">
+        Exercise 2-1 と<strong>全く同じプロンプト</strong>を入力します：
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">同じプロンプトを再度入力</div>
+        <div class="prompt-text">@app.py チケットにカテゴリ分類機能を追加してください。カテゴリはマスターテーブルで管理し、チケット作成時にカテゴリを指定できるようにしてください。また、カテゴリ別のチケット集計APIも作成してください。</div>
+      </div>
+
+      <div class="step" data-step="3">
+        Before / After の違いを比較してみてください：
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-col comparison-before">
+          <div class="comparison-label">Before（GEMINI.md なし）</div>
+          <ul style="font-size:13px; margin-left:16px;">
+            <li>命名規則がバラバラ</li>
+            <li>エラーハンドリングが不十分</li>
+            <li>docstring がないことがある</li>
+            <li>SQL にパラメータ化クエリが使われない場合がある</li>
+            <li>バリデーションなし</li>
+          </ul>
+        </div>
+        <div class="comparison-col comparison-after">
+          <div class="comparison-label">After（GEMINI.md あり）</div>
+          <ul style="font-size:13px; margin-left:16px;">
+            <li>一貫した snake_case</li>
+            <li>{"error": "..."} 形式のレスポンス</li>
+            <li>Google Style docstring 付き</li>
+            <li>パラメータ化クエリ使用</li>
+            <li>入力バリデーション付き</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="aha-moment">
+        <div class="aha-title">Aha moment</div>
+        同じプロンプトでも、<code>GEMINI.md</code> があるだけで出力品質が劇的に変わります。<strong>GEMINI.md は、プロジェクトに追加できる最もレバレッジの高いファイルです。</strong>一度書けば、チームメンバー全員の AI インタラクションが改善されます。
+      </div>
+    </div>
+
+    <!-- Exercise 2-4 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        2-4. .gemini/styleguide.md を作成する
+        <span class="badge">3分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        プロジェクトルートに <code>.gemini/</code> ディレクトリを作成し、その中に <code>styleguide.md</code> を作成します：
+      </div>
+
+<pre><span class="comment"># コードレビュー スタイルガイド</span>
+
+<span class="comment">## 必須チェック項目</span>
+
+<span class="comment">### セキュリティ</span>
+- SQL クエリにユーザー入力を直接埋め込んでいないか
+- 入力バリデーションが実装されているか
+- 秘密情報がハードコードされていないか
+
+<span class="comment">### コード品質</span>
+- 関数に docstring が記述されているか
+- エラーハンドリングが適切か
+- 変数名が snake_case で命名されているか
+
+<span class="comment">### Flask 固有</span>
+- レスポンスが jsonify() で返されているか
+- HTTP ステータスコードが適切か
+- データベース接続が適切にクローズされているか
+</pre>
+
+      <div class="callout callout-info">
+        <div class="callout-title">.gemini/styleguide.md の役割</div>
+        GitHub と連携している場合、Pull Request が作成されると Gemini がこのファイルのルールに基づいて<strong>自動的にコードレビュー</strong>を実施します。自然言語でルールを書くだけで、チームのレビュー基準が自動化されます。
+      </div>
+
+      <h4 style="margin-top: 20px; font-size: 15px;">Gemini Code Review の仕組み</h4>
+
+      <div style="margin: 16px 0; text-align: center;">
+        <pre class="mermaid">
+flowchart TD
+    A["Developer<br/>git push"] --> B["Pull Request 作成"]
+    B --> C{"Gemini Code Review<br/>自動起動"}
+    C --> D["styleguide.md<br/>ルールに基づく検査"]
+    C --> E["コード差分分析<br/>バグ・品質の指摘"]
+    C --> F["セキュリティチェック<br/>SQLi, CSRF 等の検出"]
+    D --> G["PR にレビューコメント投稿"]
+    E --> G
+    F --> G
+
+    style A fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style B fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style C fill:#fff3e0,stroke:#f9ab00,color:#202124
+    style D fill:#e6f4ea,stroke:#34a853,color:#202124
+    style E fill:#e6f4ea,stroke:#34a853,color:#202124
+    style F fill:#fce8e6,stroke:#ea4335,color:#202124
+    style G fill:#e8f0fe,stroke:#1a73e8,color:#202124
+        </pre>
+      </div>
+
+      <div class="callout callout-success">
+        <div class="callout-title">セットアップ方法</div>
+        <ol style="margin: 8px 0 0 16px; font-size: 13px;">
+          <li>GitHub Marketplace から <a href="https://github.com/marketplace/gemini-code-assist" style="color: var(--accent);">Gemini Code Assist</a> アプリをリポジトリにインストール</li>
+          <li>リポジトリのルートに <code>.gemini/styleguide.md</code> を配置</li>
+          <li>PR を作成すると、<strong>Gemini が自動的にレビューコメントを投稿</strong></li>
+        </ol>
+        <p style="margin-top: 8px; font-size: 13px;"><code>styleguide.md</code> がない場合でも一般的なベストプラクティスに基づいてレビューされますが、プロジェクト固有のルールを定義することでレビュー精度が大幅に向上します。</p>
+      </div>
+    </div>
+
+    <!-- Exercise 2-5 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        2-5. 解説
+        <span class="badge">2分</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>ファイル</th><th>用途</th><th>読み込みタイミング</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>GEMINI.md</code></td><td>プロジェクトの規約・コンテキスト</td><td>全てのプロンプトで自動</td></tr>
+          <tr><td><code>.gemini/styleguide.md</code></td><td>コードレビュールール</td><td>PR レビュー時</td></tr>
+          <tr><td><code>@</code> ファイル参照</td><td>特定ファイルのコンテキスト追加</td><td>プロンプトで明示指定時</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-success">
+        <div class="callout-title">持ち帰りアクション</div>
+        明日から自分のプロジェクトに <code>GEMINI.md</code> を追加してみてください。10分の投資で、チーム全体の AI 出力品質が向上します。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 3: AGENTIC CODING ===== -->
+<div class="chapter" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-yellow); color:#333;">Chapter 3</div>
+    <h2>Agentic Coding</h2>
+    <p>Agent モードで複数ファイルにまたがる機能を一気に実装する <span class="time-tag">18分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">Agent モードとは</div>
+      通常のチャットが「質問 &rarr; 回答」なのに対し、Agent モードは「目標を伝える &rarr; 計画を提案 &rarr; 承認後に自動実行」というワークフローです。複数ファイルの作成・編集、ターミナルコマンドの実行まで、Gemini が自律的に行います。
+    </div>
+
+    <!-- Exercise 3-1 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        3-1. Agent モードを有効にする
+        <span class="badge">2分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        チャットパネルを開きます。
+      </div>
+
+      <div class="step" data-step="2">
+        チャット入力欄の上部にある <strong>Agent モードのトグル</strong> をオンにします（またはドロップダウンから「Agent」を選択）。
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-title">Agent モードの動作フロー</div>
+        <strong>1. 分析</strong>: プロジェクト全体のコードを読み取り<br>
+        <strong>2. 計画</strong>: 変更内容の計画を提示<br>
+        <strong>3. 承認</strong>: ユーザーが計画をレビュー・承認<br>
+        <strong>4. 実行</strong>: コードの生成・編集を自動実行
+      </div>
+    </div>
+
+    <!-- Exercise 3-2 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        3-2. 対応履歴 & SLA 管理機能を追加する
+        <span class="badge">6分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        Agent モードのチャットに以下のプロンプトを入力します：
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Agent モードに入力するプロンプト</div>
+        <div class="prompt-text">お問い合わせ管理APIに対応履歴とSLA管理機能を追加してください。<br><br>
+要件:<br>
+1. 対応履歴: 各チケットに対するサポート担当者の対応記録を保存できるようにする。内部メモ（顧客に見せない）フラグも持つ。<br>
+2. SLA管理: 優先度ごとに対応期限（時間）を定義し、チケットがSLA違反かどうかを判定できるようにする。<br>
+3. 必要なDBテーブル、APIエンドポイントを全て作成してください。</div>
+      </div>
+
+      <div class="step" data-step="2">
+        Gemini が<strong>実行計画</strong>を提示します。以下の点をレビューしてください：
+      </div>
+
+      <ul style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li>新しいテーブル（<code>responses</code>, <code>sla_policies</code>）の設計は適切か</li>
+        <li>外部キー制約は正しく設定されているか</li>
+        <li>SLA 違反判定のロジックは妥当か</li>
+        <li>GEMINI.md の規約に沿っているか</li>
+      </ul>
+
+      <div class="step" data-step="3">
+        計画に問題がなければ <strong>承認</strong> してください。Gemini がコードを自動生成します。
+      </div>
+
+      <div class="aha-moment">
+        <div class="aha-title">Aha moment</div>
+        単一のプロンプトから、データベーステーブルの設計・マイグレーション・API エンドポイント・ビジネスロジック（SLA 期限計算）まで、一貫したコードが生成されます。<strong>計画のレビューステップが「あなたの価値を発揮する場所」です。</strong>アーキテクチャの問題はコードが書かれた後ではなく、計画段階で指摘しましょう。
+      </div>
+    </div>
+
+    <!-- Exercise 3-3 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        3-3. GEMINI.md との相乗効果を確認
+        <span class="badge">5分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        Agent が生成したコードを確認し、以下の点をチェックしてください：
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-col comparison-after" style="grid-column: 1 / -1;">
+          <div class="comparison-label">GEMINI.md の規約が適用されているか確認</div>
+          <ul style="font-size:13px; margin-left:16px;">
+            <li>snake_case の命名規則に従っているか</li>
+            <li>Google Style の docstring が付いているか</li>
+            <li>パラメータ化クエリを使用しているか（f-string ではなく）</li>
+            <li>エラーレスポンスが <code>{"error": "..."}</code> 形式か</li>
+            <li>入力バリデーションが含まれているか</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <div class="callout-title">Agent モード + GEMINI.md = 一貫性</div>
+        GEMINI.md がないと Agent の出力はプロンプトごとにスタイルがバラつきます。GEMINI.md があることで、Agent モードでも一貫した規約に沿ったコードが生成されます。
+      </div>
+    </div>
+
+    <!-- Exercise 3-4 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        3-4. 動作確認
+        <span class="badge">5分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        アプリを再起動します：
+      </div>
+
+<pre><span class="comment"># ターミナルで実行</span>
+python app.py</pre>
+
+      <div class="step" data-step="2">
+        新しいエンドポイントをテストします：
+      </div>
+
+<pre><span class="comment"># 対応履歴を追加</span>
+curl -X POST http://localhost:5000/tickets/1/responses \
+  -H "Content-Type: application/json" \
+  -d '{"responder": "鈴木", "message": "パスワードリセットのリンクを送信しました", "is_internal": false}'
+
+<span class="comment"># 対応履歴を取得</span>
+curl http://localhost:5000/tickets/1/responses
+
+<span class="comment"># SLA ステータスを確認</span>
+curl http://localhost:5000/tickets/1/sla-status
+
+<span class="comment"># SLA 違反チケット一覧</span>
+curl http://localhost:5000/tickets/overdue</pre>
+
+      <div class="step" data-step="3">
+        正常にレスポンスが返ることを確認してください。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 4: SECURITY ===== -->
+<div class="chapter" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-red);">Chapter 4</div>
+    <h2>セキュア開発</h2>
+    <p>脆弱性を検出し、修正し、ルールとして定着させる <span class="time-tag">13分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-danger">
+      <div class="callout-title">このアプリには意図的な脆弱性が含まれています</div>
+      <code>starter/app.py</code> には、教育目的で以下の脆弱性が意図的に埋め込まれています。<strong>これらは本番コードでは絶対に使用してはなりません。</strong>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>脆弱性</th><th>場所</th><th>内容</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="vuln-tag">SQLi</span></td><td><code>search_tickets()</code></td><td>f-string で SQL を組み立て</td></tr>
+        <tr><td><span class="vuln-tag">SQLi</span></td><td><code>get_tickets()</code> フィルタ</td><td>status パラメータを直接 SQL に埋め込み</td></tr>
+        <tr><td><span class="vuln-tag">Validation</span></td><td><code>update_status()</code></td><td>任意の文字列をステータスとして受け付ける</td></tr>
+        <tr><td><span class="vuln-tag">Config</span></td><td><code>app.run()</code></td><td>debug=True でデバッガー露出</td></tr>
+        <tr><td><span class="vuln-tag">Secrets</span></td><td><code>app.secret_key</code></td><td>秘密鍵がハードコード</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Exercise 4-1 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        4-1. Gemini で脆弱性を検出する
+        <span class="badge">4分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        チャットパネルで以下のプロンプトを入力します：
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Gemini に入力するプロンプト</div>
+        <div class="prompt-text">@app.py このコードをセキュリティの観点で包括的にレビューしてください。OWASP Top 10 を基準に、SQLインジェクション、入力バリデーション、認証・認可、設定の問題に注目してください。各脆弱性について、リスクレベルと具体的な修正方法も提案してください。</div>
+      </div>
+
+      <div class="step" data-step="2">
+        Gemini の検出結果を確認してください。上記の5つの脆弱性が全て検出されるか確認しましょう。
+      </div>
+
+      <div class="aha-moment">
+        <div class="aha-title">Aha moment</div>
+        Gemini は SQL インジェクションのような技術的な脆弱性だけでなく、設定ミス（debug=True）やハードコードされた秘密鍵なども検出します。<strong>AI はセキュリティの専門家を代替しませんが、最初のパスのコストを劇的に下げます。</strong>
+      </div>
+    </div>
+
+    <!-- Exercise 4-2 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        4-2. Agent モードで脆弱性を修正する
+        <span class="badge">4分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        Agent モードをオンにして、以下のプロンプトを入力します：
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Agent モードに入力するプロンプト</div>
+        <div class="prompt-text">このコードベースのセキュリティ脆弱性を全て修正してください。<br><br>
+具体的に:<br>
+1. 全ての SQL インジェクションをパラメータ化クエリで修正<br>
+2. チケットの title フィールドに入力バリデーション追加（1-200文字、HTML タグ除去）<br>
+3. ステータス更新時に許可された値のみ受け付けるバリデーション追加<br>
+4. secret_key を環境変数から読み込むように変更<br>
+5. debug モードを環境変数で制御するように変更</div>
+      </div>
+
+      <div class="step" data-step="2">
+        Agent の計画をレビューし、承認してください。
+      </div>
+
+      <div class="step" data-step="3">
+        修正後、特に <code>search_tickets()</code> のコードが以下のように変わっていることを確認：
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-col comparison-before">
+          <div class="comparison-label">Before（脆弱）</div>
+<pre style="background:transparent; color:inherit; padding:8px 0; font-size:12px;">sql = f"SELECT * FROM tickets
+WHERE title LIKE '%{q}%'"
+db.execute(sql)</pre>
+        </div>
+        <div class="comparison-col comparison-after">
+          <div class="comparison-label">After（安全）</div>
+<pre style="background:transparent; color:inherit; padding:8px 0; font-size:12px;">sql = "SELECT * FROM tickets
+WHERE title LIKE ?"
+db.execute(sql, (f'%{q}%',))</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercise 4-3 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        4-3. セキュリティルールを styleguide.md に定着させる
+        <span class="badge">3分</span>
+      </div>
+
+      <div class="step" data-step="1">
+        <code>.gemini/styleguide.md</code> を開き、以下のセキュリティルールを<strong>先頭に</strong>追加します：
+      </div>
+
+<pre><span class="comment">## セキュリティ（最優先）</span>
+
+<span class="comment">### SQL インジェクション防止</span>
+- f-string、% 演算子、.format() を SQL 文で絶対に使用しないこと
+- 必ずパラメータ化クエリ（? プレースホルダー）を使用すること
+
+<span class="comment">### 入力バリデーション</span>
+- 全てのユーザー入力に対してバリデーションを実施すること
+- 文字列フィールドには最大長制限を設けること
+- HTML タグやスクリプトタグを除去またはエスケープすること
+- ステータス等の列挙値は許可リストで検証すること
+
+<span class="comment">### 設定</span>
+- 秘密鍵は環境変数から読み込むこと
+- 本番環境で debug=True を使用しないこと
+- エラーメッセージに内部情報（スタックトレース等）を含めないこと
+</pre>
+
+      <div class="aha-moment">
+        <div class="aha-title">Aha moment</div>
+        セキュリティの知識をエンジニアの頭の中だけでなく、<strong>プロジェクトのコードとして定着</strong>させることが重要です。<code>styleguide.md</code> に書いたルールは、GitHub 上で Pull Request が作成されるたびに自動的にチェックされます。
+      </div>
+    </div>
+
+    <!-- Exercise 4-4 -->
+    <div class="exercise">
+      <div class="exercise-title">
+        4-4. 補足: Google Cloud のセキュア AI 開発エコシステム
+        <span class="badge">2分</span>
+      </div>
+
+      <p style="margin-bottom: 12px;">Gemini Code Assist のセキュリティ機能に加え、Google Cloud にはAI を安全に活用するためのエコシステムがあります。</p>
+
+      <table>
+        <thead>
+          <tr><th>機能</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>PR 自動レビュー</strong></td>
+            <td>GitHub 連携時、PR 作成で自動的にセキュリティ観点のレビューを実施（SQLi, CSRF, IDOR, 不安全なデータ処理を検出）</td>
+          </tr>
+          <tr>
+            <td><strong>styleguide.md</strong></td>
+            <td>自然言語で定義したルールに基づく自動コードレビュー</td>
+          </tr>
+          <tr>
+            <td><strong>Snyk MCP 連携</strong></td>
+            <td>MCP サーバーとして Snyk を接続し、コード生成時にリアルタイムで脆弱なパターンを検出</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: 20px; font-size: 15px;">Gemini CLI の Sandbox モード</h4>
+      <div class="callout callout-info">
+        <div class="callout-title">gVisor によるサンドボックス実行</div>
+        <a href="https://cli.gemini.google.com/" style="color: var(--accent);">Gemini CLI</a> では、AI が実行するシェルコマンドやファイル操作を <strong>gVisor</strong>（ユーザースペースカーネル）で隔離実行できます。全てのシステムコールがサンドボックス内で処理されるため、AI が意図しない操作でホスト環境を破壊するリスクを排除できます。
+        <br><br>
+        <strong>主な特徴:</strong>
+        <ul style="margin: 8px 0 0 16px; font-size: 13px;">
+          <li>許可ベースのアクセス制御 &mdash; 明示的に許可されたファイル・リソースのみアクセス可能</li>
+          <li>シェルコマンドの事前検証 &mdash; 実行前に安全性を確認</li>
+          <li><code>/security:analyze</code> コマンド &mdash; git diff を対象にハードコードされた秘密情報、インジェクション脆弱性、アクセス制御の問題を検出</li>
+        </ul>
+
+        <div style="margin: 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <div class="comparison-label" style="color: var(--google-red); text-align: center; margin-bottom: 8px; font-size: 13px;">Without Sandbox</div>
+            <pre class="mermaid">
+flowchart TB
+    A1["Gemini CLI"] --> B1["Gemini Model\nコマンド生成"]
+    B1 --> C1["ホスト OS 上で\n直接実行"]
+    C1 --> D1["rm -rf /\n意図しない削除"]
+    C1 --> E1["機密ファイル読取\n~/.ssh/*, .env"]
+    C1 --> F1["外部送信\ncurl attacker.com"]
+
+    style A1 fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style B1 fill:#e6f4ea,stroke:#34a853,color:#202124
+    style C1 fill:#fce8e6,stroke:#ea4335,color:#202124
+    style D1 fill:#fce8e6,stroke:#ea4335,color:#202124
+    style E1 fill:#fce8e6,stroke:#ea4335,color:#202124
+    style F1 fill:#fce8e6,stroke:#ea4335,color:#202124
+            </pre>
+          </div>
+          <div>
+            <div class="comparison-label" style="color: var(--google-green); text-align: center; margin-bottom: 8px; font-size: 13px;">With Sandbox (gVisor)</div>
+            <pre class="mermaid">
+flowchart TB
+    A2["Gemini CLI"] --> B2["Gemini Model\nコマンド生成"]
+    B2 --> SB
+
+    subgraph SB["gVisor Sandbox — 隔離されたユーザースペースカーネル"]
+      direction TB
+      G2["全 syscall を仲介"] --> D2["プロジェクト内\nファイル操作 ✓"]
+      G2 --> E2["許可されたコマンド\n実行 ✓"]
+    end
+
+    G2 --x|"ブロック"| F2["ホスト OS\nスコープ外アクセス拒否"]
+
+    style A2 fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style B2 fill:#e6f4ea,stroke:#34a853,color:#202124
+    style SB fill:#fef7e0,stroke:#f9ab00,color:#202124
+    style G2 fill:#fef7e0,stroke:#f9ab00,color:#202124
+    style D2 fill:#e6f4ea,stroke:#34a853,color:#202124
+    style E2 fill:#e6f4ea,stroke:#34a853,color:#202124
+    style F2 fill:#fce8e6,stroke:#ea4335,color:#202124
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 20px; font-size: 15px;">Model Armor</h4>
+      <div class="callout callout-info">
+        <div class="callout-title">LLM の入出力を守るセキュリティレイヤー</div>
+        <a href="https://cloud.google.com/security/products/model-armor" style="color: var(--accent);">Model Armor</a> は、LLM のプロンプト（入力）とレスポンス（出力）をリアルタイムでスクリーニングする Google Cloud のセキュリティサービスです。Gemini だけでなく、OpenAI や Anthropic など<strong>全てのモデルに対応</strong>しています。
+        <br><br>
+        <strong>主な機能:</strong>
+        <ul style="margin: 8px 0 0 16px; font-size: 13px;">
+          <li><strong>プロンプトインジェクション検出</strong> &mdash; 高度な ML でジェイルブレイク攻撃を検出・ブロック</li>
+          <li><strong>有害コンテンツフィルタリング</strong> &mdash; ヘイトスピーチ、ハラスメント等を設定可能な信頼度レベルで制御</li>
+          <li><strong>機密データ保護</strong> &mdash; Cloud DLP 連携で 150 種類以上の PII を検出・マスキング</li>
+          <li><strong>マルウェア・不正 URL 検出</strong> &mdash; ファイルや URL の安全性を検証</li>
+        </ul>
+        <br>
+        Model Armor を使うことで、LLM へのプロンプト（入力）とレスポンス（出力）の両方をリアルタイムでチェックし、プロンプトインジェクションや機密データの漏洩を未然に防ぐことができます。
+
+        <div style="margin: 12px 0; text-align: center;">
+          <pre class="mermaid">
+flowchart LR
+    A["User Input"] --> B
+    subgraph B["Model Armor - 入力"]
+      direction TB
+      B1["Prompt Injection 検出"]
+      B2["PII マスキング"]
+      B3["不正 URL ブロック"]
+    end
+    B --> C["Gemini\nCode Assist"]
+    C --> D
+    subgraph D["Model Armor - 出力"]
+      direction TB
+      D1["有害コンテンツ検出"]
+      D2["機密データ除去"]
+    end
+    D --> E["Response"]
+
+    style A fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style C fill:#e6f4ea,stroke:#34a853,color:#202124
+    style E fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style B fill:#fce8e6,stroke:#ea4335,color:#202124
+    style D fill:#fce8e6,stroke:#ea4335,color:#202124
+          </pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== WRAP UP ===== -->
+<div class="chapter" id="wrapup">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#616161;">Wrap-up</div>
+    <h2>まとめ & 次のステップ</h2>
+    <p><span class="time-tag">2分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <h3>本日のポイント</h3>
+    <table>
+      <thead>
+        <tr><th>Chapter</th><th>学んだこと</th><th>持ち帰りアクション</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ch.1 基本操作</td>
+          <td>Tab補完 / チャット / インラインチャットの使い分け</td>
+          <td>日常のコーディングで使い始める</td>
+        </tr>
+        <tr>
+          <td>Ch.2 Context Engineering</td>
+          <td>GEMINI.md で AI の出力品質を制御</td>
+          <td><strong>明日、自分のプロジェクトに GEMINI.md を追加</strong></td>
+        </tr>
+        <tr>
+          <td>Ch.3 Agentic Coding</td>
+          <td>Agent モードで複雑な機能を自律実装</td>
+          <td>フィーチャーブランチで Agent モードを試す</td>
+        </tr>
+        <tr>
+          <td>Ch.4 セキュア開発</td>
+          <td>脆弱性検出 &rarr; 修正 &rarr; ルール化</td>
+          <td>styleguide.md にセキュリティルールを追加</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-success" style="margin-top: 20px;">
+      <div class="callout-title">3つの持ち帰りアクション</div>
+      <ol style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li><strong>GEMINI.md を作成する</strong> &mdash; 10分で書けて、チーム全体の AI 出力品質が向上</li>
+        <li><strong>Agent モードをフィーチャーブランチで使う</strong> &mdash; 計画をレビューする習慣をつける</li>
+        <li><strong>styleguide.md にセキュリティルールを追加</strong> &mdash; PR レビューを自動化する</li>
+      </ol>
+    </div>
+
+    <h3 style="margin-top: 24px;">参考リンク</h3>
+    <ul style="font-size: 14px; margin-left: 20px;">
+      <li><a href="https://developers.google.com/gemini-code-assist/docs/overview">Gemini Code Assist ドキュメント</a></li>
+      <li><a href="https://developers.google.com/gemini-code-assist/docs/agent-mode">Agent モードの概要</a></li>
+      <li><a href="https://developers.google.com/gemini-code-assist/docs/code-review-style-guide">コードレビュー スタイルガイド</a></li>
+      <li><a href="https://developers.google.com/gemini-code-assist/docs/write-code-gemini">Gemini でコードを書く</a></li>
+    </ul>
+
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>Google Cloud &mdash; Gemini Code Assist Hands-on Workshop</p>
+</div>
+
+</div>
+</body>
+</html>
