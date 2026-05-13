@@ -1046,50 +1046,25 @@ flowchart TD
         <div class="prompt-label">Agent モードに入力するプロンプト</div>
         <div class="prompt-text">お問い合わせ管理APIに対応履歴機能を追加してください。<br><br>
 要件:<br>
-1. 各チケットに対するサポート担当者の対応記録を保存できるようにする<br>
-2. 対応記録には、担当者名・メッセージ・内部メモフラグ（顧客に見せないメモかどうか）を持たせる<br>
-3. 必要なDBテーブル（responses）とAPIエンドポイント（GET, POST）を作成してください</div>
+1. responses テーブルを作成する。カラムは id, ticket_id (外部キー → tickets.id), responder (TEXT), message (TEXT), is_internal (BOOLEAN, デフォルト 0), created_at<br>
+2. init_db() に CREATE TABLE を追加する<br>
+3. GET /tickets/&lt;id&gt;/responses - 指定チケットの対応履歴を時系列で取得<br>
+4. POST /tickets/&lt;id&gt;/responses - 対応履歴を追加（responder, message は必須、is_internal はオプション）<br>
+5. チケットが存在しない場合は 404 を返す</div>
       </div>
 
       <div class="step" data-step="2">
-        Gemini が<strong>実行計画</strong>を提示します。計画を読んで、以下のチェックリストで確認してください：
+        Gemini が<strong>実行計画</strong>を提示します。計画の内容を確認して <strong>承認</strong> してください。
       </div>
 
-      <table style="font-size: 13px; margin: 12px 0;">
-        <thead>
-          <tr><th style="width:30%;">チェック項目</th><th>OK の例</th><th>NG の例（修正を依頼）</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>responses テーブル</strong></td>
-            <td><code>ticket_id</code>, <code>responder</code>, <code>message</code>, <code>is_internal</code>, <code>created_at</code> がある</td>
-            <td>カラムが足りない、<code>is_internal</code> フラグがない</td>
-          </tr>
-          <tr>
-            <td><strong>外部キー</strong></td>
-            <td><code>responses.ticket_id</code> が <code>tickets.id</code> を参照している</td>
-            <td>外部キー制約がない（データ不整合のリスク）</td>
-          </tr>
-          <tr>
-            <td><strong>API エンドポイント</strong></td>
-            <td><code>GET /tickets/&lt;id&gt;/responses</code> と <code>POST /tickets/&lt;id&gt;/responses</code> がある</td>
-            <td>GET のみで POST がない</td>
-          </tr>
-          <tr>
-            <td><strong>GEMINI.md 準拠</strong></td>
-            <td>パラメータ化クエリ、JSON エラーレスポンス、docstring</td>
-            <td>f-string で SQL を組み立てている</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="step" data-step="3">
-        確認できたら <strong>承認</strong> してください。Gemini がコードを自動生成します。
-      </div>
-
-      <div class="callout callout-warning" style="font-size: 13px;">
-        <div class="callout-title">計画に問題があった場合</div>
-        そのままチャットで修正を依頼してください。例：「<em>responses テーブルに is_internal フラグを追加してください</em>」「<em>POST エンドポイントも作成してください</em>」。計画が更新されたら再度確認して承認します。
+      <div class="callout callout-info" style="font-size: 13px;">
+        <div class="callout-title">計画レビューのポイント</div>
+        プロンプトで具体的に指示しているので、計画は概ね正しいはずです。以下の点だけ軽く確認してください：
+        <ul style="margin: 6px 0 0 16px;">
+          <li><code>responses</code> テーブルに <code>is_internal</code> カラムが含まれているか</li>
+          <li><code>ticket_id</code> に外部キー制約が設定されているか</li>
+          <li>GET と POST の両方のエンドポイントが計画に含まれているか</li>
+        </ul>
       </div>
 
       <div class="insight-box">
