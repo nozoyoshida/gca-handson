@@ -1050,7 +1050,8 @@ flowchart TD
 2. init_db() に CREATE TABLE を追加する<br>
 3. GET /tickets/&lt;id&gt;/responses - 指定チケットの対応履歴を時系列で取得<br>
 4. POST /tickets/&lt;id&gt;/responses - 対応履歴を追加（responder, message は必須、is_internal はオプション）<br>
-5. チケットが存在しない場合は 404 を返す</div>
+5. チケットが存在しない場合は 404 を返す<br>
+6. チケット詳細画面（ticket_detail.html）に対応履歴の一覧を表示するセクションを追加する。内部メモには「内部メモ」バッジを表示する</div>
       </div>
 
       <div class="step" data-step="2">
@@ -1126,16 +1127,24 @@ curl -X POST http://localhost:5000/tickets/1/responses \
   -H "Content-Type: application/json" \
   -d '{"responder": "鈴木", "message": "パスワードリセットのリンクを送信しました", "is_internal": false}'
 
-<span class="comment"># 対応履歴を取得</span>
-curl http://localhost:5000/tickets/1/responses
-
-<span class="comment"># 内部メモを追加（is_internal: true）</span>
+<span class="comment"># 内部メモを追加</span>
 curl -X POST http://localhost:5000/tickets/1/responses \
   -H "Content-Type: application/json" \
   -d '{"responder": "山田", "message": "原因調査中。認証基盤側の障害の可能性あり", "is_internal": true}'</pre>
 
       <div class="step" data-step="3">
-        正常にレスポンスが返ることを確認してください。
+        ブラウザで <a href="http://localhost:5000/tickets/1/view" class="link">http://localhost:5000/tickets/1/view</a> を開き、チケット詳細画面に<strong>対応履歴セクション</strong>が追加されていることを確認してください：
+      </div>
+
+      <ul style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li>鈴木さんの対応記録が表示されているか</li>
+        <li>山田さんの内部メモに「内部メモ」バッジが付いているか</li>
+        <li>時系列順に並んでいるか</li>
+      </ul>
+
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        Agent モードは API エンドポイントだけでなく、<strong>GUI テンプレートの更新まで一貫して行える</strong>のがポイントです。バックエンド + フロントエンドにまたがる変更を1つのプロンプトで完結できます。
       </div>
     </div>
 
