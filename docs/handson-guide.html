@@ -1464,6 +1464,80 @@ flowchart LR
       </tbody>
     </table>
 
+    <h3 style="margin-top: 28px;">AI 時代の開発者に求められること</h3>
+
+    <!-- Message 1: Context Engineering -->
+    <div style="background: linear-gradient(135deg, #e8f0fe 0%, #f0e6ff 100%); border: 1px solid #c5cae9; border-radius: 10px; padding: 20px 24px; margin: 16px 0;">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="text-align: center; flex-shrink: 0;">
+          <div style="font-size: 36px; font-weight: 600; color: #1a73e8;">76%&rarr;83%</div>
+          <div style="font-size: 11px; color: #5f6368;">コンテキスト改善による<br>レビュー精度の向上</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Context Engineering がAI活用の成否を決める</div>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">
+            「エージェントが成功するか失敗するかを決める最大の要因は、モデルの性能ではなく<strong>コンテキストの質</strong>である。ほとんどのエージェントの失敗は、もはやモデルの失敗ではなくコンテキストの失敗だ」
+          </p>
+          <p style="font-size: 12px; color: #5f6368;">
+            GEMINI.md のような小さな追加が、精度と信頼性に大きな改善をもたらします。今日体験したように、同じプロンプトでもコンテキスト次第で出力品質が劇的に変わります。
+          </p>
+          <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
+            Sources: <a href="https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html" style="color: #80868b;">Martin Fowler</a> /
+            <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" style="color: #80868b;">Anthropic</a> /
+            <a href="https://cloud.google.com/blog/topics/developers-practitioners/five-best-practices-for-using-ai-coding-assistants" style="color: #80868b;">Google Cloud</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message 2: Developer skills still matter -->
+    <div style="background: linear-gradient(135deg, #e6f4ea 0%, #e8f0fe 100%); border: 1px solid #a8dab5; border-radius: 10px; padding: 20px 24px; margin: 16px 0;">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="text-align: center; flex-shrink: 0;">
+          <div style="font-size: 36px; font-weight: 600; color: #137333;">1.7x</div>
+          <div style="font-size: 11px; color: #5f6368;">AI 生成コードは<br>人間より多くの問題を含む</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Agentic Coding でも開発知見は不可欠</div>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">
+            AI 生成コードは人間のコードと比較して <strong>1.7 倍の問題</strong>を含み、<strong>45% にセキュリティ欠陥</strong>が存在するという調査結果があります。開発者の AI 提案の採用率は約 30% &mdash; 残り 70% は人間が却下しています。
+          </p>
+          <p style="font-size: 12px; color: #5f6368;">
+            AI は開発者を「コードを書く人」から「<strong>設計し、レビューし、判断する人</strong>」に変えます。ドメイン知識、アーキテクチャ設計力、セキュリティの目利きは、AI 時代にこそ重要になります。
+          </p>
+          <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
+            Sources: <a href="https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report" style="color: #80868b;">CodeRabbit 2025</a> /
+            <a href="https://www.qodo.ai/reports/state-of-ai-code-quality/" style="color: #80868b;">Qodo</a> /
+            <a href="https://github.blog/developer-skills/career-growth/hard-and-soft-skills-for-developers-coding-in-the-age-of-ai/" style="color: #80868b;">GitHub Blog</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message 3: AI-powered defense -->
+    <div style="background: linear-gradient(135deg, #fce8e6 0%, #fef7e0 100%); border: 1px solid #f5c6cb; border-radius: 10px; padding: 20px 24px; margin: 16px 0;">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="text-align: center; flex-shrink: 0;">
+          <div style="font-size: 36px; font-weight: 600; color: #c5221f;">5日</div>
+          <div style="font-size: 11px; color: #5f6368;">脆弱性公開から<br>悪用までの期間（2025年）</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">攻撃者も AI を使う。防御にも AI が必要</div>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">
+            AI サイバー攻撃は<strong>前年比 72% 増加</strong>し、87% の組織が AI ベースの攻撃を経験しています。脆弱性が公開されてから悪用されるまでの期間は、2020年の 700 日超から <strong>2025年にはわずか 5 日</strong>にまで短縮されました。
+          </p>
+          <p style="font-size: 12px; color: #5f6368;">
+            今日体験した styleguide.md によるセキュリティルールの自動チェック、AI によるコードレビューは「あれば便利」ではなく、<strong>攻撃速度に対抗するための必須の防御手段</strong>です。
+          </p>
+          <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
+            Sources: <a href="https://cloud.google.com/blog/topics/threat-intelligence/ai-vulnerability-exploitation-initial-access" style="color: #80868b;">Google Cloud</a> /
+            <a href="https://deepstrike.io/blog/ai-cyber-attack-statistics-2025" style="color: #80868b;">DeepStrike</a> /
+            <a href="https://www.deepinstinct.com/blog/the-rise-of-ai-driven-cyber-attacks-how-llms-are-reshaping-the-threat-landscape" style="color: #80868b;">Deep Instinct</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
     <div class="callout callout-success" style="margin-top: 20px;">
       <div class="callout-title">3つの持ち帰りアクション</div>
       <ol style="margin: 8px 0 0 20px; font-size: 14px;">
