@@ -15,7 +15,7 @@ Context Engineering / Agentic Coding / Secure Development を軸にした、Gemi
 
 参加者向けのステップバイステップガイドは以下で公開しています：
 
-**[ハンズオンガイドを開く](https://your-org.github.io/gca-handson/docs/handson-guide.html)**
+**[ハンズオンガイドを開く](https://nozoyoshida.github.io/gca-handson/handson-guide.html)**
 
 ## ディレクトリ構成
 
