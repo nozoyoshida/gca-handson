@@ -7,7 +7,7 @@ Context Engineering / Agentic Coding / Secure Development を軸にした、Gemi
 | 項目 | 内容 |
 |------|------|
 | 所要時間 | 60分 |
-| 対象者 | エンジニア向け中級 |
+| 対象者 | 中級 |
 | 環境 | ローカル VSCode + Python |
 | 題材 | お問い合わせ管理 API（Flask + SQLite） |
 
