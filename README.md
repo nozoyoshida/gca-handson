@@ -35,22 +35,26 @@ slides/           プレゼンター用資料
 
 ## クイックスタート
 
-```bash
-# starter/ を作業ディレクトリにコピー
-cp -r starter/ my-handson/
-cd my-handson/
+### venv を使う場合
 
-# 仮想環境を作成・有効化
+```bash
+cp -r starter/ my-handson/ && cd my-handson/
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# 依存パッケージをインストール
 pip install -r requirements.txt
-
-# アプリを起動
 python app.py
-# http://localhost:5000 で GUI、http://localhost:5000/tickets で API
 ```
+
+### uv を使う場合
+
+```bash
+cp -r starter/ my-handson/ && cd my-handson/
+uv venv && uv pip install -r requirements.txt
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python app.py
+```
+
+http://localhost:5000 で GUI、http://localhost:5000/tickets で API にアクセスできます。
 
 ## ワークショップ構成
 

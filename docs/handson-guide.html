@@ -528,9 +528,11 @@
 
     <div class="callout callout-warning">
       <div class="callout-title">環境のセットアップ</div>
-      お使いの環境を汚さないよう、<strong>venv（仮想環境）</strong>を使用してセットアップしてください。
+      お使いの環境を汚さないよう、仮想環境を使用してセットアップしてください。<strong>venv</strong> または <strong>uv</strong> のどちらかをお選びください。
     </div>
 
+    <details style="margin: 12px 0;">
+      <summary style="cursor: pointer; font-weight: 600; font-size: 15px; padding: 8px 0; color: var(--accent);">Option A: venv を使う場合</summary>
 <pre><span class="comment"># 1. starter/ を作業ディレクトリにコピー</span>
 cp -r starter/ my-handson/
 <span class="keyword">cd</span> my-handson/
@@ -546,6 +548,34 @@ pip install -r requirements.txt
 python app.py
 <span class="comment"># http://localhost:5000/tickets にアクセスできればOK</span>
 </pre>
+    </details>
+
+    <details style="margin: 12px 0;">
+      <summary style="cursor: pointer; font-weight: 600; font-size: 15px; padding: 8px 0; color: var(--accent);">Option B: uv を使う場合（推奨）</summary>
+      <div class="callout callout-info" style="margin-top: 8px;">
+        <div class="callout-title">uv とは</div>
+        <a href="https://docs.astral.sh/uv/" style="color: var(--accent);">uv</a> は Rust 製の高速な Python パッケージマネージャーです。venv + pip の代替として、仮想環境の作成から依存管理まで一括で行えます。
+      </div>
+<pre><span class="comment"># 0. uv のインストール（未インストールの場合）</span>
+curl -LsSf https://astral.sh/uv/install.sh | sh   <span class="comment"># macOS/Linux</span>
+<span class="comment"># Windows: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</span>
+
+<span class="comment"># 1. starter/ を作業ディレクトリにコピー</span>
+cp -r starter/ my-handson/
+<span class="keyword">cd</span> my-handson/
+
+<span class="comment"># 2. uv で仮想環境作成 + 依存インストール（一発で完了）</span>
+uv venv
+uv pip install -r requirements.txt
+
+<span class="comment"># 3. 仮想環境を有効化</span>
+<span class="keyword">source</span> .venv/bin/activate   <span class="comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="comment"># 4. アプリを起動して動作確認</span>
+python app.py
+<span class="comment"># http://localhost:5000/tickets にアクセスできればOK</span>
+</pre>
+    </details>
 
     <h3 style="margin-top:20px;">題材アプリ: お問い合わせ管理 API</h3>
     <p>Flask + SQLite で構築したシンプルなチケット管理 REST API です。</p>
