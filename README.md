@@ -38,7 +38,8 @@ slides/           プレゼンター用資料
 ### venv を使う場合
 
 ```bash
-cp -r starter/ my-handson/ && cd my-handson/
+git clone https://github.com/nozoyoshida/gca-handson.git
+cd gca-handson/starter/
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -48,7 +49,8 @@ python app.py
 ### uv を使う場合
 
 ```bash
-cp -r starter/ my-handson/ && cd my-handson/
+git clone https://github.com/nozoyoshida/gca-handson.git
+cd gca-handson/starter/
 uv venv && uv pip install -r requirements.txt
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 python app.py
