@@ -1052,18 +1052,49 @@ flowchart TD
       </div>
 
       <div class="step" data-step="2">
-        Gemini が<strong>実行計画</strong>を提示します。以下の点をレビューしてください：
+        Gemini が<strong>実行計画</strong>を提示します。計画を読んで、以下のチェックリストで確認してください：
       </div>
 
-      <ul style="margin: 8px 0 0 20px; font-size: 14px;">
-        <li>新しいテーブル（<code>responses</code>, <code>sla_policies</code>）の設計は適切か</li>
-        <li>外部キー制約は正しく設定されているか</li>
-        <li>SLA 違反判定のロジックは妥当か</li>
-        <li>GEMINI.md の規約に沿っているか</li>
-      </ul>
+      <table style="font-size: 13px; margin: 12px 0;">
+        <thead>
+          <tr><th style="width:30%;">チェック項目</th><th>OK の例</th><th>NG の例（修正を依頼）</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>responses テーブル</strong></td>
+            <td><code>ticket_id</code>, <code>responder</code>, <code>message</code>, <code>is_internal</code>, <code>created_at</code> がある</td>
+            <td>カラムが足りない、<code>is_internal</code> フラグがない</td>
+          </tr>
+          <tr>
+            <td><strong>sla_policies テーブル</strong></td>
+            <td><code>priority</code> ごとに <code>response_deadline_hours</code>, <code>resolution_deadline_hours</code> を定義</td>
+            <td>SLA テーブルがなく、期限がハードコード</td>
+          </tr>
+          <tr>
+            <td><strong>外部キー</strong></td>
+            <td><code>responses.ticket_id</code> が <code>tickets.id</code> を参照</td>
+            <td>外部キー制約がない（データ不整合のリスク）</td>
+          </tr>
+          <tr>
+            <td><strong>API エンドポイント</strong></td>
+            <td>対応履歴の CRUD + SLA ステータス確認 + 違反一覧</td>
+            <td>GET のみで POST がない、SLA 確認 API がない</td>
+          </tr>
+          <tr>
+            <td><strong>GEMINI.md 準拠</strong></td>
+            <td>パラメータ化クエリ、JSON エラーレスポンス、docstring</td>
+            <td>f-string で SQL を組み立てている</td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="step" data-step="3">
-        計画に問題がなければ <strong>承認</strong> してください。Gemini がコードを自動生成します。
+        確認できたら <strong>承認</strong> してください。Gemini がコードを自動生成します。
+      </div>
+
+      <div class="callout callout-warning" style="font-size: 13px;">
+        <div class="callout-title">計画に問題があった場合</div>
+        そのままチャットで修正を依頼してください。例：「<em>SLA の期限をハードコードではなくテーブルで管理してください</em>」「<em>responses テーブルに is_internal フラグを追加してください</em>」。計画が更新されたら再度確認して承認します。
       </div>
 
       <div class="insight-box">
