@@ -1034,7 +1034,7 @@ flowchart TD
     <!-- Exercise 3-2 -->
     <div class="exercise">
       <div class="exercise-title">
-        3-2. 対応履歴 & SLA 管理機能を追加する
+        3-2. 対応履歴機能を追加する
         <span class="badge">6分</span>
       </div>
 
@@ -1044,11 +1044,11 @@ flowchart TD
 
       <div class="prompt-box">
         <div class="prompt-label">Agent モードに入力するプロンプト</div>
-        <div class="prompt-text">お問い合わせ管理APIに対応履歴とSLA管理機能を追加してください。<br><br>
+        <div class="prompt-text">お問い合わせ管理APIに対応履歴機能を追加してください。<br><br>
 要件:<br>
-1. 対応履歴: 各チケットに対するサポート担当者の対応記録を保存できるようにする。内部メモ（顧客に見せない）フラグも持つ。<br>
-2. SLA管理: 優先度ごとに対応期限（時間）を定義し、チケットがSLA違反かどうかを判定できるようにする。<br>
-3. 必要なDBテーブル、APIエンドポイントを全て作成してください。</div>
+1. 各チケットに対するサポート担当者の対応記録を保存できるようにする<br>
+2. 対応記録には、担当者名・メッセージ・内部メモフラグ（顧客に見せないメモかどうか）を持たせる<br>
+3. 必要なDBテーブル（responses）とAPIエンドポイント（GET, POST）を作成してください</div>
       </div>
 
       <div class="step" data-step="2">
@@ -1066,19 +1066,14 @@ flowchart TD
             <td>カラムが足りない、<code>is_internal</code> フラグがない</td>
           </tr>
           <tr>
-            <td><strong>sla_policies テーブル</strong></td>
-            <td><code>priority</code> ごとに <code>response_deadline_hours</code>, <code>resolution_deadline_hours</code> を定義</td>
-            <td>SLA テーブルがなく、期限がハードコード</td>
-          </tr>
-          <tr>
             <td><strong>外部キー</strong></td>
-            <td><code>responses.ticket_id</code> が <code>tickets.id</code> を参照</td>
+            <td><code>responses.ticket_id</code> が <code>tickets.id</code> を参照している</td>
             <td>外部キー制約がない（データ不整合のリスク）</td>
           </tr>
           <tr>
             <td><strong>API エンドポイント</strong></td>
-            <td>対応履歴の CRUD + SLA ステータス確認 + 違反一覧</td>
-            <td>GET のみで POST がない、SLA 確認 API がない</td>
+            <td><code>GET /tickets/&lt;id&gt;/responses</code> と <code>POST /tickets/&lt;id&gt;/responses</code> がある</td>
+            <td>GET のみで POST がない</td>
           </tr>
           <tr>
             <td><strong>GEMINI.md 準拠</strong></td>
@@ -1094,12 +1089,12 @@ flowchart TD
 
       <div class="callout callout-warning" style="font-size: 13px;">
         <div class="callout-title">計画に問題があった場合</div>
-        そのままチャットで修正を依頼してください。例：「<em>SLA の期限をハードコードではなくテーブルで管理してください</em>」「<em>responses テーブルに is_internal フラグを追加してください</em>」。計画が更新されたら再度確認して承認します。
+        そのままチャットで修正を依頼してください。例：「<em>responses テーブルに is_internal フラグを追加してください</em>」「<em>POST エンドポイントも作成してください</em>」。計画が更新されたら再度確認して承認します。
       </div>
 
       <div class="insight-box">
         <div class="insight-title">Insight</div>
-        単一のプロンプトから、データベーステーブルの設計・マイグレーション・API エンドポイント・ビジネスロジック（SLA 期限計算）まで、一貫したコードが生成されます。<strong>計画のレビューステップが「あなたの価値を発揮する場所」です。</strong>アーキテクチャの問題はコードが書かれた後ではなく、計画段階で指摘しましょう。
+        単一のプロンプトから、データベーステーブルの設計・API エンドポイント・バリデーションまで、一貫したコードが生成されます。<strong>計画のレビューステップが「あなたの価値を発揮する場所」です。</strong>アーキテクチャの問題はコードが書かれた後ではなく、計画段階で指摘しましょう。
       </div>
     </div>
 
@@ -1159,11 +1154,10 @@ curl -X POST http://localhost:5000/tickets/1/responses \
 <span class="comment"># 対応履歴を取得</span>
 curl http://localhost:5000/tickets/1/responses
 
-<span class="comment"># SLA ステータスを確認</span>
-curl http://localhost:5000/tickets/1/sla-status
-
-<span class="comment"># SLA 違反チケット一覧</span>
-curl http://localhost:5000/tickets/overdue</pre>
+<span class="comment"># 内部メモを追加（is_internal: true）</span>
+curl -X POST http://localhost:5000/tickets/1/responses \
+  -H "Content-Type: application/json" \
+  -d '{"responder": "山田", "message": "原因調査中。認証基盤側の障害の可能性あり", "is_internal": true}'</pre>
 
       <div class="step" data-step="3">
         正常にレスポンスが返ることを確認してください。
