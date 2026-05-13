@@ -742,6 +742,44 @@ python app.py
         <li>SQL クエリにパラメータ化クエリが使われているか？</li>
         <li>docstring やコメントはあるか？</li>
       </ul>
+
+      <details style="margin: 16px 0 0;">
+        <summary style="cursor: pointer; font-weight: 600; font-size: 14px; padding: 8px 0; color: var(--accent);">観察のヒント: 既存コード (app.py) にはどんな課題がある？</summary>
+        <div style="margin-top: 8px;">
+
+          <h4 style="font-size: 14px; margin: 12px 0 6px;">1. 命名規則</h4>
+          <p style="font-size: 13px;">現在のコードはたまたま snake_case で書かれていますが、<strong>明示的なルールとして定義されていません</strong>。GEMINI.md がない状態では、Gemini が <code>ticketId</code> (camelCase) と <code>ticket_id</code> (snake_case) を混在させるコードを生成する可能性があります。</p>
+
+          <h4 style="font-size: 14px; margin: 12px 0 6px;">2. エラーハンドリング</h4>
+          <p style="font-size: 13px;">バラバラで不十分です:</p>
+          <table style="font-size: 12px; margin: 4px 0 8px;">
+            <tr><td><code>get_ticket()</code></td><td><code>'Ticket not found'</code> と英語</td></tr>
+            <tr><td><code>create_ticket()</code></td><td>エラーハンドリングが<strong>一切ない</strong> &mdash; 空の title でも 201 が返る</td></tr>
+            <tr><td><code>search_tickets()</code></td><td>エラーハンドリングが<strong>一切ない</strong></td></tr>
+            <tr><td><code>update_status()</code></td><td>任意の文字列（<code>"hacked"</code> 等）をステータスとして受け付ける</td></tr>
+          </table>
+          <p style="font-size: 13px;">また、<code>request.get_json()</code> が <code>None</code> を返すケース（Content-Type ヘッダーなし等）への対処もなく、<code>AttributeError</code> がそのまま 500 エラーとして露出します。</p>
+
+          <h4 style="font-size: 14px; margin: 12px 0 6px;">3. SQL クエリ</h4>
+          <p style="font-size: 13px;"><strong>安全なクエリと危険なクエリが混在</strong>しています:</p>
+          <table style="font-size: 12px; margin: 4px 0 8px;">
+            <tr><th>関数</th><th>方式</th><th>安全性</th></tr>
+            <tr><td><code>create_ticket()</code></td><td><code>?</code> プレースホルダー</td><td style="color: #137333;">安全</td></tr>
+            <tr><td><code>get_ticket()</code></td><td><code>?</code> プレースホルダー</td><td style="color: #137333;">安全</td></tr>
+            <tr><td><code>get_tickets()</code> フィルタ</td><td>f-string <code>f"...'{status}'"</code></td><td style="color: #c5221f;"><strong>SQLi 脆弱性</strong></td></tr>
+            <tr><td><code>search_tickets()</code></td><td>f-string <code>f"...'%{q}%'"</code></td><td style="color: #c5221f;"><strong>SQLi 脆弱性</strong></td></tr>
+          </table>
+          <p style="font-size: 13px;">統一されたルールがないため、同じ開発者（や AI）が書いたコード内でも安全性にばらつきが生じています。</p>
+
+          <h4 style="font-size: 14px; margin: 12px 0 6px;">4. docstring / コメント</h4>
+          <p style="font-size: 13px;">全14関数のうち、<strong>docstring がある関数は 0 個</strong>です。関数の目的、引数、戻り値、どのステータス遷移が許可されるか等が一切文書化されていません。</p>
+
+          <div class="insight-box" style="margin-top: 12px;">
+            <div class="insight-title">Insight</div>
+            これらの課題は、開発者が意識していないと AI も同じパターンで生成してしまいます。<code>GEMINI.md</code> で規約を明示することで、AI の出力を<strong>一貫してコントロール</strong>できるようになります。
+          </div>
+        </div>
+      </details>
     </div>
 
     <!-- Exercise 2-2 -->
