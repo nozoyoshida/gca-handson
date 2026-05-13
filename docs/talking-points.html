@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プレゼンター用トーキングポイント — Gemini Code Assist ハンズオン</title>
+  <style>
+    :root {
+      --google-blue: #4285F4;
+      --google-red: #EA4335;
+      --google-yellow: #FBBC04;
+      --google-green: #34A853;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #dadce0;
+      --code-bg: #f1f3f4;
+      --accent: #1a73e8;
+      --warning-bg: #fef7e0;
+      --warning-border: #f9ab00;
+      --danger-bg: #fce8e6;
+      --danger-border: #ea4335;
+      --success-bg: #e6f4ea;
+      --success-border: #34a853;
+      --info-bg: #e8f0fe;
+      --info-border: #4285f4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Google Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #5f6368 0%, #3c4043 50%, #202124 100%);
+      color: white;
+      padding: 40px 0 32px;
+      text-align: center;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 15px;
+      opacity: 0.85;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .chapter {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .chapter-header {
+      padding: 20px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .chapter-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .chapter-header h2 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .chapter-header .time-tag {
+      margin-left: auto;
+    }
+
+    .chapter-body { padding: 20px 28px 28px; }
+
+    .section {
+      margin: 16px 0;
+    }
+
+    .section h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section ul, .section ol {
+      margin: 0 0 0 20px;
+      font-size: 14px;
+    }
+
+    .section li {
+      margin: 4px 0;
+    }
+
+    .section li strong {
+      color: var(--text);
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', 'Source Code Pro', monospace;
+      font-size: 13px;
+    }
+
+    .callout {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-size: 14px;
+      border-left: 4px solid;
+    }
+
+    .callout-warning {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+    }
+
+    .callout-danger {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+    }
+
+    .callout-success {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+    }
+
+    .callout-info {
+      background: var(--info-bg);
+      border-color: var(--info-border);
+    }
+
+    .callout-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .time-tag {
+      display: inline-block;
+      background: var(--code-bg);
+      color: var(--text-secondary);
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--code-bg);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .vuln-table td:first-child {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .vuln-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--google-red);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .script-box {
+      background: linear-gradient(135deg, #fff3e0 0%, #fef7e0 100%);
+      border: 1px solid #ffe0b2;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 12px 0;
+      font-size: 14px;
+      font-style: italic;
+      color: #bf360c;
+    }
+
+    .script-box .script-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      color: #e65100;
+      font-style: normal;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    @media print {
+      body { font-size: 12px; }
+      .chapter { break-inside: avoid; }
+      .header { padding: 20px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="container">
+    <div class="header-badge">Presenter Notes</div>
+    <h1>プレゼンター用トーキングポイント</h1>
+    <p>Gemini Code Assist ハンズオン — 講師用カンニングペーパー</p>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== CH.1 ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-blue);">1</div>
+    <h2>基本操作</h2>
+    <span class="time-tag">10分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">進行形式</div>
+      <strong>参加者は操作するが、提案は全て Decline する</strong>（後続チャプターへの干渉防止）。Accept すると Ch.3-4 で app.py の状態が変わり、脆弱性検出等に影響するため。<br>
+      「操作感を掴むことが目的です。コード変更は Ch.2 以降で行います」と案内してください。
+    </div>
+
+    <div class="section">
+      <h3>キーメッセージ</h3>
+      <ul>
+        <li>Gemini Code Assist は <strong>Gemini 2.5 Pro ベース</strong>、最大 <strong>100 万トークン</strong>のコンテキストウィンドウ</li>
+        <li>3つのインタラクション: <strong>Tab 補完</strong>（最速）、<strong>インラインチャット</strong>（直接編集）、<strong>チャットパネル</strong>（議論・質問）</li>
+        <li><code>@</code> でファイルやフォルダを明示的にコンテキストに含められる</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>Copilot ユーザー向け補足</h3>
+      <ul>
+        <li>インラインの補完体験は似ている</li>
+        <li>コンテキストウィンドウのサイズと Agent モードが差別化ポイント</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CH.2 ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-green);">2</div>
+    <h2>Context Engineering</h2>
+    <span class="time-tag">15分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="section">
+      <h3>キーメッセージ</h3>
+      <ul>
+        <li><strong>GEMINI.md はプロジェクトに追加できる最もレバレッジの高いファイル</strong></li>
+        <li>10分で書けて、チーム全員の AI 出力品質が改善される</li>
+        <li>AI が「実際に読む」オンボーディング文書と考える</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>階層構造の説明</h3>
+      <table>
+        <tbody>
+          <tr><td><code>~/.gemini/GEMINI.md</code></td><td>会社全体の規約</td></tr>
+          <tr><td>プロジェクトルート <code>GEMINI.md</code></td><td>プロジェクト固有のルール</td></tr>
+          <tr><td>サブディレクトリ <code>GEMINI.md</code></td><td>モジュール固有の追加ルール</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Before/After のポイント</h3>
+      <ul>
+        <li>同じプロンプトでも出力が劇的に変わることを強調</li>
+        <li>「<strong>新しいチャットセッションを開始してから</strong>」After を試すよう促す</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>styleguide.md の説明</h3>
+      <ul>
+        <li>GitHub 連携で PR が作成されると自動レビュー</li>
+        <li>自然言語でルールを書くだけ</li>
+        <li>Gemini Code Review の仕組みを図で説明</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CH.3 ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-yellow); color:#333;">3</div>
+    <h2>Agentic Coding</h2>
+    <span class="time-tag">18分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="section">
+      <h3>キーメッセージ</h3>
+      <ul>
+        <li>「コードを書いてもらう」から「<strong>目標を伝えて計画をレビューする</strong>」へのパラダイムシフト</li>
+        <li><strong>計画のレビューステップがエンジニアの価値を発揮する場所</strong></li>
+        <li>Agent モード + GEMINI.md = 一貫した出力品質</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>注意事項</h3>
+      <ul>
+        <li>「フィーチャーブランチで使うこと」を推奨</li>
+        <li>生成 AI の出力は毎回異なる &rarr; 参加者の画面が講師と違っても正常</li>
+        <li>計画の内容が妥当かレビューする習慣をつけることが重要</li>
+        <li>DB スキーマ変更: プロンプトで <code>CREATE TABLE IF NOT EXISTS</code> を指示済み。既存データに影響しない</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">Agent の出力が期待と違った場合</div>
+      <div class="script-box" style="background: transparent; border: none; padding: 0; margin: 4px 0 0;">
+        <div class="script-label">話法例</div>
+        「これは生成 AI なので、出力は毎回変わります。大事なのはワークフローを体験すること」
+      </div>
+      <code>completed/</code> の参照コードを見せてフォローしてください。
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CH.4 ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-red);">4</div>
+    <h2>セキュア開発</h2>
+    <span class="time-tag">13分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="section">
+      <h3>キーメッセージ</h3>
+      <ul>
+        <li>AI はセキュリティの専門家を代替しないが、<strong>最初のパスのコストを劇的に下げる</strong></li>
+        <li><strong>セキュリティ知識をコード（styleguide.md）として定着させることが真の価値</strong></li>
+        <li>「見つけて直す」だけでなく「ルール化して自動チェック」まで行うのがポイント</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>脆弱性の解説</h3>
+      <table class="vuln-table">
+        <thead>
+          <tr><th>#</th><th>脆弱性</th><th>Before</th><th>After</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="vuln-num">1</span></td>
+            <td>SQL Injection（search_tickets）</td>
+            <td>f-string で SQL 組み立て</td>
+            <td>パラメータ化クエリへ</td>
+          </tr>
+          <tr>
+            <td><span class="vuln-num">2</span></td>
+            <td>SQL Injection（get_tickets フィルタ）</td>
+            <td>status を直接埋め込み</td>
+            <td>パラメータ化 + enum 検証</td>
+          </tr>
+          <tr>
+            <td><span class="vuln-num">3</span></td>
+            <td>ステータス無検証</td>
+            <td>任意の文字列を受け付ける</td>
+            <td>許可リストで検証</td>
+          </tr>
+          <tr>
+            <td><span class="vuln-num">4</span></td>
+            <td>debug=True</td>
+            <td>Werkzeug デバッガー露出</td>
+            <td>環境変数で制御</td>
+          </tr>
+          <tr>
+            <td><span class="vuln-num">5</span></td>
+            <td>ハードコード秘密鍵</td>
+            <td>ソースに直書き</td>
+            <td>環境変数から読み込み</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>補足紹介のポイント</h3>
+      <ul>
+        <li><strong>Gemini CLI sandbox (gVisor)</strong>: With/Without の比較図で説明</li>
+        <li><strong>Model Armor</strong>: 入出力チェックでプロンプトインジェクションや機密データ漏洩を防止</li>
+        <li>いずれもハンズオンでは触らない、紹介のみ</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== WRAP-UP ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#616161;">W</div>
+    <h2>Wrap-up</h2>
+    <span class="time-tag">2分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-success">
+      <div class="callout-title">3つの持ち帰りアクション</div>
+      <ol style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li><strong>明日、自分のプロジェクトに GEMINI.md を追加する</strong></li>
+        <li><strong>フィーチャーブランチで Agent モードを試す</strong></li>
+        <li><strong>styleguide.md にセキュリティルールを追加する</strong></li>
+      </ol>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== TROUBLESHOOTING ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#9e9e9e;">?</div>
+    <h2>トラブルシューティング</h2>
+  </div>
+  <div class="chapter-body">
+
+    <table>
+      <thead>
+        <tr><th>問題</th><th>対処</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gemini の応答が遅い</td>
+          <td>「少し待ちましょう。その間に <code>completed/</code> のコードを見てください」</td>
+        </tr>
+        <tr>
+          <td>Before/After の差が小さい</td>
+          <td>事前キャプチャしたスクリーンショットを見せる</td>
+        </tr>
+        <tr>
+          <td>Agent の出力が予期しないもの</td>
+          <td>「正常です。ワークフローの体験が目的です」&rarr; <code>completed/</code> を参照</td>
+        </tr>
+        <tr>
+          <td>pip install が失敗</td>
+          <td>venv が有効化されているか確認。Python バージョンを確認</td>
+        </tr>
+        <tr>
+          <td>ポート 5000 が使用中</td>
+          <td>macOS Monterey 以降は AirPlay が使用。<code>flask run -p 5001</code> を案内</td>
+        </tr>
+        <tr>
+          <td><code>.gemini/</code> が見えない</td>
+          <td>隠しフォルダ。ターミナルで <code>code .gemini/styleguide.md</code> を案内</td>
+        </tr>
+        <tr>
+          <td>Ch.4 で脆弱性が少ない</td>
+          <td>GEMINI.md の効果で Ch.3 の Agent が一部修正済み。「これが Context Engineering の効果です」と説明</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>Google Cloud &mdash; Gemini Code Assist Hands-on Workshop &mdash; Presenter Notes</p>
+</div>
+
+</body>
+</html>

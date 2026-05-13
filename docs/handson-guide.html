@@ -521,10 +521,15 @@
       <li>VSCode がインストールされている</li>
       <li>Gemini Code Assist 拡張機能がインストール・ログイン済み</li>
       <li>Python 3.9 以上がインストールされている</li>
-      <li>リポジトリを <code>git clone</code> し、<code>starter/</code> フォルダを VSCode で開いている</li>
+      <li><strong>リポジトリを <code>git clone</code> し、<code>starter/</code> フォルダを VSCode で開いている</strong></li>
       <li>仮想環境のセットアップが完了している（下記参照）</li>
       <li><code>python app.py</code> でサーバーが起動し <code>http://localhost:5000</code> にアクセスできる</li>
     </ul>
+
+    <div class="callout callout-danger">
+      <div class="callout-title">VSCode で開くフォルダに注意</div>
+      VSCode では <strong><code>gca-handson/</code> ルートではなく <code>starter/</code> フォルダを直接開いてください</strong>。<code>GEMINI.md</code> は VSCode で開いているフォルダ（ワークスペースルート）から読み込まれます。開くフォルダを間違えると、Ch.2 以降で Gemini がプロジェクトの規約を読み込めず、演習の効果が得られません。
+    </div>
 
     <div class="callout callout-warning">
       <div class="callout-title">環境のセットアップ</div>
@@ -604,8 +609,12 @@ python app.py
 │   ├── index.html
 │   └── ticket_detail.html
 ├── requirements.txt    # 依存パッケージ
-├── test_api.sh         # curl テストスクリプト
 └── .gitignore</div>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">macOS でポート 5000 が使用中の場合</div>
+      macOS Monterey 以降では、AirPlay Receiver がポート 5000 を使用しています。<code>python app.py</code> で <code>Address already in use</code> エラーが出る場合は、代わりに <code>flask run -p 5001</code> で起動してください。以降のガイドで <code>localhost:5000</code> と記載されている箇所は <code>localhost:5001</code> に読み替えてください。
+    </div>
 
   </div>
 </div>
@@ -618,6 +627,11 @@ python app.py
     <p>コード補完・チャットパネル・インラインチャットの3つのインタラクション <span class="time-tag">10分</span></p>
   </div>
   <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">この Chapter では提案を Accept しないでください</div>
+      Ch.1 では Gemini Code Assist の3つのインタラクションを体験しますが、<strong>提案されたコードは全て Decline（却下）してください</strong>。Ch.2 以降の演習で app.py を本格的に編集するため、ここではコードを変更せずに操作感を掴むことが目的です。
+    </div>
 
     <!-- Exercise 1-1 -->
     <div class="exercise">
@@ -637,7 +651,7 @@ python app.py
       </div>
 
       <div class="step" data-step="3">
-        Gemini がヘルスチェック関数を提案します。<strong>Tab キー</strong>で Accept してください。
+        Gemini がヘルスチェック関数を提案します。提案内容を確認したら、<strong>Esc キーで Decline</strong> してください。入力した文字も削除して元の状態に戻してください。
       </div>
 
       <div class="insight-box">
@@ -667,7 +681,7 @@ python app.py
       </div>
 
       <div class="step" data-step="3">
-        Gemini の回答を確認してください。データベース接続の管理方法、シード データの投入ロジック、改善提案（コンテキストマネージャの使用など）が含まれているはずです。
+        Gemini の回答を確認してください。データベース接続の管理方法、シード データの投入ロジック、改善提案（コンテキストマネージャの使用など）が含まれているはずです。<strong>コードの変更提案があっても Accept しないでください。</strong>
       </div>
 
       <div class="callout callout-info">
@@ -697,7 +711,7 @@ python app.py
       </div>
 
       <div class="step" data-step="3">
-        Gemini が <code>get_tickets()</code> を直接編集する差分を提案します。内容を確認して <strong>Accept</strong> してください。
+        Gemini が <code>get_tickets()</code> を直接編集する差分を提案します。提案内容を確認したら、<strong>Decline してください</strong>。
       </div>
 
       <div class="insight-box">
@@ -740,7 +754,12 @@ python app.py
       </div>
 
       <div class="step" data-step="2">
-        生成されたコードの以下の点を<strong>観察してください</strong>（まだ Accept しないでください）：
+        生成されたコードの以下の点を<strong>観察してください</strong>：
+      </div>
+
+      <div class="callout callout-danger">
+        <div class="callout-title">コードを Accept しないでください</div>
+        この演習は観察が目的です。<strong>生成されたコードは Accept せず、Decline してください。</strong>Accept すると Exercise 2-3 の Before/After 比較ができなくなります。誤って Accept した場合は <strong>Ctrl+Z</strong>（Mac: <strong>Cmd+Z</strong>）で元に戻してください。
       </div>
 
       <ul style="margin: 8px 0 0 20px; font-size: 14px;">
@@ -860,6 +879,11 @@ Flask と SQLite を使用したチケット管理 REST API です。
         <strong>新しいチャットセッション</strong>を開始してください（チャットパネル上部の「+」ボタン）。
       </div>
 
+      <div class="callout callout-warning">
+        <div class="callout-title">なぜ新しいセッションが必要か</div>
+        前のセッションにはチャット履歴（Exercise 2-1 のやり取り）が残っています。同じセッションでプロンプトを再送すると、その履歴も含めて Gemini が応答するため、<strong>GEMINI.md の効果だけを正しく比較できません</strong>。新しいセッションでは GEMINI.md のみが追加コンテキストとなり、Before/After の差が明確になります。
+      </div>
+
       <div class="step" data-step="2">
         Exercise 2-1 と<strong>全く同じプロンプト</strong>を入力します：
       </div>
@@ -911,6 +935,11 @@ Flask と SQLite を使用したチケット管理 REST API です。
 
       <div class="step" data-step="1">
         <code>.gemini/styleguide.md</code>（空ファイルが用意されています）を開き、以下の内容をコピーしてください：
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-title">.gemini/ は隠しフォルダです</div>
+        VSCode のエクスプローラーで <code>.gemini/</code> フォルダが見えない場合は、ターミナルから直接開いてください：<code>code .gemini/styleguide.md</code>。または、エクスプローラー上部の <strong>...</strong> メニュー &rarr;「Show Hidden Files」で表示できます。
       </div>
 
 <pre><span class="comment"># コードレビュー スタイルガイド</span>
@@ -1045,6 +1074,11 @@ flowchart TD
         <span class="badge">6分</span>
       </div>
 
+      <div class="callout callout-warning">
+        <div class="callout-title">Agent モードの出力は毎回異なります</div>
+        生成 AI の出力は毎回変わるため、講師の画面や隣の参加者と結果が異なっても正常です。<strong>大事なのは計画の内容が妥当かをレビューする体験</strong>です。想定と大きく異なる場合は <code>completed/app.py</code> を参照してください。
+      </div>
+
       <div class="step" data-step="1">
         Agent モードのチャットに以下のプロンプトを入力します：
       </div>
@@ -1054,7 +1088,7 @@ flowchart TD
         <div class="prompt-text">お問い合わせ管理APIに対応履歴機能を追加してください。<br><br>
 要件:<br>
 1. responses テーブルを作成する。カラムは id, ticket_id (外部キー → tickets.id), responder (TEXT), message (TEXT), is_internal (BOOLEAN, デフォルト 0), created_at<br>
-2. init_db() に CREATE TABLE を追加する<br>
+2. init_db() 内に CREATE TABLE IF NOT EXISTS で responses テーブルの作成を追加する（既存テーブルに影響を与えないこと）<br>
 3. GET /tickets/&lt;id&gt;/responses - 指定チケットの対応履歴を時系列で取得<br>
 4. POST /tickets/&lt;id&gt;/responses - 対応履歴を追加（responder, message は必須、is_internal はオプション）<br>
 5. チケットが存在しない場合は 404 を返す<br>
@@ -1063,6 +1097,11 @@ flowchart TD
 
       <div class="step" data-step="2">
         Gemini が<strong>実行計画</strong>を提示します。計画の内容を確認して <strong>承認</strong> してください。
+      </div>
+
+      <div class="callout callout-success">
+        <div class="callout-title">Agent が処理中の間に</div>
+        Agent がコードを生成している間、<code>completed/app.py</code> を開いて完成形のコードを確認しておくと、Agent の出力と比較しやすくなります。
       </div>
 
       <div class="callout callout-info" style="font-size: 13px;">
@@ -1139,6 +1178,19 @@ curl -X POST http://localhost:5000/tickets/1/responses \
   -H "Content-Type: application/json" \
   -d '{"responder": "山田", "message": "原因調査中。認証基盤側の障害の可能性あり", "is_internal": true}'</pre>
 
+      <details style="margin: 12px 0;">
+        <summary style="cursor: pointer; font-weight: 600; font-size: 14px; padding: 8px 0; color: var(--accent);">Windows（PowerShell）の場合</summary>
+<pre><span class="comment"># 対応履歴を追加</span>
+curl -X POST http://localhost:5000/tickets/1/responses `
+  -H "Content-Type: application/json" `
+  -d "{\"responder\": \"鈴木\", \"message\": \"パスワードリセットのリンクを送信しました\", \"is_internal\": false}"
+
+<span class="comment"># 内部メモを追加</span>
+curl -X POST http://localhost:5000/tickets/1/responses `
+  -H "Content-Type: application/json" `
+  -d "{\"responder\": \"山田\", \"message\": \"原因調査中。認証基盤側の障害の可能性あり\", \"is_internal\": true}"</pre>
+      </details>
+
       <div class="step" data-step="3">
         ブラウザで <a href="http://localhost:5000/tickets/1/view" class="link">http://localhost:5000/tickets/1/view</a> を開き、チケット詳細画面に<strong>対応履歴セクション</strong>が追加されていることを確認してください：
       </div>
@@ -1170,6 +1222,11 @@ curl -X POST http://localhost:5000/tickets/1/responses \
     <div class="callout callout-danger">
       <div class="callout-title">このアプリには意図的な脆弱性が含まれています</div>
       <code>starter/app.py</code> には、教育目的で以下の脆弱性が意図的に埋め込まれています。<strong>これらは本番コードでは絶対に使用してはなりません。</strong>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">Ch.3 で一部修正済みの場合があります</div>
+      Ch.2 で追加した GEMINI.md にセキュリティ規約が含まれているため、Ch.3 の Agent モードがコード生成時に一部の脆弱性を自動的に修正している可能性があります。その場合は、<strong>残っている脆弱性に集中してください</strong>。これは GEMINI.md の効果が実際に機能している証拠でもあります。
     </div>
 
     <table>

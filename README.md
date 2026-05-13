@@ -20,7 +20,7 @@ Context Engineering / Agentic Coding / Secure Development を軸にした、Gemi
 ## ディレクトリ構成
 
 ```
-starter/          参加者が最初に使うコード（脆弱性入り）
+starter/          参加者が最初に使うコード（脆弱性入り）← VSCode でこのフォルダを開く
 templates/        演習中にコピーするテンプレート（GEMINI.md, styleguide.md）
 completed/        全演習完了後のリファレンスコード
 docs/             ハンズオンガイド（HTML）
@@ -32,6 +32,8 @@ slides/           プレゼンター用資料
 1. VSCode をインストール
 2. [Gemini Code Assist 拡張機能](https://marketplace.visualstudio.com/items?itemName=Google.gca)をインストールしてログイン
 3. Python 3.9 以上をインストール
+
+> **重要**: VSCode では `gca-handson/` ルートではなく **`starter/` フォルダを直接開いてください**。GEMINI.md はワークスペースルートから読み込まれるため、開くフォルダを間違えると Ch.2 以降の演習が正しく機能しません。
 
 ## クイックスタート
 
