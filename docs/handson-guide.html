@@ -526,33 +526,32 @@
       <li><code>python app.py</code> でサーバーが起動し <code>http://localhost:5000</code> にアクセスできる</li>
     </ul>
 
-    <div class="callout callout-danger">
-      <div class="callout-title">VSCode で開くフォルダに注意</div>
-      VSCode では <strong><code>gca-handson/</code> ルートではなく <code>starter/</code> フォルダを直接開いてください</strong>。<code>GEMINI.md</code> は VSCode で開いているフォルダ（ワークスペースルート）から読み込まれます。開くフォルダを間違えると、Ch.2 以降で Gemini がプロジェクトの規約を読み込めず、演習の効果が得られません。
-    </div>
-
     <div class="callout callout-warning">
       <div class="callout-title">環境のセットアップ</div>
       お使いの環境を汚さないよう、仮想環境を使用してセットアップしてください。<strong>venv</strong> または <strong>uv</strong> のどちらかをお選びください。
     </div>
 
+    <h4 style="margin-top: 16px;">Step 1: clone して VSCode で開く</h4>
+    <p>ターミナル（OS のターミナルでも VSCode のターミナルでも可）で clone します。</p>
+<pre>git clone https://github.com/nozoyoshida/gca-handson.git</pre>
+
+    <div class="callout callout-danger">
+      <div class="callout-title">VSCode で開くフォルダに注意</div>
+      VSCode の <strong>File → Open Folder</strong> で <strong><code>gca-handson/starter/</code></strong> フォルダを開いてください（<code>gca-handson/</code> ルートではありません）。<br>
+      <code>GEMINI.md</code> は VSCode で開いているフォルダ（ワークスペースルート）から読み込まれます。開くフォルダを間違えると、Ch.2 以降で Gemini がプロジェクトの規約を読み込めず、演習の効果が得られません。
+    </div>
+
+    <h4>Step 2: 仮想環境のセットアップ</h4>
+    <p>以降のコマンドは <strong>VSCode の統合ターミナル</strong>（Ctrl+`）で実行してください。<code>starter/</code> を開いているので、ターミナルは最初から <code>starter/</code> にいます。</p>
+
     <details style="margin: 12px 0;">
       <summary style="cursor: pointer; font-weight: 600; font-size: 15px; padding: 8px 0; color: var(--accent);">Option A: venv を使う場合</summary>
-<pre><span class="comment"># 1. リポジトリを clone</span>
-git clone https://github.com/nozoyoshida/gca-handson.git
-<span class="keyword">cd</span> gca-handson/starter/
-
-<span class="comment"># 2. Python 仮想環境を作成・有効化</span>
+<pre><span class="comment"># 1. Python 仮想環境を作成・有効化</span>
 python3 -m venv .venv
 <span class="keyword">source</span> .venv/bin/activate   <span class="comment"># Windows: .venv\Scripts\activate</span>
 
-<span class="comment"># 3. 依存パッケージをインストール</span>
-pip install -r requirements.txt
-
-<span class="comment"># 4. アプリを起動して動作確認</span>
-python app.py
-<span class="comment"># http://localhost:5000 にアクセスできればOK</span>
-</pre>
+<span class="comment"># 2. 依存パッケージをインストール</span>
+pip install -r requirements.txt</pre>
     </details>
 
     <details style="margin: 12px 0;">
@@ -565,22 +564,17 @@ python app.py
 curl -LsSf https://astral.sh/uv/install.sh | sh   <span class="comment"># macOS/Linux</span>
 <span class="comment"># Windows: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</span>
 
-<span class="comment"># 1. リポジトリを clone</span>
-git clone https://github.com/nozoyoshida/gca-handson.git
-<span class="keyword">cd</span> gca-handson/starter/
-
-<span class="comment"># 2. uv で仮想環境作成 + 依存インストール（一発で完了）</span>
+<span class="comment"># 1. uv で仮想環境作成 + 依存インストール</span>
 uv venv
 uv pip install -r requirements.txt
 
-<span class="comment"># 3. 仮想環境を有効化</span>
-<span class="keyword">source</span> .venv/bin/activate   <span class="comment"># Windows: .venv\Scripts\activate</span>
-
-<span class="comment"># 4. アプリを起動して動作確認</span>
-python app.py
-<span class="comment"># http://localhost:5000 にアクセスできればOK</span>
-</pre>
+<span class="comment"># 2. 仮想環境を有効化</span>
+<span class="keyword">source</span> .venv/bin/activate   <span class="comment"># Windows: .venv\Scripts\activate</span></pre>
     </details>
+
+    <h4>Step 3: アプリを起動して動作確認</h4>
+<pre>python app.py
+<span class="comment"># http://localhost:5000 にアクセスできればOK</span></pre>
 
     <h3 style="margin-top:20px;">題材アプリ: お問い合わせ管理 API</h3>
     <p>Flask + SQLite で構築したシンプルなチケット管理 REST API です。</p>

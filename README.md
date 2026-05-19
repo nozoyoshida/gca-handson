@@ -33,28 +33,38 @@ slides/           プレゼンター用資料
 2. [Gemini Code Assist 拡張機能](https://marketplace.visualstudio.com/items?itemName=Google.gca)をインストールしてログイン
 3. Python 3.9 以上をインストール
 
-> **重要**: VSCode では `gca-handson/` ルートではなく **`starter/` フォルダを直接開いてください**。GEMINI.md はワークスペースルートから読み込まれるため、開くフォルダを間違えると Ch.2 以降の演習が正しく機能しません。
-
 ## クイックスタート
 
-### venv を使う場合
+### 1. clone して VSCode で開く
 
 ```bash
 git clone https://github.com/nozoyoshida/gca-handson.git
-cd gca-handson/starter/
+```
+
+> **重要**: VSCode の **File → Open Folder** で **`gca-handson/starter/`** フォルダを開いてください（`gca-handson/` ルートではありません）。GEMINI.md はワークスペースルートから読み込まれるため、開くフォルダを間違えると Ch.2 以降の演習が正しく機能しません。
+
+以降のコマンドは **VSCode の統合ターミナル**（Ctrl+`` ` ``）で実行してください。`starter/` を開いているので、ターミナルは最初から `starter/` にいます。
+
+### 2. 仮想環境のセットアップ
+
+#### venv を使う場合
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python app.py
 ```
 
-### uv を使う場合
+#### uv を使う場合
 
 ```bash
-git clone https://github.com/nozoyoshida/gca-handson.git
-cd gca-handson/starter/
 uv venv && uv pip install -r requirements.txt
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
+```
+
+### 3. 起動
+
+```bash
 python app.py
 ```
 
