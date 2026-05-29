@@ -1,0 +1,12 @@
+.git/
+.gitignore
+.gcloudignore
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.db
+.env
+GEMINI.md
+.gemini/

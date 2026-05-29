@@ -1,6 +1,32 @@
 # プレゼンター用トーキングポイント
 
-## Ch.1: 基本操作（10分）
+## 全体アジェンダ（90分）
+
+| Chapter | 内容 | 時間 |
+|---------|------|------|
+| Ch.0 | セットアップ確認 | 5分 |
+| Ch.1 | 基本操作 | 12分 |
+| Ch.2 | Context Engineering | 18分 |
+| Ch.3 | Agentic Coding | 20分 |
+| Ch.4 | セキュア開発 | 15分 |
+| Ch.5 | Cloud Run デプロイ | 15分 |
+| Wrap-up | まとめ | 5分 |
+
+---
+
+## Ch.0: セットアップ確認（5分）
+
+### 進行形式
+- **VSCode で `gca/starter/` フォルダを開いているか**を全員に確認（リポジトリルートや `gca/` ではない）
+- 統合ターミナル（Ctrl+`` ` ``）で `python app.py` → http://localhost:5000 で GUI が出ることを確認
+
+### キーメッセージ
+- GEMINI.md はワークスペースルートから読み込まれる → **開くフォルダを間違えると Ch.2 以降が機能しない**
+- 詰まる人がいたら全体を止めず、後述のトラブルシューティング表で個別対応
+
+---
+
+## Ch.1: 基本操作（12分）
 
 ### 進行形式
 - **参加者は操作するが、提案は全て Decline する**（後続チャプターへの干渉防止）
@@ -18,7 +44,7 @@
 
 ---
 
-## Ch.2: Context Engineering（15分）
+## Ch.2: Context Engineering（18分）
 
 ### キーメッセージ
 - **GEMINI.md はプロジェクトに追加できる最もレバレッジの高いファイル**
@@ -41,7 +67,7 @@
 
 ---
 
-## Ch.3: Agentic Coding（18分）
+## Ch.3: Agentic Coding（20分）
 
 ### キーメッセージ
 - 「コードを書いてもらう」から「目標を伝えて計画をレビューする」へのパラダイムシフト
@@ -60,7 +86,7 @@
 
 ---
 
-## Ch.4: セキュア開発（13分）
+## Ch.4: セキュア開発（15分）
 
 ### キーメッセージ
 - AI はセキュリティの専門家を代替しないが、最初のパスのコストを劇的に下げる
@@ -81,12 +107,33 @@
 
 ---
 
-## Wrap-up（2分）
+## Ch.5: Cloud Run デプロイ（15分）
+
+### キーメッセージ
+- **実装(Ch.3) → セキュア化(Ch.4) → デプロイ(Ch.5) を同じ AI と一気通貫で**
+- 「コードを書く」だけでなく「出荷する」まで AI が伴走することを体感してもらう
+
+### 本番化の肝（必ず強調）
+- **init_db() をモジュール読み込み時に呼ぶ**：gunicorn は `__main__` を通らないため、`if __name__ == '__main__'` の中だけで `init_db()` を呼んでいると Cloud Run で DB 未初期化 → 500 エラーになる。`CREATE TABLE IF NOT EXISTS` で冪等に
+- **`0.0.0.0` と環境変数 `PORT`（既定 8080）で待受**：Cloud Run が指定するポートでリッスンする
+- **SQLite は Cloud Run では揮発**：コールドスタートやインスタンス再作成で消える。デモのみ。本番は **Cloud SQL / Firestore**
+
+### 進行のコツ
+- **gcloud 認証と API 有効化は時間がかかる** → 可能なら事前に各自済ませてもらう（`gcloud auth login` / `gcloud services enable ...`）
+- デプロイは **Cloud Build のビルド待ちで数分**かかる。待ち時間に `completed/` のデプロイ成果物を見せる：
+  - `Dockerfile` / `Procfile` / `.gcloudignore`
+  - `app.py` の `init_db()` の位置（`__main__` の外、import 時に呼ばれること）
+- デプロイは `gcloud run deploy inquiry-system --source . --region asia-northeast1 --allow-unauthenticated`。Agent モードに依頼してターミナル実行させることもできる
+
+---
+
+## Wrap-up（5分）
 
 ### 3つの持ち帰りアクション
 1. **明日、自分のプロジェクトに GEMINI.md を追加する**
 2. **フィーチャーブランチで Agent モードを試す**
 3. **styleguide.md にセキュリティルールを追加する**
+4. **小さなサービスを Cloud Run にデプロイする**（実装から出荷までを AI と一気通貫で）
 
 ---
 
@@ -101,3 +148,8 @@
 | ポート 5000 が使用中 | macOS Monterey 以降は AirPlay が使用。`flask run -p 5001` を案内 |
 | `.gemini/` が見えない | 隠しフォルダ。ターミナルで `code .gemini/styleguide.md` を案内 |
 | Ch.4 で脆弱性が少ない | GEMINI.md の効果で Ch.3 の Agent が一部修正済み。「これが Context Engineering の効果です」と説明 |
+| gcloud 未認証エラー | `gcloud auth login` で認証し、`gcloud config set project YOUR_PROJECT_ID` でプロジェクトを設定 |
+| API 未有効化エラー | `gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com` |
+| 権限不足でデプロイ失敗 | ユーザーに `roles/run.admin` 等のロールを付与してもらう |
+| デプロイ後 500 エラー | `init_db()` が `__main__` のままで import 時に呼ばれていない。`completed/` の `app.py` を参照 |
+| データが消える | SQLite は Cloud Run で揮発（仕様）。本番は Cloud SQL / Firestore を使う |

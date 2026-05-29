@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity ハンズオン（Cloud Workstations + CLI）</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+          primaryColor: '#e8f0fe',
+          primaryBorderColor: '#4285f4',
+          primaryTextColor: '#202124',
+          lineColor: '#5f6368',
+          secondaryColor: '#e6f4ea',
+          tertiaryColor: '#fef7e0',
+          fontFamily: 'Google Sans, Noto Sans JP, sans-serif',
+          fontSize: '13px'
+        },
+        flowchart: { curve: 'basis', padding: 16 }
+      });
+    });
+  </script>
+  <style>
+    :root {
+      --google-blue: #4285F4;
+      --google-red: #EA4335;
+      --google-yellow: #FBBC04;
+      --google-green: #34A853;
+      --teal: #00897b;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #dadce0;
+      --code-bg: #f1f3f4;
+      --accent: #1a73e8;
+      --warning-bg: #fef7e0;
+      --warning-border: #f9ab00;
+      --danger-bg: #fce8e6;
+      --danger-border: #ea4335;
+      --success-bg: #e6f4ea;
+      --success-border: #34a853;
+      --info-bg: #e8f0fe;
+      --info-border: #4285f4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Google Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0b8043 0%, #1a73e8 55%, #00897b 100%);
+      color: white;
+      padding: 48px 0 40px;
+      text-align: center;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .header h1 { font-size: 32px; font-weight: 500; margin-bottom: 8px; }
+    .header p { font-size: 16px; opacity: 0.9; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    .meta-bar { display: flex; gap: 24px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 14px; opacity: 0.9; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 32px 0;
+    }
+    .toc h2 { font-size: 18px; font-weight: 500; margin-bottom: 16px; color: var(--text); }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+    .toc-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; text-decoration: none; color: var(--text); transition: background 0.15s; }
+    .toc-item:hover { background: var(--code-bg); }
+    .toc-badge { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 13px; font-weight: 600; color: white; flex-shrink: 0; }
+    .toc-text { font-size: 14px; }
+    .toc-time { font-size: 12px; color: var(--text-secondary); }
+
+    .chapter { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; margin: 24px 0; overflow: hidden; }
+    .chapter-header { padding: 24px 32px 20px; border-bottom: 1px solid var(--border); }
+    .chapter-num { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: white; margin-bottom: 8px; }
+    .chapter-header h2 { font-size: 22px; font-weight: 500; }
+    .chapter-header p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+    .chapter-body { padding: 24px 32px 32px; }
+
+    .exercise { margin: 20px 0; padding: 20px 24px; background: var(--bg); border-radius: 10px; border-left: 4px solid var(--accent); }
+    .exercise-title { font-size: 16px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .exercise-title .badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--accent); color: white; font-weight: 600; }
+
+    .step { margin: 12px 0; padding-left: 20px; position: relative; }
+    .step::before { content: attr(data-step); position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+
+    code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', 'Source Code Pro', monospace; font-size: 13px; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: 'JetBrains Mono', 'Source Code Pro', monospace; font-size: 13px; line-height: 1.6; margin: 12px 0; }
+    pre .comment { color: #6a9955; }
+    pre .keyword { color: #569cd6; }
+    pre .string { color: #ce9178; }
+    pre .function { color: #dcdcaa; }
+    pre .decorator { color: #d7ba7d; }
+    pre .variable { color: #9cdcfe; }
+    pre .prompt-label { color: #4ec9b0; }
+
+    .callout { padding: 14px 18px; border-radius: 8px; margin: 16px 0; font-size: 14px; border-left: 4px solid; }
+    .callout-warning { background: var(--warning-bg); border-color: var(--warning-border); }
+    .callout-danger { background: var(--danger-bg); border-color: var(--danger-border); }
+    .callout-success { background: var(--success-bg); border-color: var(--success-border); }
+    .callout-info { background: var(--info-bg); border-color: var(--info-border); }
+    .callout-title { font-weight: 600; margin-bottom: 4px; }
+
+    .insight-box { background: linear-gradient(135deg, #e8f0fe 0%, #f0e6ff 100%); border: 1px solid #c5cae9; border-radius: 8px; padding: 14px 18px; margin: 16px 0; font-size: 14px; }
+    .insight-box .insight-title { font-weight: 600; color: #5c6bc0; margin-bottom: 4px; }
+
+    .prompt-box { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+    .prompt-box .prompt-label { font-size: 12px; font-weight: 600; color: #e65100; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .prompt-box .prompt-text { font-size: 14px; color: #bf360c; font-style: italic; }
+
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .comparison-col { border-radius: 8px; padding: 16px; font-size: 13px; }
+    .comparison-before { background: var(--danger-bg); border: 1px solid var(--danger-border); }
+    .comparison-after { background: var(--success-bg); border: 1px solid var(--success-border); }
+    .comparison-label { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .comparison-before .comparison-label { color: var(--google-red); }
+    .comparison-after .comparison-label { color: var(--google-green); }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+    th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--code-bg); font-weight: 600; font-size: 13px; }
+
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 8px 0 8px 28px; position: relative; font-size: 14px; }
+    .checklist li::before { content: ''; position: absolute; left: 0; top: 10px; width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 3px; }
+
+    .architecture-diagram { background: var(--code-bg); border-radius: 8px; padding: 20px; margin: 16px 0; font-family: monospace; font-size: 13px; line-height: 1.4; white-space: pre; overflow-x: auto; }
+
+    .footer { text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 13px; }
+    .time-tag { display: inline-block; background: var(--code-bg); color: var(--text-secondary); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .vuln-tag { display: inline-block; background: var(--danger-bg); color: var(--google-red); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .verify-tag { display: inline-block; background: #ede7f6; color: #5e35b1; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+    @media (max-width: 600px) {
+      .comparison { grid-template-columns: 1fr; }
+      .meta-bar { flex-direction: column; align-items: center; }
+      .chapter-body, .chapter-header { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="container">
+    <div class="header-badge">Hands-on Workshop</div>
+    <h1>Antigravity ハンズオン</h1>
+    <p>Cloud Workstations + Antigravity CLI で、実装から Cloud Run デプロイまで</p>
+    <div class="meta-bar">
+      <div class="meta-item">&#9202; 90分</div>
+      <div class="meta-item">&#9729; Cloud Workstations + Antigravity CLI</div>
+      <div class="meta-item">&#127919; 中級</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="callout callout-warning" style="margin-top:28px;">
+    <div class="callout-title">はじめに：本ガイドの「要確認」表記について <span class="verify-tag">要確認</span></div>
+    Antigravity 2.0 と Gemini Enterprise Agent Platform（GEAP）は比較的新しい製品で、CLI の導入コマンド・認証フラグ・<code>.agents/</code> のパス・モデル名などの<strong>具体値は変わる可能性</strong>があります。本ガイドでは確実な土台（Cloud Workstations のブラウザ IDE / ウェブプレビュー、エージェントの「計画→承認→実行→検証」、<code>AGENTS.md</code>、<code>curl</code> 検証、Cloud Run デプロイ）をベースに記述し、ツール固有の具体値には <span class="verify-tag">要確認</span> を付けています。<strong>実施前に公式ドキュメント（antigravity.google / cloud.google.com）で最新手順をご確認ください。</strong>
+  </div>
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h2>Workshop Agenda</h2>
+  <div class="toc-grid">
+    <a href="#ch0" class="toc-item">
+      <div class="toc-badge" style="background:#9e9e9e;">0</div>
+      <div><div class="toc-text">環境準備 &amp; 認証</div><div class="toc-time">15分</div></div>
+    </a>
+    <a href="#ch1" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-blue);">1</div>
+      <div><div class="toc-text">Antigravity CLI の基本</div><div class="toc-time">10分</div></div>
+    </a>
+    <a href="#ch2" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-green);">2</div>
+      <div><div class="toc-text">Context Engineering</div><div class="toc-time">16分</div></div>
+    </a>
+    <a href="#ch3" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-yellow); color:#333;">3</div>
+      <div><div class="toc-text">Agentic Coding</div><div class="toc-time">16分</div></div>
+    </a>
+    <a href="#ch4" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-red);">4</div>
+      <div><div class="toc-text">セキュア開発</div><div class="toc-time">13分</div></div>
+    </a>
+    <a href="#ch5" class="toc-item">
+      <div class="toc-badge" style="background:var(--teal);">5</div>
+      <div><div class="toc-text">Cloud Run デプロイ</div><div class="toc-time">16分</div></div>
+    </a>
+    <a href="#appendix-a" class="toc-item">
+      <div class="toc-badge" style="background:#616161;">A</div>
+      <div><div class="toc-text">附録: 管理者セットアップ</div><div class="toc-time">参考</div></div>
+    </a>
+    <a href="#appendix-b" class="toc-item">
+      <div class="toc-badge" style="background:#616161;">B</div>
+      <div><div class="toc-text">附録: CLI チートシート</div><div class="toc-time">参考</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- ===== CHAPTER 0: SETUP & AUTH ===== -->
+<div class="chapter" id="ch0">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#9e9e9e;">Chapter 0</div>
+    <h2>環境準備 &amp; 認証</h2>
+    <p>Cloud Workstation を起動し、Antigravity CLI を GEAP 認証してアプリを動かす <span class="time-tag" style="margin-left:8px;">15分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">この版はローカルに何もインストールしません</div>
+      すべての作業は<strong>ブラウザ内の Cloud Workstation</strong>（Code OSS ベースの IDE）で完結します。手元の OS や VSCode の状態に左右されず、全員が同一環境で進められます。
+    </div>
+
+    <h3>事前準備チェックリスト</h3>
+    <ul class="checklist">
+      <li>Google Cloud アカウント（GEAP が管理者により有効化済み）</li>
+      <li>自分用の Cloud Workstation が割り当て済み（または作成権限がある）&mdash; 附録 A 参照</li>
+      <li>Chrome ブラウザ</li>
+      <li>（Ch.5 用）Cloud Run / Cloud Build / Artifact Registry へのデプロイ権限 &mdash; 附録 A 参照</li>
+    </ul>
+
+    <!-- Step 1 -->
+    <h4 style="margin-top:16px;">Step 1: Cloud Workstation をブラウザ IDE で開く</h4>
+    <div class="step" data-step="1">Google Cloud コンソールで <strong>Cloud Workstations</strong> を開き、自分のワークステーションの <strong>「起動」</strong>→<strong>「起動（Launch）」</strong>をクリックします。</div>
+    <div class="step" data-step="2">ブラウザに <strong>Code OSS の IDE</strong> が開きます（URL は <code>https://80-&lt;workstation&gt;.&lt;cluster&gt;.cloudworkstations.dev</code> の形式）。左にエクスプローラー、下に統合ターミナルがある、VSCode に近い画面です。</div>
+    <div class="callout callout-info">
+      <div class="callout-title">ターミナルを開く</div>
+      メニューの <strong>Terminal → New Terminal</strong> で統合ターミナルを開きます。以降のコマンドはここで実行します。
+    </div>
+
+    <!-- Step 2 -->
+    <h4 style="margin-top:16px;">Step 2: Antigravity CLI のセットアップと GEAP 認証 <span class="verify-tag">要確認</span></h4>
+    <div class="step" data-step="1">Antigravity CLI（<code>agy</code>）が未インストールの場合はインストールします（理想は管理者がカスタムイメージにプリイン済み &mdash; 附録 A）。<code>~/.local/bin</code> は永続ディスク上なので、一度入れれば次回以降も残ります。</div>
+<pre><span class="comment"># ※ 公式の最新インストール手順は antigravity.google で要確認</span>
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+agy --version</pre>
+    <div class="step" data-step="2">Antigravity CLI を組織の Google Cloud（GEAP）で認証します。ワークステーションは<strong>ヘッドレス</strong>なので、表示された URL を別タブのブラウザで開き、コードをターミナルに貼り付けます。GEAP の<strong>プロジェクト ID とリージョン</strong>を指定します。</div>
+<pre><span class="comment"># ※ コマンド名・フラグは要確認（例）</span>
+agy login
+<span class="comment"># 表示された URL をブラウザで開き、コードをターミナルに貼り付け</span>
+<span class="comment"># GEAP のプロジェクトとリージョンを指定（例）</span>
+agy config set project <span class="variable">YOUR_GEAP_PROJECT_ID</span>
+agy config set location <span class="variable">us-central1</span></pre>
+    <div class="callout callout-warning">
+      <div class="callout-title">ローカル PC との違い</div>
+      デスクトップ版 Antigravity は自動でブラウザを開きますが、Cloud Workstation のターミナルはヘッドレスです。<strong>「URL 表示 → 別タブで開く → コードを貼り戻す」</strong>のヘッドレス OAuth フローになります。
+    </div>
+
+    <!-- Step 3 -->
+    <h4 style="margin-top:16px;">Step 3: gcloud 認証（Cloud Run デプロイ用）</h4>
+    <div class="step" data-step="1">Ch.5 のデプロイで使う <code>gcloud</code> を認証します。<code>gcloud</code> はワークステーションに同梱されていますが、ユーザーとしてのログインは別途必要です。</div>
+<pre>gcloud auth login --no-launch-browser
+<span class="comment"># 表示された URL をブラウザで開き、コードを貼り付け</span>
+gcloud config set project <span class="variable">YOUR_PROJECT_ID</span></pre>
+    <div class="callout callout-info">
+      <div class="callout-title">認証は 2 系統あります</div>
+      <strong>Antigravity CLI の認証（GEAP）</strong>= エージェント/モデルの実行用。<strong>gcloud の認証</strong>= Cloud Run へのデプロイ用。役割が違うので両方行います。
+    </div>
+
+    <!-- Step 4 -->
+    <h4 style="margin-top:16px;">Step 4: リポジトリを clone して starter を開く</h4>
+<pre>git clone https://github.com/nozoyoshida/gca-handson.git</pre>
+    <div class="callout callout-danger">
+      <div class="callout-title">開くフォルダに注意</div>
+      <strong>File → Open Folder</strong> で <strong><code>gca-handson/antigravity/starter/</code></strong> を開いてください。<code>AGENTS.md</code> はワークスペースのルートから読み込まれるため、サブフォルダ（<code>antigravity/starter/</code>）を開く必要があります。
+    </div>
+<pre><span class="comment"># 統合ターミナルで（starter/ にいる状態）</span>
+python3 -m venv .venv
+<span class="keyword">source</span> .venv/bin/activate
+pip install -r requirements.txt
+python app.py</pre>
+
+    <!-- Step 5 -->
+    <h4 style="margin-top:16px;">Step 5: ウェブプレビューで動作確認</h4>
+    <div class="step" data-step="1">アプリ起動後、ターミナルに出る <code>http://localhost:5000</code> のリンクをクリックします。Code OSS が<strong>認証済みのプレビュー URL</strong>（<code>https://5000-&lt;ws&gt;.&lt;cluster&gt;.cloudworkstations.dev</code>）に自動変換して開きます。</div>
+    <div class="step" data-step="2">チケット一覧 GUI が表示され、<code>/tickets</code> が JSON を返すことを確認してください。</div>
+    <div class="callout callout-warning">
+      <div class="callout-title">プレビューが開かないとき</div>
+      ポートは 80 と 1024&ndash;65535 がプレビュー可能です（5000 / 8080 は OK）。それでも繋がらない場合は、アプリが <code>127.0.0.1</code> ではなく <code>0.0.0.0</code> で待ち受けているか確認してください（<code>flask run --host 0.0.0.0 -p 5000</code> で起動し直すと確実です）。
+    </div>
+
+    <h3 style="margin-top:20px;">題材アプリ: お問い合わせ管理 API</h3>
+    <p>Flask + SQLite で構築したシンプルなチケット管理 REST API です。</p>
+    <table>
+      <thead><tr><th>Method</th><th>Path</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET</code></td><td><code>/tickets</code></td><td>チケット一覧取得（status, priority でフィルタ可）</td></tr>
+        <tr><td><code>GET</code></td><td><code>/tickets/&lt;id&gt;</code></td><td>チケット詳細取得</td></tr>
+        <tr><td><code>POST</code></td><td><code>/tickets</code></td><td>チケット作成</td></tr>
+        <tr><td><code>PUT</code></td><td><code>/tickets/&lt;id&gt;</code></td><td>チケット更新</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/tickets/&lt;id&gt;/status</code></td><td>ステータス変更</td></tr>
+        <tr><td><code>GET</code></td><td><code>/tickets/search?q=</code></td><td>チケット検索</td></tr>
+      </tbody>
+    </table>
+
+    <div class="architecture-diagram">antigravity/starter/
+├── app.py              # Flask アプリケーション本体
+├── AGENTS.md           # Ch.2 で編集（空ファイル / Antigravity の Rules）
+├── templates/          # Jinja2 テンプレート（GUI）
+│   ├── base.html
+│   ├── index.html
+│   └── ticket_detail.html
+├── requirements.txt    # 依存パッケージ
+└── .gitignore</div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 1: ANTIGRAVITY CLI BASICS ===== -->
+<div class="chapter" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-blue);">Chapter 1</div>
+    <h2>Antigravity CLI の基本</h2>
+    <p>「計画 → 承認 → 実行 → 検証」のエージェントループを体験する <span class="time-tag">10分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">この Chapter では変更を保持しないでください</div>
+      Ch.1 は操作に慣れることが目的です。エージェントが作ったコードは<strong>承認しても後で <code>git restore .</code> で元に戻す</strong>か、計画段階で却下してください。Ch.2 以降で <code>app.py</code> を本格的に変更します。
+    </div>
+
+    <!-- 1-1 -->
+    <div class="exercise">
+      <div class="exercise-title">1-1. TUI を起動して全体像を掴む <span class="badge">3分</span></div>
+      <div class="step" data-step="1"><code>antigravity/starter/</code> のターミナルで CLI の対話 UI（TUI）を起動します。<span class="verify-tag">要確認</span></div>
+<pre><span class="comment"># ※ 起動コマンドは要確認（例）</span>
+agy</pre>
+      <div class="step" data-step="2">入力欄・使用中モデル・トークン使用量などが表示されます。まずは読み取り専用の質問をしてみましょう：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">@app.py このプロジェクトの構成と、提供している API エンドポイントを説明してください。</div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        Antigravity は<strong>エージェントファースト</strong>です。補完を待つのではなく、「やりたいこと」を伝えると、エージェントがコードベースを読み、計画を立て、実行し、検証します。
+      </div>
+    </div>
+
+    <!-- 1-2 -->
+    <div class="exercise">
+      <div class="exercise-title">1-2. 計画 → 承認 → 実行 → 検証 <span class="badge">4分</span></div>
+      <div class="step" data-step="1">小さなタスクでエージェントループを体験します（後で戻すので保持しません）：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">ヘルスチェック用に GET /health エンドポイントを追加してください。{"status": "ok"} を返すだけの簡単なものでよいです。</div>
+      </div>
+      <div class="step" data-step="2">エージェントが<strong>計画</strong>を提示します。ファイル操作やコマンド実行の前に<strong>許可（allow / deny / ask）</strong>を求められるので、内容を見て承認します。</div>
+      <div class="step" data-step="3">実行後、エージェントが <code>curl</code> などで動作を確認します。確認できたら、変更を破棄して元に戻します：</div>
+<pre>git restore .
+<span class="comment"># 追加された未追跡ファイルがあれば: git clean -fd</span></pre>
+      <div class="callout callout-info">
+        <div class="callout-title">権限モード（allow / deny / ask）</div>
+        読み取り系は <code>allow</code>、破壊的な操作は <code>ask</code> にするのが基本です。すべてを自動承認する <code>--dangerously-skip-permissions</code>（いわゆる YOLO モード）は、ハンズオンでは<strong>使わないで</strong>ください。<span class="verify-tag">要確認</span>
+      </div>
+    </div>
+
+    <!-- 1-3 -->
+    <div class="exercise">
+      <div class="exercise-title">1-3. CLI での「検証」と成果物 <span class="badge">3分</span></div>
+      <p style="font-size:14px;">デスクトップ IDE 版はブラウザ拡張で画面操作を録画して検証しますが、<strong>CLI（ヘッドレス）では次の方法で検証</strong>します：</p>
+      <ul style="margin:8px 0 0 20px; font-size:14px;">
+        <li><strong>アプリ起動 + <code>curl</code></strong> で API の挙動を確認（エージェントが自動で行うこともあります）</li>
+        <li><strong>ウェブプレビュー</strong>で GUI を目視確認（Ch.0 Step 5 の方法）</li>
+      </ul>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        CLI の「成果物（Artifacts）」は、<strong>リポジトリ内のファイル（計画メモ・コード差分）とターミナル出力</strong>です。<code>git diff</code> で変更を確認し、計画と突き合わせる習慣をつけましょう。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 2: CONTEXT ENGINEERING ===== -->
+<div class="chapter" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-green);">Chapter 2</div>
+    <h2>Context Engineering</h2>
+    <p><code>AGENTS.md</code>（Rules）と Workflow で、AI の出力品質を一貫してコントロールする <span class="time-tag">16分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">Context Engineering とは</div>
+      AI に渡すコンテキスト（指示・背景・規約）を設計・最適化すること。Antigravity では <strong><code>AGENTS.md</code>（Rules）</strong> がプロジェクトの規約を伝える中心的な仕組みで、エージェントが<strong>毎タスクで自動的に読み込み</strong>ます。
+    </div>
+
+    <!-- 2-1 -->
+    <div class="exercise">
+      <div class="exercise-title">2-1. Before: AGENTS.md なしでコード生成 <span class="badge">4分</span></div>
+      <div class="step" data-step="1">まだ <code>AGENTS.md</code> は空のままです。CLI に以下を依頼します：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">@app.py チケットにカテゴリ分類機能を追加してください。カテゴリはマスターテーブルで管理し、チケット作成時にカテゴリを指定できるようにしてください。また、カテゴリ別のチケット集計APIも作成してください。</div>
+      </div>
+      <div class="step" data-step="2">提示された計画と差分を<strong>観察</strong>します。以下の観点で見てください：</div>
+      <ul style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li>変数名の命名規則は統一されているか？</li>
+        <li>エラーハンドリングはあるか？形式は？</li>
+        <li>SQL クエリにパラメータ化クエリが使われているか？</li>
+        <li>docstring やコメントはあるか？</li>
+      </ul>
+      <div class="callout callout-danger">
+        <div class="callout-title">変更は保持しないでください</div>
+        この演習は観察が目的です。実行してしまった場合は <code>git restore .</code>（未追跡ファイルは <code>git clean -fd</code>）で元に戻してください。Exercise 2-3 の Before/After 比較のため、<code>app.py</code> を綺麗な状態に保ちます。
+      </div>
+      <details style="margin: 16px 0 0;">
+        <summary style="cursor: pointer; font-weight: 600; font-size: 14px; padding: 8px 0; color: var(--accent);">観察のヒント: 既存コード (app.py) にはどんな課題がある？</summary>
+        <div style="margin-top: 8px;">
+          <p style="font-size: 13px;">現在のコードはたまたま snake_case で書かれていますが<strong>ルールとして明文化されていません</strong>。エラーハンドリングは関数ごとにバラバラで、<code>create_ticket()</code> や <code>search_tickets()</code> には<strong>一切ありません</strong>。SQL は安全なパラメータ化クエリと<strong>危険な f-string が混在</strong>（<code>get_tickets()</code> のフィルタ、<code>search_tickets()</code>）。docstring は<strong>全関数で 0 個</strong>です。</p>
+          <div class="insight-box" style="margin-top: 12px;">
+            <div class="insight-title">Insight</div>
+            これらは開発者が意識しないと AI も同じパターンで生成します。<code>AGENTS.md</code> で規約を明示すると、AI の出力を<strong>一貫してコントロール</strong>できます。
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- 2-2 -->
+    <div class="exercise">
+      <div class="exercise-title">2-2. AGENTS.md を作成する <span class="badge">4分</span></div>
+      <div class="step" data-step="1">ワークスペースルートの <code>AGENTS.md</code>（空ファイルが用意されています）に、<code>antigravity/templates/AGENTS.md</code> の内容をコピーします：</div>
+<pre><span class="comment"># お問い合わせ管理 API — エージェント向けルール（AGENTS.md）</span>
+
+<span class="comment">## プロジェクト概要</span>
+Flask と SQLite を使用したチケット管理 REST API です。
+
+<span class="comment">## コーディング規約</span>
+
+<span class="comment">### 命名規則</span>
+- 変数名・関数名: snake_case
+- 定数: UPPER_SNAKE_CASE
+
+<span class="comment">### ドキュメント</span>
+- 全ての関数に Google Style の docstring を記述すること
+- API エンドポイントの docstring には HTTP メソッドとパスを含めること
+
+<span class="comment">### エラーハンドリング</span>
+- エラー時は {"error": "説明"} の形式で適切な HTTP ステータスコードを返す
+- 400: バリデーションエラー、404: リソース未検出、500: サーバーエラー
+
+<span class="comment">### データベース</span>
+- SQL クエリには必ずパラメータ化クエリ（? プレースホルダー）を使用
+- f-string や % 演算子で SQL を組み立てることは禁止
+
+<span class="comment">### バリデーション</span>
+- 全てのユーザー入力に対してバリデーションを実施すること
+- 文字列フィールドには最大長制限を設けること
+
+<span class="comment">### セキュリティ</span>
+- 秘密鍵やパスワードをハードコードしてはならない
+- 本番環境では debug モードを無効にすること</pre>
+      <div class="step" data-step="2">保存します。エージェントは次のタスクから自動的にこのファイルを読み込みます。</div>
+      <div class="callout callout-info">
+        <div class="callout-title">AGENTS.md の階層 <span class="verify-tag">要確認</span></div>
+        グローバル（ユーザー設定ディレクトリ）→ プロジェクトルートの <code>AGENTS.md</code> → サブディレクトリ、の順で適用されます。会社全体の規約をグローバルに、プロジェクト固有のルールをルートに置くことで、チーム全体で一貫した出力が得られます。
+      </div>
+    </div>
+
+    <!-- 2-3 -->
+    <div class="exercise">
+      <div class="exercise-title">2-3. After: AGENTS.md ありでコード生成 <span class="badge">3分</span></div>
+      <div class="step" data-step="1"><strong>新しい CLI セッション</strong>で（履歴の影響を避けるため）、Exercise 2-1 と<strong>全く同じプロンプト</strong>を入力します。</div>
+      <div class="step" data-step="2">Before / After を比較します：</div>
+      <div class="comparison">
+        <div class="comparison-col comparison-before">
+          <div class="comparison-label">Before（AGENTS.md なし）</div>
+          <ul style="font-size:13px; margin-left:16px;">
+            <li>命名規則がバラバラ</li>
+            <li>エラーハンドリングが不十分</li>
+            <li>docstring がないことがある</li>
+            <li>SQL にパラメータ化クエリが使われない場合がある</li>
+            <li>バリデーションなし</li>
+          </ul>
+        </div>
+        <div class="comparison-col comparison-after">
+          <div class="comparison-label">After（AGENTS.md あり）</div>
+          <ul style="font-size:13px; margin-left:16px;">
+            <li>一貫した snake_case</li>
+            <li>{"error": "..."} 形式のレスポンス</li>
+            <li>Google Style docstring 付き</li>
+            <li>パラメータ化クエリ使用</li>
+            <li>入力バリデーション付き</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step" data-step="3">確認したら <code>git restore .</code>（+ <code>git clean -fd</code>）で破棄します（Ch.3 をきれいな状態から始めるため）。</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        同じプロンプトでも、<code>AGENTS.md</code> があるだけで出力品質が劇的に変わります。<strong>AGENTS.md は、プロジェクトに追加できる最もレバレッジの高いファイル</strong>です。
+      </div>
+    </div>
+
+    <!-- 2-4 -->
+    <div class="exercise">
+      <div class="exercise-title">2-4. Workflow でコードレビューを自動化する <span class="badge">3分</span></div>
+      <div class="step" data-step="1"><code>antigravity/templates/code-review.workflow.md</code> の内容を <code>.agents/workflows/code-review.md</code> に配置します。<span class="verify-tag">要確認</span>（Workflow の正式なパス・記法は公式ドキュメントで確認）</div>
+      <div class="step" data-step="2">CLI でスラッシュコマンドとして呼び出し、現在の差分をレビューさせます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/code-review</div>
+      </div>
+      <div class="callout callout-info">
+        <div class="callout-title">GCA の styleguide.md に相当</div>
+        Gemini Code Assist では <code>.gemini/styleguide.md</code> を使った GitHub PR 自動レビューでしたが、Antigravity では <strong>Workflow（再利用可能な <code>/</code> コマンド）</strong>として、チームのレビュー基準をその場で実行できます。
+      </div>
+    </div>
+
+    <!-- 2-5 -->
+    <div class="exercise">
+      <div class="exercise-title">2-5. 解説：コンテキストの 4 階層 <span class="badge">2分</span> <span class="verify-tag">要確認</span></div>
+      <table>
+        <thead><tr><th>仕組み</th><th>用途</th><th>読み込みタイミング</th></tr></thead>
+        <tbody>
+          <tr><td><code>AGENTS.md</code>（Rules）</td><td>プロジェクトの常時ルール</td><td>全タスクで自動</td></tr>
+          <tr><td><code>.agents/workflows/</code>（Workflow）</td><td>再利用する手順（<code>/code-review</code> 等）</td><td><code>/</code> で明示起動</td></tr>
+          <tr><td><code>.agents/skills/</code>（Skill）</td><td>特定領域の知識・ツール束</td><td>関連タスクで自動 / 明示</td></tr>
+          <tr><td><code>@</code> ファイル参照</td><td>特定ファイルのコンテキスト追加</td><td>プロンプトで明示指定時</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-success">
+        <div class="callout-title">持ち帰りアクション</div>
+        明日から自分のプロジェクトに <code>AGENTS.md</code> を追加してみてください。10分の投資で、チーム全体の AI 出力品質が向上します。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 3: AGENTIC CODING ===== -->
+<div class="chapter" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-yellow); color:#333;">Chapter 3</div>
+    <h2>Agentic Coding</h2>
+    <p>複数ファイルにまたがる機能を、計画レビュー付きで一気に実装する <span class="time-tag">16分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">エージェントの出力は毎回異なります</div>
+      生成 AI の出力は毎回変わるため、講師や隣の参加者と結果が違っても正常です。<strong>大事なのは計画の内容をレビューする体験</strong>です。想定と大きく異なる場合は <code>completed/app.py</code> を参照してください。
+    </div>
+
+    <!-- 3-1 -->
+    <div class="exercise">
+      <div class="exercise-title">3-1. 対応履歴機能を実装する <span class="badge">8分</span></div>
+      <div class="step" data-step="1">CLI に以下のプロンプトを入力します：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">お問い合わせ管理APIに対応履歴機能を追加してください。<br><br>
+要件:<br>
+1. responses テーブルを作成（id, ticket_id (外部キー → tickets.id), responder TEXT, message TEXT, is_internal BOOLEAN デフォルト 0, created_at）<br>
+2. init_db() 内に CREATE TABLE IF NOT EXISTS で responses テーブル作成を追加（既存テーブルに影響を与えない）<br>
+3. GET /tickets/&lt;id&gt;/responses - 対応履歴を時系列で取得<br>
+4. POST /tickets/&lt;id&gt;/responses - 対応履歴を追加（responder, message 必須、is_internal 任意）<br>
+5. チケットが存在しない場合は 404<br>
+6. ticket_detail.html に対応履歴の一覧を表示（内部メモには「内部メモ」バッジ）</div>
+      </div>
+      <div class="step" data-step="2">エージェントが<strong>実行計画</strong>を提示します。承認する前に、以下を確認してください：</div>
+      <div class="callout callout-info" style="font-size: 13px;">
+        <div class="callout-title">計画レビューのポイント</div>
+        <ul style="margin: 6px 0 0 16px;">
+          <li><code>responses</code> テーブルに <code>is_internal</code> カラムが含まれているか</li>
+          <li><code>ticket_id</code> に外部キー制約が設定されているか</li>
+          <li>GET と POST の両方のエンドポイントが計画に含まれているか</li>
+          <li><code>ticket_detail.html</code> の更新が含まれているか</li>
+        </ul>
+      </div>
+      <div class="step" data-step="3">問題なければ承認し、エージェントに複数ファイルの変更を実行させます。<strong>この変更は保持します</strong>（デプロイ対象になります）。</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        単一のプロンプトから、DB テーブル設計・API・GUI まで一貫して生成されます。<strong>計画のレビューが「あなたの価値を発揮する場所」</strong>です。アーキテクチャの問題はコードが書かれる前（計画段階）に指摘しましょう。
+      </div>
+    </div>
+
+    <!-- 3-2 -->
+    <div class="exercise">
+      <div class="exercise-title">3-2. AGENTS.md との相乗効果を確認 <span class="badge">4分</span></div>
+      <div class="step" data-step="1">生成されたコードが <code>AGENTS.md</code> の規約に従っているか確認します：</div>
+      <div class="comparison">
+        <div class="comparison-col comparison-after" style="grid-column: 1 / -1;">
+          <div class="comparison-label">AGENTS.md の規約が適用されているか</div>
+          <ul style="font-size:13px; margin-left:16px;">
+            <li>snake_case の命名規則に従っているか</li>
+            <li>Google Style の docstring が付いているか</li>
+            <li>パラメータ化クエリを使用しているか（f-string ではなく）</li>
+            <li>エラーレスポンスが <code>{"error": "..."}</code> 形式か</li>
+            <li>入力バリデーションが含まれているか</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout callout-success">
+        <div class="callout-title">Agentic Coding + AGENTS.md = 一貫性</div>
+        AGENTS.md があることで、複数の機能を追加しても規約に沿った一貫したコードが生成されます。
+      </div>
+    </div>
+
+    <!-- 3-3 -->
+    <div class="exercise">
+      <div class="exercise-title">3-3. 動作確認 <span class="badge">4分</span></div>
+      <div class="step" data-step="1">アプリを再起動します：</div>
+<pre>python app.py</pre>
+      <div class="step" data-step="2">新しいエンドポイントを <code>curl</code> でテストします：</div>
+<pre><span class="comment"># 対応履歴を追加</span>
+curl -X POST http://localhost:5000/tickets/1/responses \
+  -H "Content-Type: application/json" \
+  -d '{"responder": "鈴木", "message": "パスワードリセットのリンクを送信しました", "is_internal": false}'
+
+<span class="comment"># 内部メモを追加</span>
+curl -X POST http://localhost:5000/tickets/1/responses \
+  -H "Content-Type: application/json" \
+  -d '{"responder": "山田", "message": "原因調査中。認証基盤側の障害の可能性あり", "is_internal": true}'</pre>
+      <div class="step" data-step="3"><strong>ウェブプレビュー</strong>で <code>/tickets/1/view</code> を開き、対応履歴セクションを確認します：</div>
+      <ul style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li>鈴木さんの対応記録が表示されているか</li>
+        <li>山田さんの内部メモに「内部メモ」バッジが付いているか</li>
+        <li>時系列順に並んでいるか</li>
+      </ul>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        バックエンド（API）+ フロントエンド（GUI テンプレート）にまたがる変更を、1 つのプロンプトで完結できます。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 4: SECURITY ===== -->
+<div class="chapter" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-red);">Chapter 4</div>
+    <h2>セキュア開発</h2>
+    <p>脆弱性を検出し、修正し、ルールとして定着させる <span class="time-tag">13分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-danger">
+      <div class="callout-title">このアプリには意図的な脆弱性が含まれています</div>
+      <code>starter/app.py</code> には教育目的の脆弱性が埋め込まれています。<strong>本番コードでは絶対に使用しないでください。</strong>
+    </div>
+    <div class="callout callout-info">
+      <div class="callout-title">Ch.3 で一部修正済みの場合があります</div>
+      Ch.2 で追加した <code>AGENTS.md</code> にセキュリティ規約が含まれるため、Ch.3 のエージェントが一部の脆弱性を自動的に避けている可能性があります。残っている脆弱性に集中してください &mdash; これは <strong>Context Engineering が効いている証拠</strong>です。
+    </div>
+
+    <table>
+      <thead><tr><th>脆弱性</th><th>場所</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><span class="vuln-tag">SQLi</span></td><td><code>search_tickets()</code></td><td>f-string で SQL を組み立て</td></tr>
+        <tr><td><span class="vuln-tag">SQLi</span></td><td><code>get_tickets()</code> フィルタ</td><td>status を直接 SQL に埋め込み</td></tr>
+        <tr><td><span class="vuln-tag">Validation</span></td><td><code>update_status()</code></td><td>任意の文字列をステータスとして受け付ける</td></tr>
+        <tr><td><span class="vuln-tag">Config</span></td><td><code>app.run()</code></td><td>debug=True でデバッガー露出</td></tr>
+        <tr><td><span class="vuln-tag">Secrets</span></td><td><code>app.secret_key</code></td><td>秘密鍵がハードコード</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 4-1 -->
+    <div class="exercise">
+      <div class="exercise-title">4-1. 脆弱性を検出する <span class="badge">4分</span></div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">@app.py このコードをセキュリティの観点で包括的にレビューしてください。OWASP Top 10 を基準に、SQLインジェクション、入力バリデーション、認証・認可、設定の問題に注目し、各脆弱性のリスクレベルと具体的な修正方法を提案してください。</div>
+      </div>
+      <div class="step" data-step="1">検出結果を確認し、上記 5 つの脆弱性が検出されるか見てみましょう。</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        AI は SQLi のような技術的脆弱性だけでなく、設定ミス（debug=True）やハードコード秘密鍵も検出します。<strong>AI はセキュリティ専門家を代替しませんが、最初のパスのコストを劇的に下げます。</strong>
+      </div>
+    </div>
+
+    <!-- 4-2 -->
+    <div class="exercise">
+      <div class="exercise-title">4-2. 脆弱性を修正する <span class="badge">4分</span></div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">このコードベースのセキュリティ脆弱性を全て修正してください。<br><br>
+1. 全ての SQL インジェクションをパラメータ化クエリで修正<br>
+2. title フィールドに入力バリデーション追加（1-200文字、HTML タグ除去）<br>
+3. ステータス更新時に許可された値のみ受け付けるバリデーション追加<br>
+4. secret_key を環境変数から読み込むように変更<br>
+5. debug モードを環境変数で制御するように変更</div>
+      </div>
+      <div class="step" data-step="1">計画をレビューして承認します。修正後、特に <code>search_tickets()</code> が以下のように変わっているか確認します：</div>
+      <div class="comparison">
+        <div class="comparison-col comparison-before">
+          <div class="comparison-label">Before（脆弱）</div>
+<pre style="background:transparent; color:inherit; padding:8px 0; font-size:12px;">sql = f"SELECT * FROM tickets
+WHERE title LIKE '%{q}%'"
+db.execute(sql)</pre>
+        </div>
+        <div class="comparison-col comparison-after">
+          <div class="comparison-label">After（安全）</div>
+<pre style="background:transparent; color:inherit; padding:8px 0; font-size:12px;">sql = "SELECT * FROM tickets
+WHERE title LIKE ?"
+db.execute(sql, (f'%{q}%',))</pre>
+        </div>
+      </div>
+      <div class="step" data-step="2">この修正は<strong>保持します</strong>（安全な状態でデプロイするため）。</div>
+    </div>
+
+    <!-- 4-3 -->
+    <div class="exercise">
+      <div class="exercise-title">4-3. セキュリティルールを AGENTS.md に定着させる <span class="badge">3分</span></div>
+      <div class="step" data-step="1"><code>antigravity/templates/AGENTS_security.md</code> の「セキュリティ（最優先）」セクションを、<code>AGENTS.md</code> の<strong>先頭付近に追記</strong>します：</div>
+<pre><span class="comment">## セキュリティ（最優先）</span>
+
+<span class="comment">### SQL インジェクション防止</span>
+- f-string、% 演算子、.format() を SQL 文で絶対に使用しないこと
+- 必ずパラメータ化クエリ（? プレースホルダー）を使用すること
+
+<span class="comment">### 入力バリデーション</span>
+- 全てのユーザー入力に対してバリデーションを実施すること
+- 文字列フィールドには最大長制限を設けること
+- HTML タグやスクリプトタグを除去またはエスケープすること
+- ステータス等の列挙値は許可リストで検証すること
+
+<span class="comment">### 設定</span>
+- 秘密鍵は環境変数から読み込むこと
+- 本番環境で debug=True を使用しないこと
+- エラーメッセージに内部情報（スタックトレース等）を含めないこと</pre>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        セキュリティ知識を<strong>コード（AGENTS.md / Workflow）として定着</strong>させることが重要です。一度書けば、以降のすべてのエージェントタスクと <code>/code-review</code> で自動的にチェックされます。
+      </div>
+    </div>
+
+    <!-- 4-4 -->
+    <div class="exercise">
+      <div class="exercise-title">4-4. 補足: Antigravity / Google Cloud のセキュリティ <span class="badge">2分</span></div>
+      <table>
+        <thead><tr><th>機能</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td><strong>権限モデル（allow/deny/ask）</strong></td><td>エージェントのコマンド実行・ファイル操作を許可リストで制御。破壊的操作は確認を求める。</td></tr>
+          <tr><td><strong>URL 許可リスト</strong></td><td>エージェントがブラウザ操作する際の接続先を制限し、プロンプトインジェクションを防ぐ。<span class="verify-tag">要確認</span></td></tr>
+          <tr><td><strong>GEAP ガバナンス</strong></td><td>Agent Identity / Registry / Gateway によりエージェントを集中管理・監査。</td></tr>
+          <tr><td><strong>Model Armor</strong></td><td>LLM の入出力をリアルタイムにスクリーニング（プロンプトインジェクション検出・PII マスキング等）。</td></tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: 16px; font-size: 15px;">Model Armor</h4>
+      <div class="callout callout-info">
+        <div class="callout-title">LLM の入出力を守るセキュリティレイヤー</div>
+        <a href="https://cloud.google.com/security/products/model-armor" style="color: var(--accent);">Model Armor</a> は、プロンプト（入力）とレスポンス（出力）をリアルタイムでスクリーニングする Google Cloud のサービスです。
+        <div style="margin: 12px 0; text-align: center;">
+          <pre class="mermaid">
+flowchart LR
+    A["User Input"] --> B
+    subgraph B["Model Armor - 入力"]
+      direction TB
+      B1["Prompt Injection 検出"]
+      B2["PII マスキング"]
+      B3["不正 URL ブロック"]
+    end
+    B --> C["Antigravity\n(GEAP)"]
+    C --> D
+    subgraph D["Model Armor - 出力"]
+      direction TB
+      D1["有害コンテンツ検出"]
+      D2["機密データ除去"]
+    end
+    D --> E["Response"]
+
+    style A fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style C fill:#e6f4ea,stroke:#34a853,color:#202124
+    style E fill:#e8f0fe,stroke:#4285f4,color:#202124
+    style B fill:#fce8e6,stroke:#ea4335,color:#202124
+    style D fill:#fce8e6,stroke:#ea4335,color:#202124
+          </pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CHAPTER 5: CLOUD RUN DEPLOY ===== -->
+<div class="chapter" id="ch5">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--teal);">Chapter 5</div>
+    <h2>Cloud Run へデプロイ</h2>
+    <p>完成したアプリを本番化し、ワークステーションからサーバーレスで公開する <span class="time-tag">16分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">この Chapter のゴール</div>
+      Ch.3 で機能を追加し、Ch.4 でセキュアにしたアプリを、<strong>Cloud Run</strong> にデプロイして公開 URL で動かします。Cloud Workstation には <code>gcloud</code> が同梱され、Ch.0 で認証済みなので、そのままデプロイできます。
+    </div>
+    <div class="callout callout-warning">
+      <div class="callout-title">前提</div>
+      Ch.0 Step 3 で <code>gcloud auth login</code> 済み・プロジェクト設定済みであること、ユーザーに Cloud Run デプロイ権限（<code>roles/run.admin</code> 等）が付与されていること（附録 A）。
+    </div>
+
+    <!-- 5-1 -->
+    <div class="exercise">
+      <div class="exercise-title">5-1. エージェントでアプリを本番対応にする <span class="badge">5分</span></div>
+      <div class="step" data-step="1">Flask の開発サーバーは本番に不向きです。CLI に以下を依頼します：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">このアプリを Cloud Run にデプロイできるよう本番対応にしてください。<br><br>
+1. requirements.txt に gunicorn を追加<br>
+2. アプリは 0.0.0.0 と環境変数 PORT（既定 8080）でリッスンするようにする<br>
+3. gunicorn 経由（__main__ を通らない）でも DB が初期化されるよう、init_db() をモジュール読み込み時に呼ぶ（CREATE TABLE IF NOT EXISTS で冪等に）<br>
+4. Dockerfile を作成（gunicorn で app:app を起動し、PORT にバインド）<br>
+5. .gcloudignore を作成（.venv, *.db, __pycache__ などを除外）</div>
+      </div>
+      <div class="step" data-step="2">計画をレビューして承認します。特に <strong>init_db() がモジュール読み込み時に呼ばれる</strong>点を確認してください。</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight: よくある落とし穴</div>
+        元の <code>app.py</code> は <code>init_db()</code> を <code>if __name__ == '__main__'</code> 内でのみ呼びます。Cloud Run では gunicorn がアプリを <code>import</code> して起動するため <code>__main__</code> は実行されず、<strong>DB 未初期化で 500 エラー</strong>になりがちです。完成形は <code>completed/</code> を参照してください。
+      </div>
+    </div>
+
+    <!-- 5-2 -->
+    <div class="exercise">
+      <div class="exercise-title">5-2. API を有効化する <span class="badge">2分</span></div>
+      <div class="step" data-step="1">デプロイに必要な API を有効化します（認証は Ch.0 で完了済み）：</div>
+<pre>gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com</pre>
+    </div>
+
+    <!-- 5-3 -->
+    <div class="exercise">
+      <div class="exercise-title">5-3. Cloud Run にデプロイする <span class="badge">6分</span></div>
+      <div class="step" data-step="1">ソースから直接デプロイします（Cloud Build がコンテナをビルド）：</div>
+<pre>gcloud run deploy inquiry-system \
+  --source . \
+  --region asia-northeast1 \
+  --allow-unauthenticated</pre>
+      <div class="callout callout-info">
+        <div class="callout-title">エージェントに任せることもできます <span class="verify-tag">要確認</span></div>
+        CLI に「<em>このアプリを Cloud Run の asia-northeast1 リージョンに、未認証アクセスを許可してデプロイして</em>」と依頼すると、エージェントがターミナルで <code>gcloud run deploy</code> を実行し、URL を読み戻します（実行時に許可を求められます）。Cloud Run の MCP サーバー経由でのデプロイも可能とされています（公式手順は要確認）。
+      </div>
+      <div class="step" data-step="2">完了後、出力の最後に <code>Service URL: https://inquiry-system-xxxxx.run.app</code> が表示されます。</div>
+    </div>
+
+    <!-- 5-4 -->
+    <div class="exercise">
+      <div class="exercise-title">5-4. 動作確認 <span class="badge">3分</span></div>
+      <div class="step" data-step="1">払い出された URL を<strong>ブラウザで直接開きます</strong>（Cloud Run は公開なので、ウェブプレビューは不要です）。チケット一覧 GUI と <code>/tickets</code> の JSON を確認します。</div>
+      <div class="callout callout-warning">
+        <div class="callout-title">SQLite はデモ用途のみ（重要）</div>
+        Cloud Run のファイルシステムは<strong>揮発性</strong>で、インスタンスはゼロにスケールします。SQLite ファイルは<strong>コールドスタートやインスタンス再作成で消えます</strong>。今回はデプロイ手順の体験が目的なので SQLite のままで構いませんが、<strong>本番では Cloud SQL や Firestore などのマネージドデータベース</strong>を使用してください。
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        アイデア → 実装（Ch.3）→ セキュア化（Ch.4）→ デプロイ（Ch.5）まで、同じエージェントと共に一気通貫で行いました。Cloud Workstations + Antigravity CLI なら、<strong>クラウド上の同一環境で「実装から出荷まで」</strong>が完結します。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== WRAP UP ===== -->
+<div class="chapter" id="wrapup">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#616161;">Wrap-up</div>
+    <h2>まとめ &amp; 次のステップ</h2>
+    <p><span class="time-tag">4分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <h3>本日のポイント</h3>
+    <table>
+      <thead><tr><th>Chapter</th><th>学んだこと</th><th>持ち帰りアクション</th></tr></thead>
+      <tbody>
+        <tr><td>Ch.1 CLI の基本</td><td>計画→承認→実行→検証のループ</td><td>日々のタスクをエージェントに任せてみる</td></tr>
+        <tr><td>Ch.2 Context Engineering</td><td>AGENTS.md で AI の出力品質を制御</td><td><strong>明日、自分のプロジェクトに AGENTS.md を追加</strong></td></tr>
+        <tr><td>Ch.3 Agentic Coding</td><td>複数ファイルの機能を計画レビュー付きで実装</td><td>フィーチャーブランチで試し、計画をレビューする</td></tr>
+        <tr><td>Ch.4 セキュア開発</td><td>脆弱性検出 &rarr; 修正 &rarr; ルール化</td><td>AGENTS.md / Workflow にセキュリティルールを追加</td></tr>
+        <tr><td>Ch.5 Cloud Run デプロイ</td><td>本番化 &rarr; デプロイ &rarr; 公開 URL で確認</td><td>小さなサービスを <code>gcloud run deploy --source .</code> で公開</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 28px;">AI 時代の開発者に求められること</h3>
+
+    <div style="background: linear-gradient(135deg, #e8f0fe 0%, #f0e6ff 100%); border: 1px solid #c5cae9; border-radius: 10px; padding: 20px 24px; margin: 16px 0;">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="text-align: center; flex-shrink: 0;">
+          <div style="font-size: 36px; font-weight: 600; color: #1a73e8;">76%&rarr;83%</div>
+          <div style="font-size: 11px; color: #5f6368;">コンテキスト改善による<br>レビュー精度の向上</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Context Engineering が AI 活用の成否を決める</div>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">「エージェントが成功するか失敗するかを決める最大の要因は、モデルの性能ではなく<strong>コンテキストの質</strong>である」。<code>AGENTS.md</code> のような小さな追加が、精度と信頼性を大きく改善します。</p>
+          <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
+            Sources: <a href="https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html" style="color: #80868b;">Martin Fowler</a> /
+            <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" style="color: #80868b;">Anthropic</a> /
+            <a href="https://cloud.google.com/blog/topics/developers-practitioners/five-best-practices-for-using-ai-coding-assistants" style="color: #80868b;">Google Cloud</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #e6f4ea 0%, #e8f0fe 100%); border: 1px solid #a8dab5; border-radius: 10px; padding: 20px 24px; margin: 16px 0;">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="text-align: center; flex-shrink: 0;">
+          <div style="font-size: 36px; font-weight: 600; color: #137333;">1.7x</div>
+          <div style="font-size: 11px; color: #5f6368;">AI 生成コードは<br>人間より多くの問題を含む</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Agentic Coding でも開発知見は不可欠</div>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">AI 生成コードは <strong>1.7 倍の問題</strong>を含み、<strong>45% にセキュリティ欠陥</strong>があるという調査も。AI は開発者を「コードを書く人」から「<strong>設計し、レビューし、判断する人</strong>」に変えます。計画レビューの体験はその縮図です。</p>
+          <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
+            Sources: <a href="https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report" style="color: #80868b;">CodeRabbit 2025</a> /
+            <a href="https://www.qodo.ai/reports/state-of-ai-code-quality/" style="color: #80868b;">Qodo</a> /
+            <a href="https://github.blog/developer-skills/career-growth/hard-and-soft-skills-for-developers-coding-in-the-age-of-ai/" style="color: #80868b;">GitHub Blog</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #fce8e6 0%, #fef7e0 100%); border: 1px solid #f5c6cb; border-radius: 10px; padding: 20px 24px; margin: 16px 0;">
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="text-align: center; flex-shrink: 0;">
+          <div style="font-size: 36px; font-weight: 600; color: #c5221f;">5日</div>
+          <div style="font-size: 11px; color: #5f6368;">脆弱性公開から<br>悪用までの期間（2025年）</div>
+        </div>
+        <div>
+          <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">攻撃者も AI を使う。防御にも AI とガバナンスが必要</div>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">脆弱性が悪用されるまでの期間は 2020 年の 700 日超から <strong>2025 年にはわずか 5 日</strong>に短縮。<code>AGENTS.md</code> / Workflow による自動チェック、Model Armor や GEAP のガバナンスは「あれば便利」ではなく<strong>必須の防御</strong>です。</p>
+          <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
+            Sources: <a href="https://cloud.google.com/blog/topics/threat-intelligence/ai-vulnerability-exploitation-initial-access" style="color: #80868b;">Google Cloud</a> /
+            <a href="https://deepstrike.io/blog/ai-cyber-attack-statistics-2025" style="color: #80868b;">DeepStrike</a> /
+            <a href="https://www.deepinstinct.com/blog/the-rise-of-ai-driven-cyber-attacks-how-llms-are-reshaping-the-threat-landscape" style="color: #80868b;">Deep Instinct</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-success" style="margin-top: 20px;">
+      <div class="callout-title">持ち帰りアクション</div>
+      <ol style="margin: 8px 0 0 20px; font-size: 14px;">
+        <li><strong>AGENTS.md を作成する</strong> &mdash; 10分で書けて、チーム全体の AI 出力品質が向上</li>
+        <li><strong>エージェントをフィーチャーブランチで使う</strong> &mdash; 計画をレビューする習慣をつける</li>
+        <li><strong>セキュリティを AGENTS.md / Workflow に定着</strong> &mdash; 毎タスクで自動チェック</li>
+        <li><strong>小さなサービスを Cloud Run にデプロイ</strong> &mdash; 実装から出荷まで一気通貫で体験</li>
+      </ol>
+    </div>
+
+    <h3 style="margin-top: 24px;">参考リンク</h3>
+    <ul style="font-size: 14px; margin-left: 20px;">
+      <li><a href="https://antigravity.google/">Google Antigravity</a></li>
+      <li><a href="https://cloud.google.com/workstations">Cloud Workstations</a></li>
+      <li><a href="https://cloud.google.com/run/docs">Cloud Run ドキュメント</a></li>
+      <li><a href="https://cloud.google.com/security/products/model-armor">Model Armor</a></li>
+    </ul>
+
+  </div>
+</div>
+
+<!-- ===== APPENDIX A: ADMIN SETUP ===== -->
+<div class="chapter" id="appendix-a">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#616161;">附録 A</div>
+    <h2>管理者セットアップ（GEAP + Cloud Workstations）</h2>
+    <p>受講者がすぐ始められるよう、管理者が事前に行う準備 <span class="time-tag">参考</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">手順・ロール名は公式ドキュメントで要確認 <span class="verify-tag">要確認</span></div>
+      以下は概略です。GEAP の有効化方法・IAM ロール名・API サービス名などは、実施時点の公式ドキュメントで確認してください。
+    </div>
+
+    <h4>1. Gemini Enterprise Agent Platform（GEAP）</h4>
+    <ul style="margin: 4px 0 12px 20px; font-size: 14px;">
+      <li>組織で GEAP を有効化し、開発者にシート / アクセスを割り当てる <span class="verify-tag">要確認</span></li>
+      <li>開発者は Antigravity CLI から自分の Google Cloud ID でサインインし、GEAP のプロジェクト + リージョンを指定する</li>
+    </ul>
+
+    <h4>2. Cloud Workstations</h4>
+<pre><span class="comment"># API 有効化</span>
+gcloud services enable workstations.googleapis.com compute.googleapis.com
+
+<span class="comment"># クラスタ作成（リージョンに1つ。作成に ~20 分）</span>
+gcloud workstations clusters create handson-cluster --region=asia-northeast1
+
+<span class="comment"># コンフィグ作成（マシンタイプ / イメージ / アイドルタイムアウト / カスタム SA）</span>
+gcloud workstations configs create handson-config \
+  --cluster=handson-cluster --region=asia-northeast1 \
+  --machine-type=e2-standard-4 \
+  --idle-timeout=3600s
+
+<span class="comment"># 各受講者のワークステーションを作成し、利用権限を付与</span>
+gcloud workstations create ws-user01 \
+  --cluster=handson-cluster --config=handson-config --region=asia-northeast1</pre>
+    <div class="callout callout-success">
+      <div class="callout-title">理想: カスタムイメージに Antigravity CLI / gcloud をプリインストール</div>
+      Google 提供のベースイメージ（Code OSS）を拡張し、<code>agy</code> や追加ツールを焼き込んだカスタムイメージを Artifact Registry に push してコンフィグで指定すると、受講者は Ch.0 の導入手順を省けます。<code>/home</code> は実行時にマウントされ上書きされるため、初期化は <code>/etc/workstation-startup.d/</code> のスタートアップスクリプトで行います。<span class="verify-tag">要確認</span>
+    </div>
+    <ul style="margin: 4px 0 12px 20px; font-size: 14px;">
+      <li>各受講者に <code>roles/workstations.user</code>（自分で作成させる場合は <code>roles/workstations.workstationCreator</code> も）を付与</li>
+    </ul>
+
+    <h4>3. Cloud Run デプロイ権限（Ch.5 用）</h4>
+    <p style="font-size:14px;">受講者の Google アカウントに以下を付与しておくと、Ch.5 がスムーズです：</p>
+    <table>
+      <thead><tr><th>ロール</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>roles/run.admin</code></td><td>Cloud Run サービスのデプロイ・更新</td></tr>
+        <tr><td><code>roles/iam.serviceAccountUser</code></td><td>Cloud Run 実行 SA として動作</td></tr>
+        <tr><td><code>roles/cloudbuild.builds.editor</code></td><td>ソースデプロイ時の Cloud Build 実行</td></tr>
+        <tr><td><code>roles/artifactregistry.writer</code></td><td>ビルド済みイメージの push</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- ===== APPENDIX B: CLI CHEAT SHEET ===== -->
+<div class="chapter" id="appendix-b">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#616161;">附録 B</div>
+    <h2>Antigravity CLI チートシート</h2>
+    <p>よく使う操作のまとめ <span class="time-tag">参考</span> <span class="verify-tag">要確認</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">具体コマンドは公式ドキュメントで確認</div>
+      以下は本ハンズオン時点での想定です。実際のコマンド名・フラグ・パスは antigravity.google の公式ドキュメントで確認してください。
+    </div>
+
+<pre><span class="comment"># インストール / バージョン確認</span>
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+agy --version
+
+<span class="comment"># 認証（GEAP）: ヘッドレス OAuth（URL をブラウザで開きコード貼付）</span>
+agy login
+agy config set project <span class="variable">YOUR_GEAP_PROJECT_ID</span>
+agy config set location <span class="variable">us-central1</span>
+
+<span class="comment"># 対話 TUI を起動</span>
+agy
+
+<span class="comment"># 一発実行（スクリプト / CI 向け）</span>
+agy -p "コミット前の差分をレビューして"
+
+<span class="comment"># Workflow（再利用コマンド）の起動</span>
+/code-review</pre>
+
+    <table>
+      <thead><tr><th>ファイル / 仕組み</th><th>役割</th></tr></thead>
+      <tbody>
+        <tr><td><code>AGENTS.md</code>（ルート）</td><td>常時適用のプロジェクトルール（Rules）</td></tr>
+        <tr><td><code>.agents/workflows/*.md</code></td><td>再利用する手順（<code>/name</code> で起動）</td></tr>
+        <tr><td><code>.agents/skills/*</code></td><td>特定領域の知識・ツール束（Skill）</td></tr>
+        <tr><td>権限リスト</td><td>allow / deny / ask でコマンド・操作を制御</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-info">
+      <div class="callout-title">（任意）ローカル VS Code から使いたい場合</div>
+      このハンズオンはブラウザ IDE 完結ですが、Cloud Workstations は<strong>ローカル VS Code からのリモート接続</strong>にも対応しています。手元の VS Code を使いたい場合は、Cloud Workstations のリモート接続機能で接続し、統合ターミナルで同じ <code>agy</code> コマンドを実行できます。<span class="verify-tag">要確認</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>Google Cloud &mdash; Antigravity (Cloud Workstations + CLI) Hands-on Workshop</p>
+</div>
+
+</div>
+</body>
+</html>

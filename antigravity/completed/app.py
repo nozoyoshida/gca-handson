@@ -489,7 +489,16 @@ def get_overdue_tickets():
     return jsonify(overdue)
 
 
+# gunicorn などの WSGI サーバー経由（Cloud Run 本番）でもテーブルが作成されるよう、
+# モジュール読み込み時にデータベースを初期化する。
+# init_db() は CREATE TABLE IF NOT EXISTS と「件数 0 のときのみ seed」で冪等なため、
+# import 時に毎回呼んでも既存データへの影響はない。
+init_db()
+
+
 if __name__ == '__main__':
-    init_db()
+    # ローカル開発用のエントリーポイント。
+    # Cloud Run は PORT 環境変数でリッスンするポートを指定する（既定 8080）。
+    port = int(os.environ.get('PORT', 8080))
     debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
-    app.run(debug=debug_mode)
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

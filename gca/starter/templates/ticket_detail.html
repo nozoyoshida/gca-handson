@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}#{{ ticket.id }} {{ ticket.title }} - お問い合わせ管理{% endblock %}
+
+{% block content %}
+<a class="back-link" href="/">&larr; チケット一覧に戻る</a>
+
+<div class="card">
+  <h2 style="font-size: 20px; font-weight: 500; margin-bottom: 16px;">
+    <span style="color: #5f6368;">#{{ ticket.id }}</span> {{ ticket.title }}
+  </h2>
+
+  <div class="detail-grid">
+    <div class="detail-item">
+      <div class="label">ステータス</div>
+      <span class="badge badge-{{ ticket.status }}">
+        {% if ticket.status == 'open' %}未対応
+        {% elif ticket.status == 'in_progress' %}対応中
+        {% elif ticket.status == 'closed' %}完了
+        {% else %}{{ ticket.status }}
+        {% endif %}
+      </span>
+    </div>
+    <div class="detail-item">
+      <div class="label">優先度</div>
+      <span class="badge badge-{{ ticket.priority }}">
+        {% if ticket.priority == 'high' %}高
+        {% elif ticket.priority == 'medium' %}中
+        {% elif ticket.priority == 'low' %}低
+        {% else %}{{ ticket.priority }}
+        {% endif %}
+      </span>
+    </div>
+    <div class="detail-item">
+      <div class="label">担当者</div>
+      <div>{{ ticket.assignee or '未割り当て' }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">作成日</div>
+      <div>{{ ticket.created_at }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-size: 15px; font-weight: 600; color: #5f6368; margin-bottom: 12px;">お問い合わせ内容</h3>
+  <p style="font-size: 14px; white-space: pre-wrap;">{{ ticket.description }}</p>
+</div>
+
+<div class="card">
+  <h3 style="font-size: 15px; font-weight: 600; color: #5f6368; margin-bottom: 12px;">顧客情報</h3>
+  <div class="detail-grid">
+    <div class="detail-item">
+      <div class="label">名前</div>
+      <div>{{ ticket.customer_name }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">メール</div>
+      <div>{{ ticket.customer_email }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">会社</div>
+      <div>{{ ticket.customer_company or '個人' }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

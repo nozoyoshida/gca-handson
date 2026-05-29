@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 駆動開発 ハンズオン</title>
+  <style>
+    :root { --blue:#1a73e8; --teal:#00897b; --bg:#f8f9fa; --text:#202124; --sub:#5f6368; --border:#dadce0; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Google Sans','Noto Sans JP',-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.8; }
+    .header { background:linear-gradient(135deg,#1a73e8 0%,#4285f4 50%,#00897b 100%); color:white; padding:56px 24px 48px; text-align:center; }
+    .header h1 { font-size:30px; font-weight:500; margin-bottom:10px; }
+    .header p { font-size:16px; opacity:.92; }
+    .container { max-width:880px; margin:0 auto; padding:32px 24px 56px; }
+    .lead { font-size:15px; color:var(--sub); margin-bottom:28px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
+    .card { background:white; border:1px solid var(--border); border-radius:14px; padding:26px; display:flex; flex-direction:column; }
+    .card h2 { font-size:20px; font-weight:600; margin-bottom:6px; }
+    .card .env { font-size:13px; color:var(--sub); margin-bottom:14px; }
+    .card ul { margin:0 0 18px 18px; font-size:14px; color:#3c4043; }
+    .card .spacer { flex:1; }
+    .btn { display:inline-block; text-align:center; text-decoration:none; color:white; padding:11px 18px; border-radius:8px; font-size:14px; font-weight:600; }
+    .btn-blue { background:var(--blue); }
+    .btn-teal { background:var(--teal); }
+    .tag { display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; margin-bottom:12px; }
+    .tag-blue { background:#e8f0fe; color:var(--blue); }
+    .tag-teal { background:#e0f2f1; color:var(--teal); }
+    .footer { text-align:center; color:var(--sub); font-size:13px; padding:24px; }
+    .note { font-size:12px; color:var(--sub); margin-top:10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>AI 駆動開発 ハンズオン</h1>
+    <p>お問い合わせ管理システムを題材に、実装から Cloud Run デプロイまで</p>
+  </div>
+  <div class="container">
+    <p class="lead">同じ題材（Flask + SQLite のお問い合わせ管理 API）を、2 種類の AI 開発ツールで実践します。どちらも約 90 分・Cloud Run デプロイまで含みます。下のカードから選んでください。</p>
+    <div class="cards">
+
+      <div class="card">
+        <div><span class="tag tag-blue">ローカル VSCode</span></div>
+        <h2>Gemini Code Assist 版</h2>
+        <div class="env">VSCode + Gemini Code Assist 拡張</div>
+        <ul>
+          <li>補完 / チャット / インラインチャット</li>
+          <li>Context Engineering（GEMINI.md）</li>
+          <li>Agent モードで機能追加</li>
+          <li>セキュア開発 → Cloud Run デプロイ</li>
+        </ul>
+        <div class="spacer"></div>
+        <a class="btn btn-blue" href="gca/docs/handson-guide.html">ガイドを開く</a>
+      </div>
+
+      <div class="card">
+        <div><span class="tag tag-teal">Cloud Workstations + CLI</span></div>
+        <h2>Antigravity 版</h2>
+        <div class="env">Cloud Workstations（ブラウザ IDE）+ Antigravity CLI / 認証: Gemini Enterprise Agent Platform</div>
+        <ul>
+          <li>Cloud Workstations + GEAP 認証</li>
+          <li>Antigravity CLI（計画→承認→実行→検証）</li>
+          <li>Context Engineering（AGENTS.md / Workflows）</li>
+          <li>セキュア開発 → Cloud Run デプロイ</li>
+        </ul>
+        <div class="spacer"></div>
+        <a class="btn btn-teal" href="antigravity/docs/handson-guide.html">ガイドを開く</a>
+      </div>
+
+    </div>
+    <p class="note">プレゼンター用トーキングポイント: <a href="gca/docs/talking-points.html">GCA 版</a> / <a href="antigravity/docs/talking-points.html">Antigravity 版</a></p>
+  </div>
+  <div class="footer">Google Cloud — AI-driven Development Hands-on</div>
+</body>
+</html>

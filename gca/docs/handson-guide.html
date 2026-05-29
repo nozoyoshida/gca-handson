@@ -471,7 +471,7 @@
     <h1>Gemini Code Assist ハンズオン</h1>
     <p>Context Engineering / Agentic Coding / Secure Development</p>
     <div class="meta-bar">
-      <div class="meta-item">&#9202; 60分</div>
+      <div class="meta-item">&#9202; 90分</div>
       <div class="meta-item">&#128187; VSCode + Python Flask</div>
       <div class="meta-item">&#127919; 中級</div>
     </div>
@@ -486,23 +486,27 @@
   <div class="toc-grid">
     <a href="#ch0" class="toc-item">
       <div class="toc-badge" style="background:#9e9e9e;">0</div>
-      <div><div class="toc-text">セットアップ確認</div><div class="toc-time">2分</div></div>
+      <div><div class="toc-text">セットアップ確認</div><div class="toc-time">5分</div></div>
     </a>
     <a href="#ch1" class="toc-item">
       <div class="toc-badge" style="background:var(--google-blue);">1</div>
-      <div><div class="toc-text">基本操作</div><div class="toc-time">10分</div></div>
+      <div><div class="toc-text">基本操作</div><div class="toc-time">12分</div></div>
     </a>
     <a href="#ch2" class="toc-item">
       <div class="toc-badge" style="background:var(--google-green);">2</div>
-      <div><div class="toc-text">Context Engineering</div><div class="toc-time">15分</div></div>
+      <div><div class="toc-text">Context Engineering</div><div class="toc-time">18分</div></div>
     </a>
     <a href="#ch3" class="toc-item">
       <div class="toc-badge" style="background:var(--google-yellow); color:#333;">3</div>
-      <div><div class="toc-text">Agentic Coding</div><div class="toc-time">18分</div></div>
+      <div><div class="toc-text">Agentic Coding</div><div class="toc-time">20分</div></div>
     </a>
     <a href="#ch4" class="toc-item">
       <div class="toc-badge" style="background:var(--google-red);">4</div>
-      <div><div class="toc-text">セキュア開発</div><div class="toc-time">13分</div></div>
+      <div><div class="toc-text">セキュア開発</div><div class="toc-time">15分</div></div>
+    </a>
+    <a href="#ch5" class="toc-item">
+      <div class="toc-badge" style="background:#00897b;">5</div>
+      <div><div class="toc-text">Cloud Run デプロイ</div><div class="toc-time">15分</div></div>
     </a>
   </div>
 </div>
@@ -512,7 +516,7 @@
   <div class="chapter-header">
     <div class="chapter-num" style="background:#9e9e9e;">Chapter 0</div>
     <h2>セットアップ確認</h2>
-    <p>事前準備の確認（インストールは事前作業として完了済み）<span class="time-tag" style="margin-left:8px;">2分</span></p>
+    <p>事前準備の確認（インストールは事前作業として完了済み）<span class="time-tag" style="margin-left:8px;">5分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -521,7 +525,7 @@
       <li>VSCode がインストールされている</li>
       <li>Gemini Code Assist 拡張機能がインストール・ログイン済み</li>
       <li>Python 3.9 以上がインストールされている</li>
-      <li><strong>リポジトリを <code>git clone</code> し、<code>starter/</code> フォルダを VSCode で開いている</strong></li>
+      <li><strong>リポジトリを <code>git clone</code> し、<code>gca/starter/</code> フォルダを VSCode で開いている</strong></li>
       <li>仮想環境のセットアップが完了している（下記参照）</li>
       <li><code>python app.py</code> でサーバーが起動し <code>http://localhost:5000</code> にアクセスできる</li>
     </ul>
@@ -537,7 +541,7 @@
 
     <div class="callout callout-danger">
       <div class="callout-title">VSCode で開くフォルダに注意</div>
-      VSCode の <strong>File → Open Folder</strong> で <strong><code>gca-handson/starter/</code></strong> フォルダを開いてください（<code>gca-handson/</code> ルートではありません）。<br>
+      VSCode の <strong>File → Open Folder</strong> で <strong><code>gca-handson/gca/starter/</code></strong> フォルダを開いてください（<code>gca-handson/</code> ルートや <code>gca/</code> ではありません）。<br>
       <code>GEMINI.md</code> は VSCode で開いているフォルダ（ワークスペースルート）から読み込まれます。開くフォルダを間違えると、Ch.2 以降で Gemini がプロジェクトの規約を読み込めず、演習の効果が得られません。
     </div>
 
@@ -618,7 +622,7 @@ uv pip install -r requirements.txt
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-blue);">Chapter 1</div>
     <h2>基本操作</h2>
-    <p>コード補完・チャットパネル・インラインチャットの3つのインタラクション <span class="time-tag">10分</span></p>
+    <p>コード補完・チャットパネル・インラインチャットの3つのインタラクション <span class="time-tag">12分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -722,7 +726,7 @@ uv pip install -r requirements.txt
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-green);">Chapter 2</div>
     <h2>Context Engineering</h2>
-    <p>GEMINI.md でプロジェクトの規約を AI に伝え、出力品質を劇的に変える <span class="time-tag">15分</span></p>
+    <p>GEMINI.md でプロジェクトの規約を AI に伝え、出力品質を劇的に変える <span class="time-tag">18分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -1028,7 +1032,7 @@ flowchart TD
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-yellow); color:#333;">Chapter 3</div>
     <h2>Agentic Coding</h2>
-    <p>Agent モードで複数ファイルにまたがる機能を一気に実装する <span class="time-tag">18分</span></p>
+    <p>Agent モードで複数ファイルにまたがる機能を一気に実装する <span class="time-tag">20分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -1209,7 +1213,7 @@ curl -X POST http://localhost:5000/tickets/1/responses `
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-red);">Chapter 4</div>
     <h2>セキュア開発</h2>
-    <p>脆弱性を検出し、修正し、ルールとして定着させる <span class="time-tag">13分</span></p>
+    <p>脆弱性を検出し、修正し、ルールとして定着させる <span class="time-tag">15分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -1477,12 +1481,95 @@ flowchart LR
   </div>
 </div>
 
+<!-- ===== CHAPTER 5: CLOUD RUN DEPLOY ===== -->
+<div class="chapter" id="ch5">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#00897b;">Chapter 5</div>
+    <h2>Cloud Run へデプロイ</h2>
+    <p>完成したアプリを本番化し、サーバーレスでインターネットに公開する <span class="time-tag">15分</span></p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">この Chapter のゴール</div>
+      Ch.3 で機能を追加し、Ch.4 でセキュアにしたアプリを、<strong>Google Cloud Run</strong>（フルマネージドのサーバーレス基盤）にデプロイして公開 URL で動かします。「実装 → 出荷」までを AI 駆動で一気通貫に体験します。
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">前提（ハンズオン環境）</div>
+      この章は <code>gcloud</code> CLI と、課金が有効な Google Cloud プロジェクトが必要です。環境がない場合は読み物として進め、後で各自試せます。事前に <code>gcloud</code> がインストール済みで、プロジェクトが用意されていることを前提とします。
+    </div>
+
+    <!-- Exercise 5-1 -->
+    <div class="exercise">
+      <div class="exercise-title">5-1. Agent モードでアプリを本番対応にする <span class="badge">5分</span></div>
+      <div class="step" data-step="1">Flask の開発サーバー（<code>app.run()</code>）は本番に不向きです。Agent モードで以下を依頼します：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">Agent モードに入力するプロンプト</div>
+        <div class="prompt-text">このアプリを Cloud Run にデプロイできるよう本番対応にしてください。<br><br>
+1. requirements.txt に gunicorn を追加<br>
+2. アプリは 0.0.0.0 と環境変数 PORT（既定 8080）でリッスンするようにする<br>
+3. gunicorn 経由（__main__ を通らない）でも DB が初期化されるよう、init_db() をモジュール読み込み時に呼ぶ（CREATE TABLE IF NOT EXISTS で冪等に）<br>
+4. Dockerfile を作成（gunicorn で app:app を起動し、PORT にバインド）<br>
+5. .gcloudignore を作成（.venv, *.db, __pycache__ などを除外）</div>
+      </div>
+      <div class="step" data-step="2">計画をレビューして承認します。特に <strong>init_db() がモジュール読み込み時に呼ばれる</strong>点を確認してください（これがないと Cloud Run でテーブルが作られません）。</div>
+      <div class="insight-box">
+        <div class="insight-title">Insight: よくある落とし穴</div>
+        元の <code>app.py</code> は <code>init_db()</code> を <code>if __name__ == '__main__'</code> の中だけで呼んでいます。Cloud Run では gunicorn がアプリを <code>import</code> して起動するため <code>__main__</code> は実行されず、<strong>DB が初期化されないまま 500 エラー</strong>になりがちです。完成形は <code>completed/</code> を参照してください。
+      </div>
+    </div>
+
+    <!-- Exercise 5-2 -->
+    <div class="exercise">
+      <div class="exercise-title">5-2. gcloud の認証と API 有効化 <span class="badge">3分</span></div>
+      <div class="step" data-step="1">VSCode の統合ターミナルで認証し、プロジェクトと API を設定します：</div>
+<pre><span class="comment"># ログインとプロジェクト設定</span>
+gcloud auth login
+gcloud config set project <span class="variable">YOUR_PROJECT_ID</span>
+
+<span class="comment"># 必要な API を有効化</span>
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com</pre>
+    </div>
+
+    <!-- Exercise 5-3 -->
+    <div class="exercise">
+      <div class="exercise-title">5-3. Cloud Run にデプロイする <span class="badge">5分</span></div>
+      <div class="step" data-step="1">ソースから直接デプロイします（Cloud Build がコンテナをビルド）。完成したコードのあるディレクトリで実行してください：</div>
+<pre>gcloud run deploy inquiry-system \
+  --source . \
+  --region asia-northeast1 \
+  --allow-unauthenticated</pre>
+      <div class="callout callout-info">
+        <div class="callout-title">Agent に任せることもできます</div>
+        Agent モードに「<em>このアプリを Cloud Run の asia-northeast1 リージョンに、未認証アクセスを許可してデプロイして</em>」と依頼すると、Agent がターミナルで <code>gcloud run deploy</code> を実行し、払い出された URL を読み戻してくれます（ターミナル実行の許可を求められます）。
+      </div>
+      <div class="step" data-step="2">デプロイ完了後、出力の最後に <code>Service URL: https://inquiry-system-xxxxx.run.app</code> が表示されます。</div>
+    </div>
+
+    <!-- Exercise 5-4 -->
+    <div class="exercise">
+      <div class="exercise-title">5-4. 動作確認 <span class="badge">2分</span></div>
+      <div class="step" data-step="1">払い出された URL をブラウザで開き、チケット一覧 GUI が表示されること、<code>/tickets</code> が JSON を返すことを確認します。</div>
+      <div class="callout callout-warning">
+        <div class="callout-title">SQLite はデモ用途のみ（重要）</div>
+        Cloud Run のファイルシステムは<strong>揮発性</strong>で、インスタンスはリクエストがないとゼロにスケールします。SQLite ファイルは<strong>コールドスタートやインスタンス再作成で消えます</strong>。今回はデプロイ手順の体験が目的なので SQLite のままで構いませんが、<strong>本番では Cloud SQL や Firestore などのマネージドデータベース</strong>を使用してください。
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">Insight</div>
+        アイデア → 実装（Ch.3）→ セキュア化（Ch.4）→ デプロイ（Ch.5）までを、同じ AI アシスタントと共に一気通貫で行いました。AI 駆動開発は「コードを書く」だけでなく「出荷する」まで伴走します。
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ===== WRAP UP ===== -->
 <div class="chapter" id="wrapup">
   <div class="chapter-header">
     <div class="chapter-num" style="background:#616161;">Wrap-up</div>
     <h2>まとめ & 次のステップ</h2>
-    <p><span class="time-tag">2分</span></p>
+    <p><span class="time-tag">5分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -1511,6 +1598,11 @@ flowchart LR
           <td>Ch.4 セキュア開発</td>
           <td>脆弱性検出 &rarr; 修正 &rarr; ルール化</td>
           <td>styleguide.md にセキュリティルールを追加</td>
+        </tr>
+        <tr>
+          <td>Ch.5 Cloud Run デプロイ</td>
+          <td>本番化 &rarr; サーバーレスにデプロイ &rarr; 公開 URL で確認</td>
+          <td>小さなサービスを <code>gcloud run deploy --source .</code> で公開してみる</td>
         </tr>
       </tbody>
     </table>
@@ -1590,11 +1682,12 @@ flowchart LR
     </div>
 
     <div class="callout callout-success" style="margin-top: 20px;">
-      <div class="callout-title">3つの持ち帰りアクション</div>
+      <div class="callout-title">持ち帰りアクション</div>
       <ol style="margin: 8px 0 0 20px; font-size: 14px;">
         <li><strong>GEMINI.md を作成する</strong> &mdash; 10分で書けて、チーム全体の AI 出力品質が向上</li>
         <li><strong>Agent モードをフィーチャーブランチで使う</strong> &mdash; 計画をレビューする習慣をつける</li>
         <li><strong>styleguide.md にセキュリティルールを追加</strong> &mdash; PR レビューを自動化する</li>
+        <li><strong>小さなサービスを Cloud Run にデプロイする</strong> &mdash; 実装から出荷までを AI と一気通貫で体験する</li>
       </ol>
     </div>
 

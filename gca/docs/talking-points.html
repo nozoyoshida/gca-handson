@@ -275,12 +275,37 @@
 
 <div class="container">
 
+<!-- ===== CH.0 ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#9aa0a6;">0</div>
+    <h2>セットアップ確認</h2>
+    <span class="time-tag">5分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-warning">
+      <div class="callout-title">進行形式</div>
+      <strong>VSCode で <code>gca/starter/</code> フォルダを開いているか</strong>を全員に確認してください（リポジトリルートや <code>gca/</code> ではありません）。統合ターミナル（Ctrl+<code>`</code>）で <code>python app.py</code> を実行し、<code>http://localhost:5000</code> で GUI が表示されることを確認します。
+    </div>
+
+    <div class="section">
+      <h3>キーメッセージ</h3>
+      <ul>
+        <li>GEMINI.md は<strong>ワークスペースルートから読み込まれる</strong> &rarr; 開くフォルダを間違えると Ch.2 以降が機能しない</li>
+        <li>詰まる人がいたら全体を止めず、トラブルシューティング表で個別対応する</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
 <!-- ===== CH.1 ===== -->
 <div class="chapter">
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-blue);">1</div>
     <h2>基本操作</h2>
-    <span class="time-tag">10分</span>
+    <span class="time-tag">12分</span>
   </div>
   <div class="chapter-body">
 
@@ -315,7 +340,7 @@
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-green);">2</div>
     <h2>Context Engineering</h2>
-    <span class="time-tag">15分</span>
+    <span class="time-tag">18分</span>
   </div>
   <div class="chapter-body">
 
@@ -364,7 +389,7 @@
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-yellow); color:#333;">3</div>
     <h2>Agentic Coding</h2>
-    <span class="time-tag">18分</span>
+    <span class="time-tag">20分</span>
   </div>
   <div class="chapter-body">
 
@@ -404,7 +429,7 @@
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-red);">4</div>
     <h2>セキュア開発</h2>
-    <span class="time-tag">13分</span>
+    <span class="time-tag">15分</span>
   </div>
   <div class="chapter-body">
 
@@ -470,21 +495,60 @@
   </div>
 </div>
 
+<!-- ===== CH.5 ===== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#00897b;">5</div>
+    <h2>Cloud Run デプロイ</h2>
+    <span class="time-tag">15分</span>
+  </div>
+  <div class="chapter-body">
+
+    <div class="section">
+      <h3>キーメッセージ</h3>
+      <ul>
+        <li><strong>実装(Ch.3) &rarr; セキュア化(Ch.4) &rarr; デプロイ(Ch.5) を同じ AI と一気通貫で</strong></li>
+        <li>「コードを書く」だけでなく「<strong>出荷する</strong>」まで AI が伴走することを体感してもらう</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-danger">
+      <div class="callout-title">本番化の肝（必ず強調）</div>
+      <ul style="margin: 4px 0 0 20px; font-size: 14px;">
+        <li><strong>init_db() をモジュール読み込み時に呼ぶ</strong>: gunicorn は <code>__main__</code> を通らないため、<code>if __name__ == '__main__'</code> の中だけで <code>init_db()</code> を呼んでいると Cloud Run で DB 未初期化 &rarr; 500 エラーになる（<code>CREATE TABLE IF NOT EXISTS</code> で冪等に）</li>
+        <li><strong><code>0.0.0.0</code> と環境変数 <code>PORT</code>（既定 8080）で待受</strong></li>
+        <li><strong>SQLite は Cloud Run では揮発</strong>: コールドスタートで消える。デモのみ。本番は <strong>Cloud SQL / Firestore</strong></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>進行のコツ</h3>
+      <ul>
+        <li><strong>gcloud 認証と API 有効化は時間がかかる</strong> &rarr; 可能なら事前に各自済ませてもらう</li>
+        <li>デプロイは <strong>Cloud Build のビルド待ちで数分</strong>。待ち時間に <code>completed/</code> のデプロイ成果物（<code>Dockerfile</code> / <code>Procfile</code> / <code>.gcloudignore</code> / <code>app.py</code> の <code>init_db()</code> の位置）を見せる</li>
+        <li>デプロイは <code>gcloud run deploy inquiry-system --source . --region asia-northeast1 --allow-unauthenticated</code>。Agent モードに依頼してターミナル実行させることもできる</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
 <!-- ===== WRAP-UP ===== -->
 <div class="chapter">
   <div class="chapter-header">
     <div class="chapter-num" style="background:#616161;">W</div>
     <h2>Wrap-up</h2>
-    <span class="time-tag">2分</span>
+    <span class="time-tag">5分</span>
   </div>
   <div class="chapter-body">
 
     <div class="callout callout-success">
-      <div class="callout-title">3つの持ち帰りアクション</div>
+      <div class="callout-title">持ち帰りアクション</div>
       <ol style="margin: 8px 0 0 20px; font-size: 14px;">
         <li><strong>明日、自分のプロジェクトに GEMINI.md を追加する</strong></li>
         <li><strong>フィーチャーブランチで Agent モードを試す</strong></li>
         <li><strong>styleguide.md にセキュリティルールを追加する</strong></li>
+        <li><strong>小さなサービスを Cloud Run にデプロイする</strong>（実装から出荷までを AI と一気通貫で）</li>
       </ol>
     </div>
 
@@ -531,6 +595,26 @@
         <tr>
           <td>Ch.4 で脆弱性が少ない</td>
           <td>GEMINI.md の効果で Ch.3 の Agent が一部修正済み。「これが Context Engineering の効果です」と説明</td>
+        </tr>
+        <tr>
+          <td>gcloud 未認証エラー</td>
+          <td><code>gcloud auth login</code> で認証し、<code>gcloud config set project YOUR_PROJECT_ID</code> でプロジェクトを設定</td>
+        </tr>
+        <tr>
+          <td>API 未有効化エラー</td>
+          <td><code>gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com</code></td>
+        </tr>
+        <tr>
+          <td>権限不足でデプロイ失敗</td>
+          <td>ユーザーに <code>roles/run.admin</code> 等のロールを付与してもらう</td>
+        </tr>
+        <tr>
+          <td>デプロイ後 500 エラー</td>
+          <td><code>init_db()</code> が <code>__main__</code> のままで import 時に呼ばれていない。<code>completed/</code> の <code>app.py</code> を参照</td>
+        </tr>
+        <tr>
+          <td>データが消える</td>
+          <td>SQLite は Cloud Run で揮発（仕様）。本番は Cloud SQL / Firestore を使う</td>
         </tr>
       </tbody>
     </table>
