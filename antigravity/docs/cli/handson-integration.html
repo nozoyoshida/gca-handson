@@ -33,7 +33,7 @@
       <tr>
         <td><strong>Ch.2 Context Engineering</strong></td>
         <td><code>AGENTS.md</code>（ワークスペース直下、起動時に自動読込）／<code>@</code> でコンテキスト付与／<strong>「探索→計画→実行」</strong>のフェーズ分割</td>
-        <td>AGENTS.md は公式ベストプラクティスそのもの。Before/After 比較に最適。<span class="verify">要修正</span> コードレビュー自動化は <code>/code-review</code> ではなく <strong>Skill（<code>/skills</code>）</strong>で表現する（下記 3 章）。</td>
+        <td>AGENTS.md は公式ベストプラクティスそのもの。Before/After 比較に最適。コードレビュー自動化は <strong>Skill</strong>（<code>.agents/skills/code-review.md</code> → <code>/code-review</code>）として表現する（下記 3 章）。</td>
       </tr>
       <tr>
         <td><strong>Ch.3 Agentic Coding</strong></td>
@@ -63,7 +63,7 @@
       <tr><td>ルールファイル（<code>GEMINI.md</code> / <code>AGENTS.md</code>）</td><td>Ch.2 の中心（現行どおり <code>AGENTS.md</code> でOK）</td></tr>
       <tr><td>権限を構造化（<code>request-review</code> / <code>proceed-in-sandbox</code> / <code>strict</code>）</td><td>Ch.0 で初期設定、Ch.4 で深掘り</td></tr>
       <tr><td>セッション管理（<code>esc</code> / <code>/rewind</code> / <code>/fork</code> / <code>/resume</code>）</td><td>Ch.1 で体験</td></tr>
-      <tr><td>自動化（<code>agy -p</code>、並列サブエージェント）</td><td>Ch.5 の git hook 例／追加ハンズオン案（part 3）</td></tr>
+      <tr><td>自動化（<code>agy -p</code>、並列サブエージェント）</td><td>Ch.5 の git hook 例／<a href="../handson-advanced.html">発展ハンズオン</a>（M2・M3）</td></tr>
     </tbody>
   </table>
 
@@ -102,10 +102,10 @@
   <ul>
     <li>ハンズオンガイドの先頭・各章から本 <a href="index.html">CLI リファレンス</a>へリンクし、詳細はそちらへ誘導（実施済み）。</li>
     <li>附録 B チートシートを実在コマンドへ更新（実施済み）。</li>
-    <li>コードレビュー自動化を <strong>Skill</strong> ベースに再構成（<code>completed/.agents/workflows/code-review.md</code> → Skill 形式）。影響範囲が複数ファイルのため、別途実施を推奨。</li>
-    <li>Ch.4 に「<strong>権限/サンドボックスでエージェント実行を安全に縛る</strong>」演習を追加（part 3 の案 B を参照）。</li>
+    <li>コードレビュー自動化を <strong>Skill</strong>（<code>.agents/skills/code-review.md</code>）へ再構成（実施済み。completed/・templates・各章に反映）。</li>
+    <li>「権限/サンドボックスでエージェント実行を安全に縛る」等の発展テーマは <a href="../handson-advanced.html">発展ハンズオン</a>（M1〜M7）として実装済み。</li>
   </ul>
 </main>
-<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください<br>最終更新: 2026-06-03</footer>
 </body>
 </html>

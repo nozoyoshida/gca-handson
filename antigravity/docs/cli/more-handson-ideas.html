@@ -3,80 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>agy CLI を活かす追加ハンズオン案 — Antigravity CLI リファレンス</title>
+<title>追加ハンズオン案（メニュー） — Antigravity CLI リファレンス</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="doc-header"><div class="container">
   <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
-  <h1>agy CLI を活かす追加ハンズオン案</h1>
-  <div class="src">根拠: 公式 CLI ドキュメント要約（features / best-practices / permissions / sandbox / subagents / plugins）</div>
+  <h1>agy CLI を活かす追加ハンズオン案（メニュー）</h1>
+  <div class="src">実装版（手順つき）→ <a href="../handson-advanced.html">発展ハンズオン</a></div>
 </div></header>
 
 <main class="container doc">
-  <p><code>agy</code> CLI の「<strong>並列サブエージェント</strong>」「<strong>権限＆サンドボックス</strong>」「<strong>プラグイン/スキル</strong>」「<strong>非対話実行（<code>-p</code>）</strong>」「<strong>セッション操作（<code>/fork</code> 等）</strong>」といった特徴を主役にした、追加ハンズオンのネタ案です。既存の「お問い合わせ管理 API」題材を流用できます。各案に <strong>ねらい / 使う機能 / 流れ / レベル・所要</strong> を付けました。</p>
+  <div class="callout callout-info">
+    <div class="t">このページについて</div>
+    以下の案は <a href="../handson-advanced.html">発展ハンズオン（handson-advanced.html）</a> として<strong>すでに手順化済み</strong>です。本ページは「どの案がどの発展モジュールに当たるか」を一覧する<strong>早見メニュー</strong>です（題材は基礎ハンズオンと同じ「お問い合わせ管理 API」）。
+  </div>
 
-  <h2>案 A. 並列サブエージェントで大規模リファクタ／監査</h2>
-  <p><strong>ねらい</strong>: 1 つの会話をブロックせず、複数の作業を<strong>並列</strong>に走らせる「エージェントの司令塔」体験。</p>
-  <ul>
-    <li><strong>使う機能</strong>: 並列サブエージェント、<code>/agents</code> パネル、<code>/tasks</code>、高速承認 <code>ctrl+k</code>／テレポート <code>ctrl+j</code></li>
-    <li><strong>流れ</strong>: 「全関数に docstring を付与」「危険な SQL をパラメータ化」「各エンドポイントに最小テストを追加」を<strong>同時に</strong>サブエージェントへ依頼 → <code>/agents</code> で進捗監視 → 承認待ちは <code>ctrl+k</code> で即承認 → 主画面では別作業を継続。</li>
-    <li><strong>レベル・所要</strong>: 中級 / 20分</li>
-  </ul>
-
-  <h2>案 B. 権限＆サンドボックスで「安全なエージェント運用」</h2>
-  <p><strong>ねらい</strong>: Ch.4（セキュア開発）の発展。<em>コードの安全性</em>だけでなく<em>エージェント実行そのものの安全性</em>を設計する。</p>
-  <ul>
-    <li><strong>使う機能</strong>: <code>~/.gemini/antigravity-cli/settings.json</code> の <code>permissions</code>（<code>allow</code>/<code>deny</code>/<code>ask</code>、優先順位 Deny &gt; Ask &gt; Allow）、ターミナルサンドボックス（<code>enableTerminalSandbox</code> / <code>proceed-in-sandbox</code>）</li>
-    <li><strong>流れ</strong>: <code>deny: command(rm -rf), command(sudo), command(curl .*)</code> と <code>allow: command(git), command(npm run (build|lint|test))</code> を設定 → わざと「一時ファイルを掃除して」等の曖昧/危険な指示を出し、<strong>ブロック/確認が働く</strong>ことを確認 → <code>proceed-in-sandbox</code> で未知コマンドが <code>nsjail</code> 隔離下で動くことを体験。</li>
-    <li><strong>レベル・所要</strong>: 中級 / 20分</li>
-  </ul>
-
-  <h2>案 C. <code>-p</code> ワンショットで CI / Git フック自動化</h2>
-  <p><strong>ねらい</strong>: 対話だけでなく、エージェントを<strong>シェルパイプライン/自動化</strong>に組み込む。</p>
-  <ul>
-    <li><strong>使う機能</strong>: 非対話実行 <code>agy -p "..." --cwd $(pwd)</code></li>
-    <li><strong>流れ</strong>: <code>prepare-commit-msg</code> フックで <code>agy -p "Review this git diff and draft a conventional commit message"</code> を実行しコミットメッセージ草案を生成 → さらに「変更点からリリースノートを生成」「PR 説明文を作成」へ展開。</li>
-    <li><strong>レベル・所要</strong>: 中級 / 15分</li>
-  </ul>
-
-  <h2>案 D. スキル／プラグインでチーム規約をパッケージ化</h2>
-  <p><strong>ねらい</strong>: 自分用の手順を<strong>再利用可能なスキル</strong>として束ね、チームに配布する。</p>
-  <ul>
-    <li><strong>使う機能</strong>: <code>/skills</code>、プラグイン（<code>~/.gemini/antigravity-cli/plugins/&lt;name&gt;/</code> に <code>plugin.json</code> / <code>skills/</code> / <code>agents/</code> / <code>rules/</code> / <code>mcp_config.json</code> / <code>hooks.json</code>）</li>
-    <li><strong>流れ</strong>: 「お問い合わせ API のコードレビュー」スキルを作成（セキュリティ＋規約チェックの手順を定義）→ <code>/skills</code> から呼び出し → プラグイン化してチーム配布、起動時に自動ロードされることを確認。</li>
-    <li><strong>レベル・所要</strong>: 中〜上級 / 25分</li>
-  </ul>
-
-  <h2>案 E. MCP サーバー連携で外部システムを操作</h2>
-  <p><strong>ねらい</strong>: エージェントから外部ツール（DB・監視・クラウド）へ安全に接続する。</p>
-  <ul>
-    <li><strong>使う機能</strong>: <code>/mcp</code>、権限 <code>mcp(server/tool)</code></li>
-    <li><strong>流れ</strong>: Cloud Run の MCP サーバー等を <code>/mcp</code> で接続 → 「このアプリをデプロイして URL を教えて」と依頼し、MCP ツール経由で実行 → <code>mcp(...)</code> 権限で実行可能ツールを限定。</li>
-    <li><strong>レベル・所要</strong>: 上級 / 20分（※接続先の準備が必要）</li>
-  </ul>
-
-  <h2>案 F. 視覚デバッグ（スクリーンショット添付）</h2>
-  <p><strong>ねらい</strong>: フロントの表示崩れを、画像を見せて直してもらう。</p>
-  <ul>
-    <li><strong>使う機能</strong>: プロンプトへのメディア貼付 <code>ctrl+v</code>（PNG/JPEG/動画など）</li>
-    <li><strong>流れ</strong>: チケット詳細画面の CSS をわざと崩す → 崩れた画面のスクショを <code>ctrl+v</code> で添付し「この崩れを直して」と依頼 → 修正後、ウェブプレビューで確認。</li>
-    <li><strong>レベル・所要</strong>: 初〜中級 / 15分</li>
-  </ul>
-
-  <h2>案 G. <code>/fork</code> で実装方針 A/B を比較</h2>
-  <p><strong>ねらい</strong>: 不確実な設計判断を、会話を<strong>分岐</strong>して実験的に比較する。</p>
-  <ul>
-    <li><strong>使う機能</strong>: <code>/fork</code>（分岐）、<code>/resume</code>（<code>/switch</code>、戻る）、<code>/rewind</code>（<code>/undo</code>、巻き戻し）、<code>Esc</code>（中断）</li>
-    <li><strong>流れ</strong>: 「全文検索を <code>LIKE</code> で実装」と「SQLite FTS で実装」を <code>/fork</code> で別セッションに分けて試す → 良い方を採用、もう片方は <code>/resume</code> で破棄 → 失敗したら <code>/rewind</code> で安定点へ。</li>
-    <li><strong>レベル・所要</strong>: 中級 / 20分</li>
-  </ul>
+  <h2>案 → 発展モジュール 対応表</h2>
+  <table>
+    <thead><tr><th>案</th><th>概要</th><th>主に使う agy 機能</th><th>対応モジュール</th><th>区分</th></tr></thead>
+    <tbody>
+      <tr><td>A 並列サブエージェントで一括改善</td><td>複数の改善を並行実行し監視・承認</td><td><code>/agents</code> <code>/tasks</code> <code>ctrl+k</code> <code>ctrl+j</code></td><td><a href="../handson-advanced.html#m3">M3</a></td><td>必修</td></tr>
+      <tr><td>B 権限 &amp; サンドボックスで安全運用</td><td>allow/deny/ask とサンドボックスで実行を制御</td><td><code>permissions</code> <code>enableTerminalSandbox</code></td><td><a href="../handson-advanced.html#m1">M1</a></td><td>必修</td></tr>
+      <tr><td>C -p ワンショットで CI / Git フック</td><td>非対話実行を自動化へ組み込む</td><td><code>agy -p ... --cwd</code></td><td><a href="../handson-advanced.html#m2">M2</a></td><td>必修</td></tr>
+      <tr><td>D スキル / プラグインで配布</td><td>規約・定型作業をチームに配る</td><td><code>/skills</code> <code>.agents/skills/</code> plugins</td><td><a href="../handson-advanced.html#m4">M4</a></td><td>必修</td></tr>
+      <tr><td>E MCP 連携</td><td>外部 API / DB をエージェントに接続</td><td><code>/mcp</code> <code>.agents/mcp_config.json</code></td><td><a href="../handson-advanced.html#m5">M5</a></td><td>任意</td></tr>
+      <tr><td>F 視覚デバッグ</td><td>スクショを貼って UI 崩れを直す</td><td><code>ctrl+v</code></td><td><a href="../handson-advanced.html#m6">M6</a></td><td>任意</td></tr>
+      <tr><td>G /fork で A/B 比較</td><td>実装方針を分岐して比較・巻き戻し</td><td><code>/fork</code> <code>/resume</code> <code>/rewind</code></td><td><a href="../handson-advanced.html#m7">M7</a></td><td>任意</td></tr>
+    </tbody>
+  </table>
 
   <div class="callout callout-tip">
-    <div class="t">組み合わせのおすすめ</div>
-    既存ハンズオン（Ch.0〜5）に対して、<strong>案 B（権限/サンドボックス）を Ch.4 の発展</strong>として、<strong>案 C（<code>-p</code> 自動化）を Ch.5 の発展</strong>として差し込むと、追加コストが小さく効果的です。半日ワークショップにするなら 案 A・D を独立セッションとして追加してください。
+    <div class="t">既存ハンズオンへの差し込み方</div>
+    低コストでの拡張は、<strong>B（権限/サンドボックス）を Ch.4 の発展</strong>、<strong>C（-p 自動化）を Ch.5 の発展</strong>として差し込むのがおすすめです。半日ワークショップにするなら A・D を独立セッションとして追加してください。詳細手順は <a href="../handson-advanced.html">発展ハンズオン</a> を参照。
   </div>
 </main>
-<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+<footer class="doc-footer">追加ハンズオン案メニュー · 最終更新: 2026-06-03 · <a href="index.html">CLI リファレンス目次</a></footer>
 </body>
 </html>
