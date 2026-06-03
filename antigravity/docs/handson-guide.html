@@ -244,7 +244,7 @@
 
     <div class="callout callout-info">
       <div class="callout-title">最初に確認しておくと便利</div>
-      TUI を起動したら、まず <code>?</code> でコマンド一覧、<code>/config</code>（=<code>/settings</code>、verbosity を low に）、<code>/model</code>、<code>/permissions</code> を確認しておきましょう。
+      TUI 起動後は <code>?</code> でいつでもコマンド一覧を表示できます。まず <code>/config</code>（=<code>/settings</code>）で verbosity を low にするとノイズが減ります。よく使うコマンドは<a href="#appendix-b">附録 B</a>にまとめています。
     </div>
 
     <h3>事前準備チェックリスト</h3>
@@ -259,10 +259,7 @@
     <h4 style="margin-top:16px;">Step 1: Cloud Workstation をブラウザ IDE で開く</h4>
     <div class="step" data-step="1">Google Cloud コンソールで <strong>Cloud Workstations</strong> を開き、自分のワークステーションの <strong>「起動」</strong>→<strong>「起動（Launch）」</strong>をクリックします。</div>
     <div class="step" data-step="2">ブラウザに <strong>Code OSS の IDE</strong> が開きます（URL は <code>https://80-&lt;workstation&gt;.&lt;cluster&gt;.cloudworkstations.dev</code> の形式）。左にエクスプローラー、下に統合ターミナルがある、VSCode に近い画面です。</div>
-    <div class="callout callout-info">
-      <div class="callout-title">ターミナルを開く</div>
-      メニューの <strong>Terminal → New Terminal</strong> で統合ターミナルを開きます。以降のコマンドはここで実行します。
-    </div>
+    <div class="step" data-step="3">メニューの <strong>Terminal → New Terminal</strong> で統合ターミナルを開きます（以降のコマンドはここで実行します）。</div>
 
     <!-- Step 2 -->
     <h4 style="margin-top:16px;">Step 2: Antigravity CLI のセットアップと GEAP 認証 <span class="verify-tag">要確認</span></h4>
@@ -364,8 +361,8 @@ python app.py</pre>
     <!-- 1-1 -->
     <div class="exercise">
       <div class="exercise-title">1-1. TUI を起動して全体像を掴む <span class="badge">3分</span></div>
-      <div class="step" data-step="1"><code>antigravity/starter/</code> のターミナルで CLI の対話 UI（TUI）を起動します。<span class="verify-tag">要確認</span></div>
-<pre><span class="comment"># ※ 起動コマンドは要確認（例）</span>
+      <div class="step" data-step="1"><code>antigravity/starter/</code> のターミナルで CLI の対話 UI（TUI）を起動します。</div>
+<pre><span class="comment"># 対話 TUI（ターミナル UI）を起動</span>
 agy</pre>
       <div class="step" data-step="2">入力欄・使用中モデル・トークン使用量などが表示されます。まずは読み取り専用の質問をしてみましょう：</div>
       <div class="prompt-box">
@@ -392,7 +389,7 @@ agy</pre>
 <span class="comment"># 追加された未追跡ファイルがあれば: git clean -fd</span></pre>
       <div class="callout callout-info">
         <div class="callout-title">権限モード（allow / deny / ask）</div>
-        読み取り系は <code>allow</code>、破壊的な操作は <code>ask</code> にするのが基本です。すべてを自動承認する <code>--dangerously-skip-permissions</code>（いわゆる YOLO モード）は、ハンズオンでは<strong>使わないで</strong>ください。<span class="verify-tag">要確認</span>
+        読み取り系は <code>allow</code>、破壊的な操作は <code>ask</code> にするのが基本です。すべてを自動承認する <code>--dangerously-skip-permissions</code>（いわゆる YOLO モード）は、ハンズオンでは<strong>使わないで</strong>ください。
       </div>
     </div>
 
@@ -418,7 +415,7 @@ agy</pre>
   <div class="chapter-header">
     <div class="chapter-num" style="background:var(--google-green);">Chapter 2</div>
     <h2>Context Engineering</h2>
-    <p><code>AGENTS.md</code>（Rules）と Workflow で、AI の出力品質を一貫してコントロールする <span class="time-tag">16分</span></p>
+    <p><code>AGENTS.md</code>（Rules）と Skill で、AI の出力品質を一貫してコントロールする <span class="time-tag">16分</span></p>
   </div>
   <div class="chapter-body">
 
@@ -535,8 +532,8 @@ Flask と SQLite を使用したチケット管理 REST API です。
 
     <!-- 2-4 -->
     <div class="exercise">
-      <div class="exercise-title">2-4. Workflow でコードレビューを自動化する <span class="badge">3分</span></div>
-      <div class="step" data-step="1"><code>antigravity/templates/code-review.workflow.md</code> の内容を <code>.agents/skills/code-review.md</code> に置きます（先頭に frontmatter: <code>name: code-review</code> / <code>description: ...</code> を付ける）。登録すると <code>/code-review</code> として呼び出せます。</div>
+      <div class="exercise-title">2-4. Skill でコードレビューを自動化する <span class="badge">3分</span></div>
+      <div class="step" data-step="1"><code>antigravity/templates/code-review.skill.md</code> の内容を <code>.agents/skills/code-review.md</code> に置きます（先頭に frontmatter: <code>name: code-review</code> / <code>description: ...</code> を付ける）。登録すると <code>/code-review</code> として呼び出せます。</div>
       <div class="step" data-step="2">CLI でスラッシュコマンドとして呼び出し、現在の差分をレビューさせます：</div>
       <div class="prompt-box">
         <div class="prompt-label">CLI に入力</div>
@@ -544,20 +541,19 @@ Flask と SQLite を使用したチケット管理 REST API です。
       </div>
       <div class="callout callout-info">
         <div class="callout-title">GCA の styleguide.md に相当</div>
-        Gemini Code Assist では <code>.gemini/styleguide.md</code> を使った GitHub PR 自動レビューでしたが、Antigravity では <strong>Workflow（再利用可能な <code>/</code> コマンド）</strong>として、チームのレビュー基準をその場で実行できます。
+        Gemini Code Assist では <code>.gemini/styleguide.md</code> を使った GitHub PR 自動レビューでしたが、Antigravity では <strong>Skill（再利用可能な <code>/</code> コマンド）</strong>として、チームのレビュー基準をその場で実行できます。
       </div>
     </div>
 
     <!-- 2-5 -->
     <div class="exercise">
-      <div class="exercise-title">2-5. 解説：コンテキストの 4 階層 <span class="badge">2分</span> <span class="verify-tag">要確認</span></div>
+      <div class="exercise-title">2-5. 解説：コンテキストの 3 つの仕組み <span class="badge">2分</span></div>
       <table>
         <thead><tr><th>仕組み</th><th>用途</th><th>読み込みタイミング</th></tr></thead>
         <tbody>
-          <tr><td><code>AGENTS.md</code>（Rules）</td><td>プロジェクトの常時ルール</td><td>全タスクで自動</td></tr>
-          <tr><td><code>.agents/skills/</code>（Skill）</td><td>再利用コマンド（<code>/code-review</code> 等、起動時に自動登録）</td><td><code>/</code> で明示起動</td></tr>
-          <tr><td><code>.agents/skills/</code>（Skill）</td><td>特定領域の知識・ツール束</td><td>関連タスクで自動 / 明示</td></tr>
-          <tr><td><code>@</code> ファイル参照</td><td>特定ファイルのコンテキスト追加</td><td>プロンプトで明示指定時</td></tr>
+          <tr><td><code>AGENTS.md</code>（Rules）</td><td>プロジェクトの常時ルール（規約・背景）</td><td>全タスクで自動</td></tr>
+          <tr><td><code>.agents/skills/</code>（Skill）</td><td>再利用する手順。frontmatter の <code>name</code> が <code>/</code> コマンド名になる（例 <code>/code-review</code>）</td><td>起動時に登録 → <code>/</code> で実行</td></tr>
+          <tr><td><code>@</code> ファイル参照</td><td>特定ファイルをそのプロンプトの文脈に追加</td><td>プロンプトで明示指定時</td></tr>
         </tbody>
       </table>
       <div class="callout callout-success">
@@ -767,7 +763,7 @@ db.execute(sql, (f'%{q}%',))</pre>
 - エラーメッセージに内部情報（スタックトレース等）を含めないこと</pre>
       <div class="insight-box">
         <div class="insight-title">Insight</div>
-        セキュリティ知識を<strong>コード（AGENTS.md / Workflow）として定着</strong>させることが重要です。一度書けば、以降のすべてのエージェントタスクと <code>/code-review</code> で自動的にチェックされます。
+        セキュリティ知識を<strong>コード（AGENTS.md / Skill）として定着</strong>させることが重要です。一度書けば、以降のすべてのエージェントタスクと <code>/code-review</code> で自動的にチェックされます。
       </div>
     </div>
 
@@ -777,7 +773,7 @@ db.execute(sql, (f'%{q}%',))</pre>
       <table>
         <thead><tr><th>機能</th><th>説明</th></tr></thead>
         <tbody>
-          <tr><td><strong>権限モデル（allow/deny/ask）</strong></td><td>エージェントのコマンド実行・ファイル操作を許可リストで制御。破壊的操作は確認を求める。</td></tr>
+          <tr><td><strong>権限モデル（allow/deny/ask）</strong></td><td>コマンド・ファイル・URL を <code>action(target)</code> 単位で制御（詳細は下の設定例）。</td></tr>
           <tr><td><strong>URL 許可リスト</strong></td><td>エージェントがブラウザ操作する際の接続先を制限し、プロンプトインジェクションを防ぐ。<span class="verify-tag">要確認</span></td></tr>
           <tr><td><strong>GEAP ガバナンス</strong></td><td>Agent Identity / Registry / Gateway によりエージェントを集中管理・監査。</td></tr>
           <tr><td><strong>Model Armor</strong></td><td>LLM の入出力をリアルタイムにスクリーニング（プロンプトインジェクション検出・PII マスキング等）。</td></tr>
@@ -923,7 +919,7 @@ flowchart LR
         <tr><td>Ch.1 CLI の基本</td><td>計画→承認→実行→検証のループ</td><td>日々のタスクをエージェントに任せてみる</td></tr>
         <tr><td>Ch.2 Context Engineering</td><td>AGENTS.md で AI の出力品質を制御</td><td><strong>明日、自分のプロジェクトに AGENTS.md を追加</strong></td></tr>
         <tr><td>Ch.3 Agentic Coding</td><td>複数ファイルの機能を計画レビュー付きで実装</td><td>フィーチャーブランチで試し、計画をレビューする</td></tr>
-        <tr><td>Ch.4 セキュア開発</td><td>脆弱性検出 &rarr; 修正 &rarr; ルール化</td><td>AGENTS.md / Workflow にセキュリティルールを追加</td></tr>
+        <tr><td>Ch.4 セキュア開発</td><td>脆弱性検出 &rarr; 修正 &rarr; ルール化</td><td>AGENTS.md / Skill にセキュリティルールを追加</td></tr>
         <tr><td>Ch.5 Cloud Run デプロイ</td><td>本番化 &rarr; デプロイ &rarr; 公開 URL で確認</td><td>小さなサービスを <code>gcloud run deploy --source .</code> で公開</td></tr>
       </tbody>
     </table>
@@ -974,7 +970,7 @@ flowchart LR
         </div>
         <div>
           <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">攻撃者も AI を使う。防御にも AI とガバナンスが必要</div>
-          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">脆弱性が悪用されるまでの期間は 2020 年の 700 日超から <strong>2025 年にはわずか 5 日</strong>に短縮。<code>AGENTS.md</code> / Workflow による自動チェック、Model Armor や GEAP のガバナンスは「あれば便利」ではなく<strong>必須の防御</strong>です。</p>
+          <p style="font-size: 13px; color: #3c4043; margin-bottom: 8px;">脆弱性が悪用されるまでの期間は 2020 年の 700 日超から <strong>2025 年にはわずか 5 日</strong>に短縮。<code>AGENTS.md</code> / Skill による自動チェック、Model Armor や GEAP のガバナンスは「あれば便利」ではなく<strong>必須の防御</strong>です。</p>
           <p style="font-size: 11px; color: #80868b; margin-top: 6px;">
             Sources: <a href="https://cloud.google.com/blog/topics/threat-intelligence/ai-vulnerability-exploitation-initial-access" style="color: #80868b;">Google Cloud</a> /
             <a href="https://deepstrike.io/blog/ai-cyber-attack-statistics-2025" style="color: #80868b;">DeepStrike</a> /
@@ -989,7 +985,7 @@ flowchart LR
       <ol style="margin: 8px 0 0 20px; font-size: 14px;">
         <li><strong>AGENTS.md を作成する</strong> &mdash; 10分で書けて、チーム全体の AI 出力品質が向上</li>
         <li><strong>エージェントをフィーチャーブランチで使う</strong> &mdash; 計画をレビューする習慣をつける</li>
-        <li><strong>セキュリティを AGENTS.md / Workflow に定着</strong> &mdash; 毎タスクで自動チェック</li>
+        <li><strong>セキュリティを AGENTS.md / Skill に定着</strong> &mdash; 毎タスクで自動チェック</li>
         <li><strong>小さなサービスを Cloud Run にデプロイ</strong> &mdash; 実装から出荷まで一気通貫で体験</li>
       </ol>
     </div>
