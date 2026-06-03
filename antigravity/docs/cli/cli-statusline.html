@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ステータスライン — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>ステータスライン</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-statusline">antigravity.google/docs/cli-statusline</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>標準のステータスライン構成要素の切り替え、カスタムスクリプト構成の定義、動的な JSON 状態ペイロードの整形を行います。</p>
+
+<h2>概要</h2>
+<p>ステータスラインは TUI プロンプトパネルの最下部に表示されます。アクティブなエージェントのサイクル、ワークスペース環境、コンテキストトークンウィンドウの使用状況、バックグラウンド実行タスクなどのコンテキストを一目で把握できます。</p>
+
+<h2>対話型の切り替え</h2>
+<ol>
+  <li>プロンプトボックスで <code>/statusline</code> と入力し、<span class="kbd">Enter</span> を押します。</li>
+  <li>対話型の <strong>ステータスピッカーパネル（Status Picker Panel）</strong> オーバーレイが開きます。</li>
+  <li><span class="kbd">↑</span> / <span class="kbd">↓</span> を使って、特定のメトリクス要素（アクティブなモデル、タスクカウンター、コンテキスト割合など）の表示・非表示を切り替えます。</li>
+  <li><span class="kbd">Enter</span> を押すと選択を確定して終了します。<span class="kbd">Esc</span> を押すとキャンセルします。</li>
+</ol>
+
+<h2>カスタムステータスラインスクリプト</h2>
+<p>高度なターミナルレイアウトやカスタムステータスバー表示のために、アクティブなエージェントのメタデータをカスタムスクリプトへ渡すことができます。</p>
+
+<h3>設定</h3>
+<p><code>~/.gemini/antigravity-cli/settings.json</code> ファイルに <code>statusLine</code> 設定ブロックを追加します。</p>
+<pre><code>{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.gemini/antigravity-cli/statusline.sh"
+  }
+}</code></pre>
+<p>エージェントの状態が変化するたびに、TUI はあなたのコマンドスクリプトを実行し、詳細な状態 JSON ペイロードをスクリプトの <code>stdin</code> に直接パイプし、<code>stdout</code> から整形済みの文字列を読み取って、プロンプトのステータスラインにその結果をレンダリングします。フルの ANSI カラーコードがサポートされます。</p>
+
+<h3>利用可能な JSON フィールド</h3>
+<p>スクリプトにパイプされる JSON ペイロードには、次のトップレベルフィールドが含まれます。</p>
+<table>
+  <thead>
+    <tr><th>フィールド</th><th>型</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>cwd</code></td><td>string</td><td>現在の作業ディレクトリ</td></tr>
+    <tr><td><code>conversation_id</code></td><td>string</td><td>現在の会話 ID</td></tr>
+    <tr><td><code>model</code></td><td>object</td><td>アクティブなモデルの <code>id</code> と <code>display_name</code></td></tr>
+    <tr><td><code>product</code></td><td>string</td><td>アプリケーション名（例: <code>antigravity-cli</code>）</td></tr>
+    <tr><td><code>workspace</code></td><td>object</td><td><code>current_dir</code> と <code>project_dir</code> のパス</td></tr>
+    <tr><td><code>version</code></td><td>string</td><td>CLI のバージョン文字列</td></tr>
+    <tr><td><code>plan_tier</code></td><td>string</td><td>認証済みユーザーのサブスクリプションティア</td></tr>
+    <tr><td><code>email</code></td><td>string</td><td>認証済みユーザーの LDAP / メールアドレス</td></tr>
+    <tr><td><code>agent</code></td><td>object</td><td>アクティブなエージェントプロファイル名</td></tr>
+    <tr><td><code>context_window</code></td><td>object</td><td><code>total_input_tokens</code>、<code>total_output_tokens</code>、<code>context_window_size</code>、<code>used_percentage</code>、<code>remaining_percentage</code>、<code>current_usage</code></td></tr>
+    <tr><td><code>agent_state</code></td><td>string</td><td>現在の状態: <code>idle</code>、<code>thinking</code>、<code>working</code>、<code>tool_use</code>、<code>initializing</code></td></tr>
+    <tr><td><code>vcs</code></td><td>object</td><td>バージョン管理情報: <code>type</code>（git/jj/fig）、<code>branch</code>、<code>client</code>、<code>dirty</code></td></tr>
+    <tr><td><code>sandbox</code></td><td>object</td><td>サンドボックス設定: <code>enabled</code>、<code>allow_network</code></td></tr>
+    <tr><td><code>subagents</code></td><td>array</td><td>アクティブなサブエージェントセッション（<code>name</code>、<code>role</code>、<code>status</code>）</td></tr>
+    <tr><td><code>artifacts</code></td><td>array</td><td>生成されたアーティファクト（<code>uri</code>、<code>status</code>、<code>type</code>）</td></tr>
+    <tr><td><code>pending_input_count</code></td><td>int</td><td>キューに入っているユーザーメッセージの数</td></tr>
+    <tr><td><code>background_tasks</code></td><td>array</td><td>実行中のタスク（<code>name</code>、<code>status</code>、<code>index</code>）</td></tr>
+    <tr><td><code>tool_confirmation_pending</code></td><td>bool</td><td>ツール確認ダイアログが表示されているかどうか</td></tr>
+    <tr><td><code>terminal_width</code></td><td>int</td><td>対話型ターミナルのライブな幅</td></tr>
+  </tbody>
+</table>
+
+<h3>JSON ペイロードの例</h3>
+<p>以下は、ステータスラインスクリプトにパイプされる、サニタイズ済みの典型的な JSON ペイロードです。</p>
+<pre><code>{
+  "cwd": "/home/user/my-project",
+  "conversation_id": "12345678-abcd-ef01-2345-6789abcdef01",
+  "model": {
+    "id": "Gemini",
+    "display_name": "Gemini"
+  },
+  "workspace": {
+    "current_dir": "/home/user/my-project",
+    "project_dir": "file:///home/user/my-project"
+  },
+  "version": "2026.04.15",
+  "context_window": {
+    "total_input_tokens": 88244,
+    "total_output_tokens": 61074,
+    "context_window_size": 1048576,
+    "used_percentage": 8.415603637695312,
+    "remaining_percentage": 91.58439636230469,
+    "current_usage": {
+      "input_tokens": 63382,
+      "output_tokens": 346,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 20857
+    }
+  },
+  "product": "antigravity-cli",
+  "agent_state": "idle",
+  "vcs": {
+    "type": "git",
+    "client": "my-project",
+    "branch": "dev",
+    "dirty": false
+  },
+  "sandbox": {
+    "enabled": false
+  },
+  "plan_tier": "Pro",
+  "email": "developer@email.com",
+  "terminal_width": 111
+}</code></pre>
+
+<h3>サンプルスクリプト</h3>
+<p>完全でレイアウト適応型のスクリプトを、公式の <a href="https://github.com/google-antigravity/antigravity-cli/blob/main/examples/statusline/statusline.sh">GitHub 上の statusline.sh の例</a> からダウンロードできます。このスクリプトは状態バッジを描画し、アクティブなブランチを処理し、コンテキストウィンドウの進捗バーを動的に整形します。</p>
+<p>スクリプトを <code>~/.gemini/antigravity-cli/statusline.sh</code> に保存し、実行可能にします。</p>
+<pre><code>chmod +x ~/.gemini/antigravity-cli/statusline.sh</code></pre>
+
+<h2>関連項目</h2>
+<ul>
+  <li><strong><a href="cli-title.html">ターミナルタイトルのカスタマイズ</a></strong>: 動的なウィンドウタイトルを設定します。</li>
+  <li><strong><a href="cli-settings.html">設定（settings.json）</a></strong>: キーボードホットキーとバッファをカスタマイズします。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-sandbox">権限とサンドボックス</a></strong>: 安全なディレクトリ権限を管理します。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

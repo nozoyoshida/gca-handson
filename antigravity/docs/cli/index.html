@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antigravity CLI リファレンス（日本語要約）</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="../handson-guide.html">← Antigravity ハンズオンガイドへ</a>
+  <h1>Antigravity CLI（agy）リファレンス</h1>
+  <div class="src">公式ドキュメント <a href="https://antigravity.google/docs/cli-using">antigravity.google/docs</a> の日本語要約集</div>
+</div></header>
+
+<main class="container doc">
+  <div class="callout callout-warn">
+    <div class="t">この資料について <span class="verify">要確認</span></div>
+    本ページ群は公式ドキュメント（<code>antigravity.google/docs/cli-*</code>）の内容を日本語で要約・整理したものです。各ページ上部に出典リンクを記載しています。Antigravity はアップデートが速いため、コマンドやフラグの最終確認は必ず公式ドキュメントで行ってください。設定ファイルは <code>~/.gemini/antigravity-cli/settings.json</code>、CLI のバイナリ名は <code>agy</code> です。
+  </div>
+
+  <div class="sec-label">基本</div>
+  <div class="toc-grid">
+    <a class="toc-card" href="cli-using.html"><div class="n">USING</div><div class="ti">AGY CLI の使い方</div><div class="d">設定システム、便利ショートカット、スラッシュコマンドの基本（<code>/config</code> <code>@</code> <code>!</code> <code>?</code>）</div></a>
+    <a class="toc-card" href="cli-tutorial.html"><div class="n">TUTORIAL</div><div class="ti">チュートリアル</div><div class="d">最初のエンドツーエンド体験（導入→対話→実装→検証）</div></a>
+    <a class="toc-card" href="cli-prompting.html"><div class="n">PROMPTING</div><div class="ti">プロンプトと操作</div><div class="d">プロンプト入力・複数行・中断（<code>Esc</code>）・メディア貼付（<code>ctrl+v</code>）</div></a>
+    <a class="toc-card" href="gcli-migration.html"><div class="n">MIGRATION</div><div class="ti">Gemini CLI からの移行</div><div class="d">旧 Gemini CLI からの移行ポイント・対応関係</div></a>
+  </div>
+
+  <div class="sec-label">機能</div>
+  <div class="toc-grid">
+    <a class="toc-card" href="cli-features.html"><div class="n">FEATURES</div><div class="ti">機能一覧（Features）</div><div class="d">プラグイン / サンドボックス / スラッシュコマンド一覧 / サブエージェントの全体像</div></a>
+    <a class="toc-card" href="cli-subagents.html"><div class="n">SUBAGENTS</div><div class="ti">バックグラウンドタスクとサブエージェント</div><div class="d"><code>/agents</code> パネル・並列実行・<code>ctrl+k</code> 高速承認</div></a>
+    <a class="toc-card" href="cli-plugins.html"><div class="n">PLUGINS</div><div class="ti">プラグイン</div><div class="d">skills / agents / rules / MCP / hooks をまとめた配布単位</div></a>
+  </div>
+
+  <div class="sec-label">設定・カスタマイズ</div>
+  <div class="toc-grid">
+    <a class="toc-card" href="cli-settings.html"><div class="n">SETTINGS</div><div class="ti">設定（settings.json）</div><div class="d">全設定キーと既定値、設定パネル（<code>/config</code>）</div></a>
+    <a class="toc-card" href="cli-statusline.html"><div class="n">STATUSLINE</div><div class="ti">ステータスライン</div><div class="d">ステータスバーのカスタム表示（<code>/statusline</code>）</div></a>
+    <a class="toc-card" href="cli-title.html"><div class="n">TITLE</div><div class="ti">ウィンドウタイトル</div><div class="d">ターミナルのウィンドウタイトルをカスタマイズ</div></a>
+  </div>
+
+  <div class="sec-label">セキュリティ</div>
+  <div class="toc-grid">
+    <a class="toc-card" href="cli-permissions.html"><div class="n">PERMISSIONS</div><div class="ti">権限（Permissions）</div><div class="d"><code>action(target)</code> の allow / deny / ask、優先順位 Deny &gt; Ask &gt; Allow</div></a>
+    <a class="toc-card" href="cli-sandbox.html"><div class="n">SANDBOX</div><div class="ti">サンドボックス</div><div class="d">nsjail / sandbox-exec / AppContainer による隔離実行</div></a>
+  </div>
+
+  <div class="sec-label">ハンズオン連携（本リポジトリ向け）</div>
+  <div class="toc-grid">
+    <a class="toc-card" href="handson-integration.html"><div class="n">INTEGRATION</div><div class="ti">ハンズオンでの agy 活用ポイント</div><div class="d">既存ハンズオン各章に、agy のスラッシュコマンド/ベストプラクティスを自然に組み込む箇所の洗い出し</div></a>
+    <a class="toc-card" href="more-handson-ideas.html"><div class="n">IDEAS</div><div class="ti">agy CLI を活かす追加ハンズオン案</div><div class="d">サブエージェント並列・権限/サンドボックス・プラグイン・<code>-p</code> スクリプト等を題材にした新ネタ</div></a>
+    <a class="toc-card" href="../handson-advanced.html"><div class="n">ADVANCED</div><div class="ti">発展ハンズオン（agy 深掘り）</div><div class="d">権限/サンドボックス・並列サブエージェント・<code>-p</code> 自動化・スキル/プラグイン等の発展モジュール</div></a>
+  </div>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

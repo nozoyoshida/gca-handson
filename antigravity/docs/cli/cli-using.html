@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGY CLI の使い方 — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>AGY CLI の使い方</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-using">antigravity.google/docs/cli-using</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<h2>設定（Settings）</h2>
+<p>Antigravity CLI は、ワークスペースの挙動、安全制限、エディタの設定、見た目のスタイル、パフォーマンスなどをカスタマイズするための柔軟な設定システムを備えています。</p>
+<ul>
+  <li><strong>設定ファイル</strong>: プレーンな JSON ファイル <code>~/.gemini/antigravity-cli/settings.json</code> に保存されます。</li>
+  <li><strong>設定パネル</strong>: <code>/config</code> または <code>/settings</code> と入力すると、利用可能なすべてのオプションを一覧表示するフルスクリーンのオーバーレイメニューが開きます。
+    <ul>
+      <li>設定を選択すると、そのオプション一覧またはテキスト入力フィールドが開きます。</li>
+      <li>選択した内容は即座にディスクへ保存され、メインの一覧に戻ります。</li>
+    </ul>
+  </li>
+  <li><strong>オーバーライド</strong>: 一部の設定は、起動時に CLI フラグ（例: <code>--sandbox</code> や <code>--dangerously-skip-permissions</code>）で上書きできます。
+    <ul>
+      <li>設定メニューには、オーバーライドの出所を示すインジケータが表示されます（例: <em>Sandbox Mode on overridden by <code>--sandbox</code></em>）。</li>
+      <li>ディスク上の永続設定は引き続き編集できますが、現在のセッションでは再起動するまでコマンドラインのオーバーライドが優先されます。</li>
+    </ul>
+  </li>
+</ul>
+
+<h2>クイックヒント（Quick Tips）</h2>
+<table>
+<thead>
+<tr><th>操作・機能</th><th>ヒント・コマンド</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>ファイルパスの自動補完</strong></td><td><code>@</code> を入力するとパス候補が表示されます</td></tr>
+<tr><td><strong>プロンプトのクリア</strong></td><td><code>esc esc</code> と入力するとプロンプトボックスをクリアできます（ストリーミング中でない場合）</td></tr>
+<tr><td><strong>ターミナルコマンド</strong></td><td>プロンプトの先頭で <code>!</code> を使うと、ターミナルコマンドを直接実行できます</td></tr>
+<tr><td><strong>ヘルプ</strong></td><td><code>?</code> と入力するとヘルプが表示され、すべてのスラッシュコマンドが一覧されます</td></tr>
+<tr><td><strong>ツール呼び出しのノイズ低減</strong></td><td><code>/config</code> で verbosity を <strong>low</strong> に設定すると、多数のツール呼び出しによる出力を最小限に抑えられます</td></tr>
+<tr><td><strong>権限の管理</strong></td><td><code>/config</code> または <code>/permissions</code> で権限を制御します</td></tr>
+<tr><td><strong>会話を巻き戻す</strong></td><td><code>/rewind</code> または <code>/undo</code> で会話履歴を巻き戻します</td></tr>
+<tr><td><strong>会話のフォーク</strong></td><td><code>/fork</code> で別のワークスペースを立ち上げ、以前の地点から会話を分岐させます</td></tr>
+<tr><td><strong>会話のクリア</strong></td><td><code>/clear</code> でプロンプトをクリアし、新しい会話セッションを開始します</td></tr>
+<tr><td><strong>会話の再開</strong></td><td><code>/resume</code> で過去の会話ログを一覧表示し、再開します</td></tr>
+<tr><td><strong>自動保存による再開</strong></td><td>CLI を閉じると、その特定のセッションを再開するために必要な正確なコマンドが自動的に出力されます</td></tr>
+</tbody>
+</table>
+
+<h2>キーバインド（Keybindings）</h2>
+<p>AGY CLI ではキーバインドをカスタマイズできます。<code>/keybindings</code> と入力するか、JSON ファイルを直接編集して変更できます。</p>
+<ul>
+  <li><strong>ファイルの場所</strong>: <code>~/.gemini/antigravity-cli/keybindings.json</code></li>
+  <li><strong>リセット</strong>: デフォルトに戻すには、<code>keybindings.json</code> ファイルを削除します。</li>
+</ul>
+
+<h3>デフォルトのキーバインド</h3>
+<table>
+<thead>
+<tr><th>操作・コマンド</th><th>キー</th><th>用途</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>TUI 画面のクリア</strong></td><td><code>ctrl+l</code></td><td>ターミナル出力をクリアする</td></tr>
+<tr><td><strong>Enter / 送信</strong></td><td><code>enter</code></td><td>プロンプトや選択を送信する</td></tr>
+<tr><td><strong>Escape / キャンセル</strong></td><td><code>ctrl+c</code>, <code>esc</code></td><td>ストリームの停止、メニューを閉じる、プロンプトのクリア</td></tr>
+<tr><td><strong>CLI の終了</strong></td><td><code>ctrl+d</code></td><td>CLI の TUI セッションを終了する</td></tr>
+<tr><td><strong>CLI のサスペンド</strong></td><td><code>ctrl+z</code></td><td>CLI セッションをターミナルのバックグラウンドへ送る</td></tr>
+<tr><td><strong>コマンドの編集</strong></td><td><code>e</code></td><td>提案されたターミナルコマンドを編集するためにエディタを開く</td></tr>
+<tr><td><strong>「いいえ」で確認</strong></td><td><code>n</code></td><td>ターミナルコマンドの実行を拒否する</td></tr>
+<tr><td><strong>「はい」で確認</strong></td><td><code>y</code></td><td>ターミナルコマンドの実行を承認する</td></tr>
+<tr><td><strong>エディタを開く</strong></td><td><code>ctrl+g</code></td><td>既定のシェルエディタ内でプロンプトを編集する</td></tr>
+<tr><td><strong>テキストの貼り付け</strong></td><td><code>ctrl+v</code></td><td>クリップボードからテキストを貼り付ける</td></tr>
+<tr><td><strong>テキスト編集のやり直し</strong></td><td><code>ctrl+shift+z</code></td><td>直前に取り消したテキスト変更をやり直す</td></tr>
+<tr><td><strong>テキスト編集の取り消し</strong></td><td><code>ctrl+_</code>, <code>ctrl+shift+-</code></td><td>直前のテキスト変更を取り消す</td></tr>
+<tr><td><strong>ヤンク（コピー）</strong></td><td><code>ctrl+y</code></td><td>選択したテキストをヤンク/コピーする</td></tr>
+<tr><td><strong>下へ移動</strong></td><td><code>down</code></td><td>メニュー一覧を下へスクロールする</td></tr>
+<tr><td><strong>最下部へ移動</strong></td><td><code>ctrl+end</code></td><td>TUI ビューを一気に最下部へ移動する</td></tr>
+<tr><td><strong>最上部へ移動</strong></td><td><code>ctrl+home</code></td><td>TUI ビューを一気に最上部へ移動する</td></tr>
+<tr><td><strong>左へ移動</strong></td><td><code>left</code></td><td>プロンプトのカーソルを左へ移動する</td></tr>
+<tr><td><strong>ページダウン</strong></td><td><code>pgdown</code>, <code>shift+down</code></td><td>TUI を 1 ページ分下へスクロールする</td></tr>
+<tr><td><strong>ページアップ</strong></td><td><code>pgup</code>, <code>shift+up</code></td><td>TUI を 1 ページ分上へスクロールする</td></tr>
+<tr><td><strong>右へ移動</strong></td><td><code>right</code></td><td>プロンプトのカーソルを右へ移動する</td></tr>
+<tr><td><strong>Tab / フォーカス</strong></td><td><code>tab</code></td><td>選択肢を自動補完する、またはコンポーネントのフォーカスを切り替える</td></tr>
+<tr><td><strong>上へ移動</strong></td><td><code>up</code></td><td>メニュー一覧を上へスクロールする</td></tr>
+<tr><td><strong>改行の挿入</strong></td><td><code>alt+enter</code>, <code>ctrl+j</code>, <code>shift+enter</code></td><td>送信せずにプロンプトへ改行を追加する</td></tr>
+</tbody>
+</table>
+<p>JSON ファイルでは、1 つの操作に複数のキーバインドを割り当てられます。キーバインドを無効にするには、リストを空（例: <code>[]</code>）に設定します。ファイルが不正な形式の場合、CLI は有効な部分を使用し、壊れた操作についてはデフォルトにフォールバックします。</p>
+
+<div class="callout callout-warn"><div class="t">注意</div> <strong>重要</strong>: キーバインド <code>cli.exit</code> と <code>cli.enter</code> は無効化できません。</div>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

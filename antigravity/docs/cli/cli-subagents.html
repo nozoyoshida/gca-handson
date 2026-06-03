@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>バックグラウンドタスクとサブエージェント — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>バックグラウンドタスクとサブエージェント</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-subagents">antigravity.google/docs/cli-subagents</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>時間のかかるビルド、複数ファイルのコード生成、リサーチの一括処理を並列のバックグラウンドエージェントに委任し、自分のプログラミングの流れを止めずに作業を続けます。</p>
+
+<h2>非同期実行モデル</h2>
+
+<p>開発者の速度を最大化するため、Antigravity CLI はマルチスレッドの非同期実行アーキテクチャを採用しています。長時間のビルド、大規模なコードベースの検索一括処理、複雑な複数ファイルの編集の間にターミナルセッションをロックする代わりに、主エージェントはこれらの操作を並列の<strong>サブエージェント</strong>やバックグラウンドの<strong>タスク</strong>に委任します。</p>
+
+<p>この委任モデルにより、レイテンシの高い AI 処理を待つ必要がなくなります。複数の自律的なバックグラウンドスレッドが並行して検証タスクを実行している間も、コードの作成、プロンプトの送信、ファイルの確認を続けられます。</p>
+
+<h2>エージェントの管理: <code>/agents</code> パネル</h2>
+
+<p>現在のエージェント階層は、インタラクティブなターミナルインターフェースを通じて完全に可視化・管理できます。</p>
+
+<h3>パネルを開く</h3>
+
+<p>プロンプトで <code>/agents</code> と入力して <span class="kbd">Enter</span> を押すと、インタラクティブな<strong>エージェントマネージャーパネル</strong>が開きます。</p>
+
+<h3>パネルの概要</h3>
+
+<p>パネルには、実行中・完了・終了・失敗したすべてのバックグラウンドエージェントのライブチェックリストが表示されます。</p>
+
+<ul>
+<li><strong>識別子（Identifier）</strong>: 対象サブエージェントの一意の ID。</li>
+<li><strong>役割（Role</strong>): エージェントの専門的な役割（「Codebase Researcher」や「Database Debugger」など）。</li>
+<li><strong>状態（State）</strong>: ライブのステータス表示（running、done、killed、error）。</li>
+<li><strong>ステップ（Step）</strong>: 現在実行中のツールや推論ステップのリアルタイムな要約。</li>
+</ul>
+
+<h2>詳細な監視（ディープダイブ）</h2>
+
+<p>特定のバックグラウンドエージェントの内部的な推論、思考、ログを検査するには、次の手順を行います。</p>
+
+<ol>
+<li><code>/agents</code> パネルを開き、<span class="kbd">↑</span>/<span class="kbd">↓</span> で対象のエージェントを選択します。</li>
+<li><span class="kbd">Enter</span> を押して<strong>サブエージェント詳細ビュー</strong>を開きます。</li>
+<li>この全画面ビューには、サブエージェントの推論ログ全体（プライベートな内部思考、ツール呼び出し、実行出力を含む）が表示されます。</li>
+<li><span class="kbd">Esc</span> を押すと、ビューを終了してメインのエージェントマネージャーの一覧に戻ります。</li>
+</ol>
+
+<h2><code>/tasks</code> によるバックグラウンドタスクの監視</h2>
+
+<p>直接のシェルコマンド、テストスイート、<code>/btw</code> 経由で開始した単純なバックグラウンドクエリなど、エージェントによらないバックグラウンド操作には <code>/tasks</code> コマンドを使用します。</p>
+
+<pre><code>/tasks</code></pre>
+
+<p>タスクの追跡リストでは、次のことができます。</p>
+
+<ul>
+<li>標準的な非対話型のバックグラウンドプロセスを追跡する。</li>
+<li><span class="kbd">↑</span>/<span class="kbd">↓</span> でタスクを選択し、<span class="kbd">Enter</span> を押して標準出力（stdout）のログを表示する。</li>
+<li>暴走したターミナルプロセスを安全に終了する。</li>
+</ul>
+
+<h2>キーボード操作の効率化</h2>
+
+<p>サブエージェントが手動の操作やツールの承認を必要とする際のコンテキスト切り替えの手間を減らすため、Antigravity CLI は効率的なショートカット経路を統合しています。</p>
+
+<h3>詳細への「テレポート」ナビゲーション（<code>Ctrl+J</code>）</h3>
+
+<p>サブエージェントが承認の必要なツール（ファイルの書き込みやデータベースマイグレーションの実行など）に遭遇すると、ステータスバーの通知が点滅します。</p>
+
+<ul>
+<li>メインのプロンプトパネル内で <span class="kbd">Alt+J</span> を押すと、現在の会話から、承認待ちの次のサブエージェントの詳細ビューへ即座に「テレポート」します。</li>
+<li>アクションを承認または却下し、<span class="kbd">Esc</span> を押すと主スレッドへテレポートして戻ります。</li>
+</ul>
+
+<h3>「ファストパス」での承認（<code>Ctrl+K</code>）</h3>
+
+<p>作業中のワークスペースを離れずにエージェントのアクションを即座に承認するには、次の手順を行います。</p>
+
+<ol>
+<li>アクティブなプロンプトボックスのすぐ上に表示されるインラインのステータス通知を確認します。これは保留中のアクションを要約します（例: <code>Subagent 12 asks to run "npm test"</code>）。</li>
+<li><span class="kbd">Ctrl+K</span> を押すと、パネルを切り替えたりオーバーレイを開いたりせずに、保留中のファストパスアクションを即座に承認できます。</li>
+</ol>
+
+<h2>次のステップ</h2>
+
+<p>シェルの表示挙動を設定し、構成プロファイルをカスタマイズします。</p>
+
+<ul>
+<li><strong><a href="cli-settings.html">設定、表示、キーバインド</a></strong>: キーマップ、バッファリング、JSON ルールをカスタマイズします。</li>
+<li><strong><a href="cli-sandbox.html">権限とサンドボックス</a></strong>: バックグラウンドプロセスにセキュリティの封じ込め領域を適用します。</li>
+<li><strong><a href="cli-plugins.html">プラグインとスキル</a></strong>: 独自のカスタムスキルやスラッシュコマンドを作成します。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

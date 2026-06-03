@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サンドボックス — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>サンドボックス</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-sandbox">antigravity.google/docs/cli-sandbox</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>ネイティブなオペレーティングシステムのプロセス分離を強制し、実行の封じ込め境界を管理し、ローカルワークステーションを保護します。</p>
+
+<h2>セキュリティモデル</h2>
+<p>自律的な開発エージェントは、ローカルのターミナルコマンドを実行し、ソースコードを編集し、ワークスペース内で直接テストを実行するため、安全なワークステーション環境を維持することが極めて重要です。Antigravity CLI は、破壊的なシェル操作や許可されていないリモートネットワーク呼び出しを制限するため、ネイティブな<strong>ターミナルサンドボックス（Terminal Sandbox）</strong>を統合しています。</p>
+
+<h3>ネイティブ OS による封じ込め</h3>
+<p>実行速度を低下させる重い仮想コンテナや分離された仮想マシンとは異なり、Antigravity は軽量でネイティブなオペレーティングシステムのカーネルユーティリティを使用して、実行オーバーヘッドゼロで安全なプロセスリングを作成します。</p>
+
+<table>
+<thead>
+<tr><th>オペレーティングシステム</th><th>サンドボックスユーティリティ</th><th>セキュリティ特性</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Linux</strong></td>
+  <td><code>nsjail</code></td>
+  <td>カーネルの名前空間（namespaces）と cgroups を利用して CPU、メモリ、パスの可視性を制限する、オープンソースのプロセスアイソレーターです。</td>
+</tr>
+<tr>
+  <td><strong>macOS</strong></td>
+  <td><code>sandbox-exec</code></td>
+  <td>絶対パスのファイルシステムアクセスや生の TCP クエリを制限するポリシープロファイルを強制する、ネイティブなシステムツールです。</td>
+</tr>
+<tr>
+  <td><strong>Windows</strong></td>
+  <td><code>AppContainer</code></td>
+  <td>ファイルシステムの権限とレジストリの可視性を分離する、デスクトップセキュリティ封じ込めリングです。</td>
+</tr>
+</tbody>
+</table>
+
+<h2>サンドボックスの有効化</h2>
+<p>サンドボックスはグローバル設定内で直接構成します。</p>
+
+<pre><code>~/.gemini/antigravity-cli/settings.json</code></pre>
+
+<h3>サンドボックスの構成</h3>
+<p>設定プロファイルにサンドボックスのトグルを追加します。</p>
+
+<pre><code>{
+  "enableTerminalSandbox": true
+}</code></pre>
+
+<ul>
+  <li><strong><code>enableTerminalSandbox</code></strong>（boolean、デフォルト: <code>false</code>）: エージェントが起動するすべてのローカル実行コマンドを OS の封じ込めリングに制限します。</li>
+</ul>
+
+<h2>サンドボックスでの対話的な承認</h2>
+<p>エージェントがターミナルツールやシェルコマンドの実行を試みると、TUI のプロンプトブロックがサンドボックスの状態に応じて動的に変化します。</p>
+<ul>
+  <li><strong>サンドボックスが有効な場合</strong>: プロンプトパネルは一時的なエスケープオプションを提供します。
+  <pre><code>Do you want to proceed?
+1. Yes
+2. Yes, and run without sandbox restrictions
+3. No</code></pre>
+  オプション 2 を選択すると、その 1 回の実行に限り封じ込め障壁をバイパスします。</li>
+  <li><strong>サンドボックスが無効な場合</strong>: プロンプトでは、リスクのあるコマンドに対して封じ込めを強制できます。
+  <pre><code>Do you want to proceed?
+1. Yes
+2. Yes, and run in sandbox
+3. No</code></pre>
+  </li>
+</ul>
+
+<h2>関連項目</h2>
+<ul>
+  <li><strong><a href="cli-permissions.html">権限エンジン</a></strong>: きめ細かな allow / deny ポリシールールを構成します。</li>
+  <li><strong><a href="cli-plugins.html">プラグインとスキル</a></strong>: 独自のカスタムスキルやスラッシュコマンドを作成します。</li>
+  <li><strong><a href="cli-settings.html">設定、レンダリング、キーバインディング</a></strong>: キーボードのホットキーやバッファをカスタマイズします。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

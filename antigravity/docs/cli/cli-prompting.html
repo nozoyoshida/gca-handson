@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プロンプトと操作 — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>プロンプトと操作</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-prompting">antigravity.google/docs/cli-prompting</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>基本的な操作パターン、複数行入力のワークフロー、セッションの中断操作、ターミナルへのメディア貼り付けを習得します。</p>
+
+<h2>プロンプトボックス</h2>
+
+<p>Antigravity CLI は、ターミナル画面の最下部に固定表示されるプロンプトパネルを備えています。このパネルでは、通常の入力、複数行のスクリプト、メディアの直接貼り付けを扱えます。</p>
+
+<pre><code>───────────────────────────────────────────────────────────────────────────
+&gt; Describe your next engineering task here...
+───────────────────────────────────────────────────────────────────────────</code></pre>
+
+<h3>プロンプトの送信</h3>
+
+<p>エージェントのターンを開始するには、プロンプトパネルに指示を入力して <span class="kbd">Enter</span> を押します。エージェントはただちに現在のディレクトリ（ワークスペース）を分析し、必要な設定を読み込み、実行プランの作成を開始します。</p>
+
+<h3>実行中セッションの中断</h3>
+
+<p>エージェントが意図しないタスクを始めたり、コマンド実行中にループに陥ったりした場合は、<span class="kbd">Esc</span> を押すとセッションを即座に停止できます。</p>
+
+<div class="callout callout-tip"><div class="t">ヒント</div>
+<p><strong>万能のエスケープ</strong>: <code>Esc</code> キーはグローバルな脱出口として機能します。<code>Esc</code> を押すと、実行中のエージェントのターンを即座にキャンセルし、オーバーレイパネルを閉じ、クリーンなプロンプトボックスへフォーカスを戻します。</p>
+</div>
+
+<h2>複数行の入力</h2>
+
+<p>複雑な指示、構造化されたテストシナリオ、複数段落にわたる指示には、組み込みの複数行機能を利用します。</p>
+
+<h3>改行の挿入ショートカット</h3>
+
+<ul>
+<li><strong>標準</strong>: <span class="kbd">Shift+Enter</span> または <span class="kbd">ctrl+j</span> を押すと、送信せずに現在のプロンプト内へ改行を挿入できます。</li>
+<li><strong>macOS ターミナルでの代替手段</strong>: Apple のターミナル（既定では <code>Shift+Enter</code> を転送しません）を使用している場合は、<span class="kbd">Option+Enter</span> を押します。ターミナルの環境設定プロファイルで <strong>Use Option as Meta key</strong>（Option キーを Meta キーとして使用）にチェックが入っていることを確認してください。</li>
+<li><strong>バックスラッシュによる汎用エスケープ</strong>: 現在の行末に末尾のバックスラッシュ <code>\</code> を入力して <span class="kbd">Enter</span> を押します。CLI は自動的にバックスラッシュを削除し、改行を挿入します。</li>
+</ul>
+
+<h3><code>$EDITOR</code> でプロンプトを編集する</h3>
+
+<p>大規模なプロンプトを普段の開発用エディタで作成・編集するには、次の手順を行います。</p>
+
+<ol>
+<li>空のプロンプトパネル内で <span class="kbd">ctrl+g</span> を押します。</li>
+<li>CLI がシステム既定のテキストエディタ（<code>vim</code>、<code>nano</code>、<code>code</code> など。<code>/config</code> または環境の <code>$EDITOR</code> 変数で設定）を起動します。</li>
+<li>一時的なエディタバッファ内で複数行の指示を作成します。</li>
+<li>エディタを保存して終了します。CLI は編集したバッファを自動的にターミナルのプロンプトへ取り込みます。</li>
+</ol>
+
+<h2>メディアの添付</h2>
+
+<p>Antigravity CLI は、システムのクリップボードからリッチメディア形式を直接貼り付けることをサポートしています。プロンプトパネル内で <span class="kbd">ctrl+v</span>（またはターミナル本来の貼り付け操作）を押すと、スクリーンショットのモックアップや動画の録画を添付できます。</p>
+
+<h3>対応するファイル形式</h3>
+
+<ul>
+<li><strong>画像</strong>: PNG、JPEG、GIF、WebP、BMP、TIFF、SVG。</li>
+<li><strong>動画</strong>: MP4、MOV、WebM、AVI。</li>
+</ul>
+
+<h2>次のステップ</h2>
+
+<p>操作パターンを習得したら、エージェントがどのようにアクションを提示し、確認を求めるかを確認しましょう。</p>
+
+<ul>
+<li><strong><a href="https://antigravity.google/docs/cli-artifacts">アーティファクトの確認</a></strong>: ファイル編集、プラン、テスト実行の検査と管理方法を学びます。</li>
+<li><strong><a href="https://antigravity.google/docs/cli-conversations">会話の管理</a></strong>: 過去のスレッドを再開し、実行中のセッションをフォークします。</li>
+<li><strong><a href="cli-subagents.html">バックグラウンドタスクとサブエージェント</a></strong>: 非同期で動くバックグラウンドエージェントを監視します。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

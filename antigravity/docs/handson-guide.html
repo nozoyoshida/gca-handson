@@ -186,7 +186,7 @@
 
   <div class="callout callout-warning" style="margin-top:28px;">
     <div class="callout-title">はじめに：本ガイドの「要確認」表記について <span class="verify-tag">要確認</span></div>
-    Antigravity 2.0 と Gemini Enterprise Agent Platform（GEAP）は比較的新しい製品で、CLI の導入コマンド・認証フラグ・<code>.agents/</code> のパス・モデル名などの<strong>具体値は変わる可能性</strong>があります。本ガイドでは確実な土台（Cloud Workstations のブラウザ IDE / ウェブプレビュー、エージェントの「計画→承認→実行→検証」、<code>AGENTS.md</code>、<code>curl</code> 検証、Cloud Run デプロイ）をベースに記述し、ツール固有の具体値には <span class="verify-tag">要確認</span> を付けています。<strong>実施前に公式ドキュメント（antigravity.google / cloud.google.com）で最新手順をご確認ください。</strong>
+    Antigravity 2.0 と Gemini Enterprise Agent Platform（GEAP）は比較的新しい製品で、CLI の導入コマンド・認証フラグ・<code>.agents/</code> のパス・モデル名などの<strong>具体値は変わる可能性</strong>があります。本ガイドでは確実な土台（Cloud Workstations のブラウザ IDE / ウェブプレビュー、エージェントの「計画→承認→実行→検証」、<code>AGENTS.md</code>、<code>curl</code> 検証、Cloud Run デプロイ）をベースに記述し、ツール固有の具体値には <span class="verify-tag">要確認</span> を付けています。<strong>実施前に公式ドキュメント（antigravity.google / cloud.google.com）で最新手順をご確認ください。</strong> なお、<code>agy</code> CLI のコマンド詳細は <a href="cli/index.html">CLI リファレンス（日本語要約）</a> にまとめています。
   </div>
 
 <!-- ===== TOC ===== -->
@@ -240,6 +240,11 @@
     <div class="callout callout-info">
       <div class="callout-title">この版はローカルに何もインストールしません</div>
       すべての作業は<strong>ブラウザ内の Cloud Workstation</strong>（Code OSS ベースの IDE）で完結します。手元の OS や VSCode の状態に左右されず、全員が同一環境で進められます。
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">最初に確認しておくと便利</div>
+      TUI を起動したら、まず <code>?</code> でコマンド一覧、<code>/config</code>（=<code>/settings</code>、verbosity を low に）、<code>/model</code>、<code>/permissions</code> を確認しておきましょう。
     </div>
 
     <h3>事前準備チェックリスト</h3>
@@ -349,6 +354,11 @@ python app.py</pre>
     <div class="callout callout-warning">
       <div class="callout-title">この Chapter では変更を保持しないでください</div>
       Ch.1 は操作に慣れることが目的です。エージェントが作ったコードは<strong>承認しても後で <code>git restore .</code> で元に戻す</strong>か、計画段階で却下してください。Ch.2 以降で <code>app.py</code> を本格的に変更します。
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">プロンプト内ショートカット & セッション操作</div>
+      入力中に使えます: <code>@</code> パス補完 / <code>!</code> ターミナル直実行 / <code>esc esc</code> 入力クリア / <code>Esc</code> 中断。セッションは <code>/rewind</code>(<code>/undo</code>) で巻き戻し・<code>/fork</code> で分岐・<code>/resume</code> で再開できます。
     </div>
 
     <!-- 1-1 -->
@@ -526,7 +536,7 @@ Flask と SQLite を使用したチケット管理 REST API です。
     <!-- 2-4 -->
     <div class="exercise">
       <div class="exercise-title">2-4. Workflow でコードレビューを自動化する <span class="badge">3分</span></div>
-      <div class="step" data-step="1"><code>antigravity/templates/code-review.workflow.md</code> の内容を <code>.agents/workflows/code-review.md</code> に配置します。<span class="verify-tag">要確認</span>（Workflow の正式なパス・記法は公式ドキュメントで確認）</div>
+      <div class="step" data-step="1"><code>antigravity/templates/code-review.workflow.md</code> の内容を <code>.agents/skills/code-review.md</code> に置きます（先頭に frontmatter: <code>name: code-review</code> / <code>description: ...</code> を付ける）。登録すると <code>/code-review</code> として呼び出せます。</div>
       <div class="step" data-step="2">CLI でスラッシュコマンドとして呼び出し、現在の差分をレビューさせます：</div>
       <div class="prompt-box">
         <div class="prompt-label">CLI に入力</div>
@@ -545,7 +555,7 @@ Flask と SQLite を使用したチケット管理 REST API です。
         <thead><tr><th>仕組み</th><th>用途</th><th>読み込みタイミング</th></tr></thead>
         <tbody>
           <tr><td><code>AGENTS.md</code>（Rules）</td><td>プロジェクトの常時ルール</td><td>全タスクで自動</td></tr>
-          <tr><td><code>.agents/workflows/</code>（Workflow）</td><td>再利用する手順（<code>/code-review</code> 等）</td><td><code>/</code> で明示起動</td></tr>
+          <tr><td><code>.agents/skills/</code>（Skill）</td><td>再利用コマンド（<code>/code-review</code> 等、起動時に自動登録）</td><td><code>/</code> で明示起動</td></tr>
           <tr><td><code>.agents/skills/</code>（Skill）</td><td>特定領域の知識・ツール束</td><td>関連タスクで自動 / 明示</td></tr>
           <tr><td><code>@</code> ファイル参照</td><td>特定ファイルのコンテキスト追加</td><td>プロンプトで明示指定時</td></tr>
         </tbody>
@@ -571,6 +581,11 @@ Flask と SQLite を使用したチケット管理 REST API です。
     <div class="callout callout-warning">
       <div class="callout-title">エージェントの出力は毎回異なります</div>
       生成 AI の出力は毎回変わるため、講師や隣の参加者と結果が違っても正常です。<strong>大事なのは計画の内容をレビューする体験</strong>です。想定と大きく異なる場合は <code>completed/app.py</code> を参照してください。
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">大きめの実装を進めるコツ</div>
+      規模の大きいタスクは <code>/agents</code>・<code>/tasks</code> で進捗を監視できます。ベストプラクティスは<strong>「検証ループ」</strong>: テストや <code>curl</code> をエージェント自身に実行させ、結果を見て反復させましょう。
     </div>
 
     <!-- 3-1 -->
@@ -769,6 +784,11 @@ db.execute(sql, (f'%{q}%',))</pre>
         </tbody>
       </table>
 
+      <div class="callout callout-warning">
+        <div class="callout-title">エージェントの実行自体を安全に縛る</div>
+        <code>settings.json</code>（<code>~/.gemini/antigravity-cli/settings.json</code>）の <code>permissions</code>（allow/deny/ask、優先順位 <strong>Deny &gt; Ask &gt; Allow</strong>）と <code>enableTerminalSandbox</code>（nsjail / sandbox-exec / AppContainer）で、エージェントの実行自体を制限できます（例 deny: <code>command(rm -rf)</code>, <code>command(sudo)</code>）。
+      </div>
+
       <h4 style="margin-top: 16px; font-size: 15px;">Model Armor</h4>
       <div class="callout callout-info">
         <div class="callout-title">LLM の入出力を守るセキュリティレイヤー</div>
@@ -821,6 +841,11 @@ flowchart LR
     <div class="callout callout-warning">
       <div class="callout-title">前提</div>
       Ch.0 Step 3 で <code>gcloud auth login</code> 済み・プロジェクト設定済みであること、ユーザーに Cloud Run デプロイ権限（<code>roles/run.admin</code> 等）が付与されていること（附録 A）。
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">非対話実行で自動化に組み込む</div>
+      <code>agy -p "..." --cwd $(pwd)</code> でエージェントを非対話実行でき、git hook や CI などに組み込めます。
     </div>
 
     <!-- 5-1 -->
@@ -969,6 +994,11 @@ flowchart LR
       </ol>
     </div>
 
+    <div class="callout callout-info" style="margin-top: 24px;">
+      <div class="callout-title">次に読む</div>
+      <code>agy</code> の権限・サンドボックス・並列サブエージェント・<code>-p</code> 自動化などをさらに深掘りしたい方は <a href="handson-advanced.html">発展ハンズオン（agy の特徴を深掘り）</a> へ。各コマンドの詳細は <a href="cli/index.html">Antigravity CLI リファレンス</a> にまとめています。
+    </div>
+
     <h3 style="margin-top: 24px;">参考リンク</h3>
     <ul style="font-size: 14px; margin-left: 20px;">
       <li><a href="https://antigravity.google/">Google Antigravity</a></li>
@@ -1049,35 +1079,36 @@ gcloud workstations create ws-user01 \
   <div class="chapter-body">
 
     <div class="callout callout-warning">
-      <div class="callout-title">具体コマンドは公式ドキュメントで確認</div>
-      以下は本ハンズオン時点での想定です。実際のコマンド名・フラグ・パスは antigravity.google の公式ドキュメントで確認してください。
+      <div class="callout-title">詳細は CLI リファレンスへ</div>
+      公式 CLI ドキュメントを日本語要約した <a href="cli/index.html">Antigravity CLI リファレンス</a> に各コマンドの詳細をまとめています。最新の正確な情報は <a href="https://antigravity.google/docs/cli-using">公式ドキュメント</a> でご確認ください。
     </div>
 
-<pre><span class="comment"># インストール / バージョン確認</span>
+<pre><span class="comment"># インストール / バージョン確認（公式手順は要確認）</span>
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 agy --version
 
-<span class="comment"># 認証（GEAP）: ヘッドレス OAuth（URL をブラウザで開きコード貼付）</span>
-agy login
-agy config set project <span class="variable">YOUR_GEAP_PROJECT_ID</span>
-agy config set location <span class="variable">us-central1</span>
-
-<span class="comment"># 対話 TUI を起動</span>
+<span class="comment"># 対話 TUI を起動（Google アカウントでサインイン。ログアウトは /logout）</span>
 agy
 
-<span class="comment"># 一発実行（スクリプト / CI 向け）</span>
-agy -p "コミット前の差分をレビューして"
+<span class="comment"># 一発実行（CI / git hook 向け）</span>
+agy -p "コミット前の差分をレビューして" --cwd $(pwd)
 
-<span class="comment"># Workflow（再利用コマンド）の起動</span>
-/code-review</pre>
+<span class="comment"># プロンプト内ショートカット</span>
+<span class="comment">#   @ パス補完  ! ターミナル直実行  ? ヘルプ  esc esc 入力クリア  Esc 中断  ctrl+v 画像添付</span>
+
+<span class="comment"># よく使うスラッシュコマンド</span>
+/config (=/settings)   設定パネル          /permissions  自律レベル
+/model  モデル選択       /agents サブエージェント    /tasks バックグラウンド
+/skills スキル           /mcp    MCP         /rewind (=/undo)  巻き戻し
+/fork   分岐             /resume (=/switch) 再開     /clear 新規</pre>
 
     <table>
       <thead><tr><th>ファイル / 仕組み</th><th>役割</th></tr></thead>
       <tbody>
-        <tr><td><code>AGENTS.md</code>（ルート）</td><td>常時適用のプロジェクトルール（Rules）</td></tr>
-        <tr><td><code>.agents/workflows/*.md</code></td><td>再利用する手順（<code>/name</code> で起動）</td></tr>
-        <tr><td><code>.agents/skills/*</code></td><td>特定領域の知識・ツール束（Skill）</td></tr>
-        <tr><td>権限リスト</td><td>allow / deny / ask でコマンド・操作を制御</td></tr>
+        <tr><td><code>AGENTS.md</code> / <code>GEMINI.md</code>（ルート）</td><td>起動時に自動読込される常時ルール（Rules）</td></tr>
+        <tr><td><code>~/.gemini/antigravity-cli/settings.json</code></td><td>設定・<code>permissions</code>（allow/deny/ask）・<code>enableTerminalSandbox</code></td></tr>
+        <tr><td>スキル / プラグイン<br><code>~/.gemini/antigravity-cli/plugins/</code></td><td><code>/skills</code> で参照。skills / agents / rules / MCP / hooks を配布</td></tr>
+        <tr><td>権限アクション <code>action(target)</code></td><td><code>command(...)</code> / <code>read_file(...)</code> / <code>mcp(...)</code> 等を allow/deny/ask</td></tr>
       </tbody>
     </table>
 

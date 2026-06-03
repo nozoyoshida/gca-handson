@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プラグイン — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>プラグイン</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-plugins">antigravity.google/docs/cli-plugins</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>エージェントの機能を拡張し、サードパーティの拡張バンドルをインストールし、カスタムワークフロースキルをパッケージ化し、Model Context Protocol（MCP）サーバーと連携します。</p>
+
+<h2>拡張性モデル</h2>
+<p>Antigravity CLI は無制限のカスタマイズを前提として設計されています。<strong>プラグイン（Plugins）</strong>と呼ばれる構造化されたパッケージモジュールをインストールしたり、<strong>スキル（Skills）</strong>と呼ばれるローカルな Markdown のブループリントを作成したりすることで、共有エージェントハーネスを拡張できます。</p>
+<p>これらのカスタマイズにより、エージェントは専用の独自コマンドにアクセスし、ドメイン固有のサブエージェントを呼び出し、カスタマイズされたスタイル制約を参照できるようになります。</p>
+
+<h2>Antigravity プラグイン</h2>
+<p>プラグインは、カスタムスキル、バックグラウンドのサブエージェント、リンティングルール、Model Context Protocol の定義、イベントフックを、単一のデプロイ可能なアセットにパッケージ化した、名前空間付きのバンドルです。</p>
+
+<h3>プラグインのファイルシステム構造</h3>
+<p>プラグインをインストールまたはインポートすると、CLI はバンドルのファイルをグローバル設定パス内にステージングします。</p>
+
+<pre><code>~/.gemini/antigravity-cli/plugins/&lt;plugin_name&gt;/</code></pre>
+
+<p>準拠したプラグインは、次のレイアウトを含みます。</p>
+
+<pre><code>~/.gemini/antigravity-cli/plugins/&lt;plugin_name&gt;/
+├── plugin.json                 # Required package marker file
+├── mcp_config.json             # Optional Model Context Protocol servers
+├── hooks.json                  # Optional pre/post tool event hooks
+├── skills/                     # Optional specialized skills directory
+├── agents/                     # Optional subagent definition templates
+└── rules/                      # Optional custom codebase rules files</code></pre>
+
+<h3>CLI サブコマンドによるプラグイン管理</h3>
+<p>CLI は、拡張機能を管理するための <code>plugin</code>（または複数形の <code>plugins</code>）サブコマンドのパイプラインを提供します。</p>
+<ul>
+  <li><strong>インストール済みプラグインの一覧表示</strong>: アクティブなパッケージと、ロードされたコンポーネントを表示します。
+  <pre><code>agy plugin list</code></pre></li>
+  <li><strong>ローカルまたはリモートのプラグインのインストール</strong>: パッケージディレクトリをローカルプロファイルにステージングします。
+  <pre><code>agy plugin install /path/to/local/plugin</code></pre></li>
+  <li><strong>プラグインの無効化／有効化</strong>: アセットを削除せずに、プラグインのツールを一時停止します。
+  <pre><code>agy plugin disable &lt;plugin_name&gt;
+agy plugin enable &lt;plugin_name&gt;</code></pre></li>
+  <li><strong>プラグインのアンインストール</strong>: パッケージディレクトリを削除し、レジストリをクリーンアップします。
+  <pre><code>agy plugin uninstall &lt;plugin_name&gt;</code></pre></li>
+</ul>
+
+<h2>エージェントスキル</h2>
+<p>スキルは、宣言的で人間が読める Markdown ファイルであり、専門的なエンジニアリングタスクに向けた明示的な指示プロトコル、スクリプト、対象リソースを記述します。</p>
+<p>登録されると、<strong>スキルは自動的に TUI 内のスラッシュコマンドに変換され</strong>、手動で呼び出せるようになります（例: <code>/refactor-ui</code> と入力）。</p>
+
+<h3>ローカルなワークスペーススキルの作成</h3>
+<p>Git リポジトリと一緒に保持される、ワークスペース固有のスキルをデプロイするには次の手順に従います。</p>
+<ol>
+  <li>プロジェクトのルートに <code>.agents/skills/</code> という名前のディレクトリを作成します。</li>
+  <li>その中に、<code>.md</code> 拡張子の Markdown ファイル（<code>format-tests.md</code> など）を作成します。</li>
+  <li>スキルのフロントマターメタデータを定義します。
+  <pre><code>---
+name: format-tests
+description: Standardize and re-format Python unittest assertions
+---</code></pre></li>
+  <li>メタデータの下に、エージェントへの明示的な指示を記述します。このディレクトリで <code>agy</code> を実行すると、スキルがコンパイルされ、プロンプトボックスで <code>/format-tests</code> が利用可能になります。</li>
+</ol>
+
+<h3>グローバルスキルの共有</h3>
+<p>ワークステーション上のすべてのワークスペースでスキルを共有するには、対象の Markdown ファイルをグローバル設定パス内に配置します。</p>
+
+<pre><code>~/.gemini/antigravity-cli/skills/</code></pre>
+
+<p>このディレクトリ内のあらゆる Markdown スキルは、任意のディレクトリで <code>agy</code> を起動するたびに、グローバルなスラッシュコマンドとして自動的にインポートされます。</p>
+
+<h2>フックの管理</h2>
+<p>フックは、実行の直前または直後にエージェントのアクションをインターセプトします。これは、自動的なプリフライトチェックや生成後のフォーマット（ファイル書き込み後の <code>prettier</code> 実行など）を行うのに役立ちます。</p>
+<p>フックは、プラグインの <code>hooks.json</code> 内で定義するか、メインの <code>settings.json</code> ファイル内で構成します。ロードされてアクティブなすべてのフックは、TUI で次のように入力して確認できます。</p>
+
+<pre><code>/hooks</code></pre>
+
+<h2>Model Context Protocol（MCP）</h2>
+<p>Model Context Protocol は、基盤モデルがローカル API、ファイルパーサー、カスタム開発ツールと安全に連携できるようにするオープンスタンダードです。</p>
+<p>Antigravity CLI は、ローカルプロセスとリモートホストの MCP サーバー構成の両方をサポートします。</p>
+
+<h3>MCP マネージャーへのアクセス</h3>
+<p>プロンプトパネルで <code>/mcp</code> と入力して <code>Enter</code> を押すと、対話的な <strong>MCP マネージャーオーバーレイ（MCP Manager Overlay）</strong>が開きます。このパネルでは次のことができます。</p>
+<ul>
+  <li>アクティブ、切断、ロード中のサーバーのライブステータスリングを表示する。</li>
+  <li>サーバー構成を手動で再読み込みしたり、接続ログを確認したりする。</li>
+</ul>
+
+<h3>グローバルおよびワークスペースのサーバー構成</h3>
+<p>従来のセットアップとは異なり、Antigravity は MCP の定義を、専用の簡潔な構成に分離します。</p>
+<ul>
+  <li><strong>グローバルサーバー設定</strong>: <code>~/.gemini/antigravity-cli/mcp_config.json</code> で構成します。</li>
+  <li><strong>ワークスペースローカル設定</strong>: アクティブなプロジェクト内の <code>.agents/mcp_config.json</code> で構成します。</li>
+</ul>
+
+<pre><code>{
+  "mcpServers": {
+    "sqlite-explorer": {
+      "command": "node",
+      "args": ["/usr/local/bin/sqlite-mcp-server.js"],
+      "env": {
+        "SQLITE_DB_PATH": "/var/data/app.db"
+      }
+    }
+  }
+}</code></pre>
+
+<div class="callout callout-warn"><div class="t">注意</div>
+<strong>リモート接続スキーマ</strong>: リモートの SSE または WebSocket ベースの MCP 接続を宣言する場合は、<code>serverUrl</code> フィールドを定義する必要があります。<code>url</code> や <code>httpUrl</code> などの従来のフィールドはサポートされていません。
+</div>
+
+<h2>次のステップ</h2>
+<p>既存の構成を Gemini CLI から移行する方法や、接続の異常をトラブルシューティングする方法を学びます。</p>
+<ul>
+  <li><strong><a href="https://antigravity.google/docs/gcli-migration">Gemini CLI からの移行</a></strong>: 従来の拡張機能や構成の変換を迅速に行います。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-troubleshooting">トラブルシューティング</a></strong>: ターミナルのフックエラー、ロックアウト、ネットワーク障害を解決します。</li>
+  <li><strong><a href="cli-sandbox.html">権限とサンドボックス</a></strong>: カスタムプラグインや MCP サーバーの周囲にセキュリティ封じ込めリングを構成します。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

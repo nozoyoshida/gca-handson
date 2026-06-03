@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>権限（Permissions） — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>権限（Permissions）</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-permissions">antigravity.google/docs/cli-permissions</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>ローカルワークステーションを保護し、絶対パスを制限し、独自の allow / deny / ask ポリシーを構成し、対話的な承認を管理します。</p>
+
+<h2>きめ細かな権限制御</h2>
+<p>自律的なワークフローを実現しながらワークステーションを保護するため、Antigravity CLI は堅牢な<strong>きめ細かな権限エンジン（Fine-Grained Permissions Engine）</strong>を統合しています。エージェントが実行するすべての機微な操作は、<code>action(target)</code> という形式の<strong>権限リソース</strong>として表現されます。</p>
+<p>権限は、グローバル設定内で構成される 3 つのアクセスリストにわたって評価されます。</p>
+
+<pre><code>~/.gemini/antigravity-cli/settings.json</code></pre>
+
+<ul>
+  <li><strong><code>deny</code></strong>: その操作を即座にブロックします。</li>
+  <li><strong><code>ask</code></strong>: エージェントは一時停止し、続行前にあなたの明示的な承認を求めます。</li>
+  <li><strong><code>allow</code></strong>: その操作を確認なしで自動承認します。</li>
+</ul>
+
+<div class="callout callout-warn"><div class="t">注意</div>
+<strong>優先順位ルール（Precedence Rule）</strong>: 競合するルールは厳密に優先順位順で評価されます: <strong>Deny &gt; Ask &gt; Allow</strong>。たとえば、<code>ask</code> リストに <code>command(*)</code> を、<code>allow</code> リストに <code>command(git)</code> を設定した場合、<code>ask</code> ルールが優先され、すべてのコマンドの前にプロンプトが表示されます。
+</div>
+
+<h2>サポートされるアクションとマッチングルール</h2>
+<p>きめ細かな権限は、標準的なスキーマパターンに従います。</p>
+
+<pre><code>action(target)</code></pre>
+
+<p>サポートされるアクション、ターゲットの形式仕様、およびマッチングアルゴリズムは次のとおりです。</p>
+
+<table>
+<thead>
+<tr><th>アクション</th><th>ターゲット形式</th><th>マッチングの挙動</th><th>デフォルトのフォールバック</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong><code>read_file</code></strong></td>
+  <td><code>read_file(/path)</code>、<code>read_file(dir)</code>、または <code>read_file(*)</code></td>
+  <td>絶対パス、またはワークスペースルートからの相対パスにマッチします。含まれるすべてのファイル/フォルダに対して再帰的な読み取りアクセスを付与します。<code>read_file(*)</code> はシステム上のすべてのファイルにマッチします。</td>
+  <td><strong>Ask</strong>（ワークスペース内では自動的に許可）</td>
+</tr>
+<tr>
+  <td><strong><code>write_file</code></strong></td>
+  <td><code>write_file(/path)</code> または <code>write_file(*)</code></td>
+  <td><code>read_file</code> と同じです。まったく同じターゲットパスに対する <code>read_file</code> を暗黙的に付与します。</td>
+  <td><strong>Ask</strong>（ワークスペース内では自動的に許可）</td>
+</tr>
+<tr>
+  <td><strong><code>read_url</code></strong></td>
+  <td><code>read_url(domain)</code> または <code>read_url(*)</code></td>
+  <td>ホスト名とサブドメインにマッチします（例: <code>google.com</code> は <code>mail.google.com</code> をカバーします）。URL のパスセグメントは無視します。<code>read_url(*)</code> は任意のドメインにマッチします。</td>
+  <td><strong>Ask</strong></td>
+</tr>
+<tr>
+  <td><strong><code>execute_url</code></strong></td>
+  <td><code>execute_url(domain)</code> または <code>execute_url(*)</code></td>
+  <td>あるドメイン上で Web 要素を操作（クリック、入力）したり、対話的なブラウザワークフローを駆動したりします。</td>
+  <td><strong>Ask</strong></td>
+</tr>
+<tr>
+  <td><strong><code>command</code></strong></td>
+  <td><code>command(prefix)</code>、<code>command(regex)</code>、または <code>command(*)</code></td>
+  <td>コマンドを正確な単語/トークンのプレフィックスでマッチします。空白で区切られた各トークンは、アンカー付き正規表現（<code>^(?:pattern)$</code>）として評価されます。例: <code>command(npm run (build|lint|test))</code> は <code>npm run build</code> と <code>npm run test</code> にマッチします。</td>
+  <td><strong>Ask</strong></td>
+</tr>
+<tr>
+  <td><strong><code>unsandboxed</code></strong></td>
+  <td><code>unsandboxed(prefix)</code> または <code>unsandboxed(*)</code></td>
+  <td>コマンドを正確な単語/トークンのプレフィックスでマッチします。このグラントにマッチするコマンドは、コンテナ分離の外で実行されます（ターミナルサンドボックスが有効な場合にのみ適用されます）。</td>
+  <td><strong>Ask</strong></td>
+</tr>
+<tr>
+  <td><strong><code>mcp</code></strong></td>
+  <td><code>mcp(server/tool)</code> または <code>mcp(*)</code></td>
+  <td>正確な MCP ツール、または指定されたサーバー上のすべてのツールにマッチします（ローカルの <code>mcpl</code> サーバーおよびリモート接続に適用されます）。<code>mcp(*)</code> は任意のツールにマッチします。</td>
+  <td><strong>Ask</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3>グローバルワイルドカード構文</h3>
+<p>サポートされるすべてのアクションタイプにおいて、グローバルワイルドカード <code>*</code> を渡すと（<code>read_file(*)</code>、<code>command(*)</code>、<code>mcp(*)</code> など）、そのアクション名前空間全体に含まれるすべてのターゲットにマッチします。</p>
+
+<h3>暗黙的な権限ルール</h3>
+<ul>
+  <li><strong>Write は Read を含む</strong>: あるパスに対して <code>write_file</code> を許可すると、そのパスに対する <code>read_file</code> も自動的に付与されます。</li>
+  <li><strong>Read の拒否は Write の拒否を含む</strong>: あるパスに対して <code>read_file</code> を拒否すると、そのパスに対する <code>write_file</code> も即座にブロックされます。</li>
+</ul>
+
+<h3>クロスプラットフォームのパス正規化</h3>
+<p>Antigravity CLI は、macOS、Linux、Windows のいずれで開発していても、権限ルールが完全に機能することを保証します。macOS と Linux では、パスは標準的なスラッシュ（<code>/</code>）を使用します。Windows では、Antigravity CLI はルール評価の前にパスを自動的に正規化し、ドライブレター（例: <code>C:</code>）を取り除き、すべてのバックスラッシュ（<code>\</code>）をスラッシュ（<code>/</code>）に変換します。</p>
+
+<h2>システムのデフォルト挙動とガードレール</h2>
+<p>あるアクションが <code>allow</code>、<code>deny</code>、<code>ask</code> のいずれのリストにも明示的に列挙されていない場合、システムは安全なシステムデフォルトにフォールバックします。</p>
+<ol>
+  <li><strong>ワークスペースは自動的に許可</strong>: 通常の運用では、アクティブなプロジェクトディレクトリ内のファイルの読み取りと書き込みは自動的に許可されます。</li>
+  <li><strong>Web ブラウジングはデフォルトで Ask</strong>: <code>read_url</code> と <code>execute_url</code> のアクションはデフォルトで <strong>Ask</strong> になります。エージェントが Web ページにアクセスまたは操作する前に、allow ルールが構成されていない限り、一時停止して承認を求めます。</li>
+  <li><strong>未構成のアクションはデフォルトで Ask</strong>: その他の未構成のアクション（<code>command</code>、<code>mcp</code>、<code>execute_url</code>、ワークスペース外のファイル）はすべてデフォルトで <strong>Ask</strong> になります。</li>
+</ol>
+
+<h2>対話的な権限プロンプト</h2>
+<p>エージェントが承認を必要とする操作（<strong>Ask</strong> モード）に遭遇すると、TUI に対話的なプロンプトカードが表示されます。</p>
+<p>ファイル、URL、または MCP 権限について <strong>Allow</strong> を確定する前に、プロンプトカード内でターゲット文字列を直接編集して、付与するスコープを拡大できます（たとえば、単一ファイルのリクエスト <code>/project/file.txt</code> を親ディレクトリ <code>/project</code> に広げるなど）。CLI は、編集後のターゲットがその操作を安全にカバーしていることを検証し、そのターン中は拡大されたグラントを適用することで、関連する操作に対する繰り返しのプロンプトを防ぎます。<em>（注: ターミナルコマンドではスコープ編集はサポートされていません。）</em></p>
+
+<h2>構成例</h2>
+<p>これらのルールを <code>~/.gemini/antigravity-cli/settings.json</code> ファイルに追加します。</p>
+
+<pre><code>{
+  "permissions": {
+    "allow": [
+      "command(git)",
+      "command(npm run (build|lint|test))",
+      "unsandboxed(git push)",
+      "read_file(/var/log/app)",
+      "write_file(src/)",
+      "read_url(google.com)",
+      "mcp(linter/*)"
+    ],
+    "deny": [
+      "command(rm -rf)",
+      "command(curl .*)",
+      "command(sudo)",
+      "write_file(.git/)",
+      "write_file(/home/user/.ssh)"
+    ],
+    "ask": ["command(*)", "execute_url(aws.amazon.com)", "mcp(sql/execute_mutation)"]
+  }
+}</code></pre>
+
+<h2>関連項目</h2>
+<ul>
+  <li><strong><a href="cli-sandbox.html">サンドボックスのカスタマイズ</a></strong>: OS レベルのコンテナ分離境界を強制します。</li>
+  <li><strong><a href="cli-plugins.html">プラグインとスキル</a></strong>: 独自のカスタムスキルやスラッシュコマンドを作成します。</li>
+  <li><strong><a href="cli-settings.html">設定、レンダリング、キーバインディング</a></strong>: キーボードのホットキーやバッファをカスタマイズします。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

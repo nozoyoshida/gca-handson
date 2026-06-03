@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity 発展ハンズオン（agy CLI 深掘り）</title>
+  <style>
+    :root {
+      --google-blue: #4285F4;
+      --google-red: #EA4335;
+      --google-yellow: #FBBC04;
+      --google-green: #34A853;
+      --teal: #00897b;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #dadce0;
+      --code-bg: #f1f3f4;
+      --accent: #1a73e8;
+      --warning-bg: #fef7e0;
+      --warning-border: #f9ab00;
+      --danger-bg: #fce8e6;
+      --danger-border: #ea4335;
+      --success-bg: #e6f4ea;
+      --success-border: #34a853;
+      --info-bg: #e8f0fe;
+      --info-border: #4285f4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Google Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0b8043 0%, #1a73e8 55%, #00897b 100%);
+      color: white;
+      padding: 48px 0 40px;
+      text-align: center;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .header h1 { font-size: 32px; font-weight: 500; margin-bottom: 8px; }
+    .header p { font-size: 16px; opacity: 0.9; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    .meta-bar { display: flex; gap: 24px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 14px; opacity: 0.9; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 32px 0;
+    }
+    .toc h2 { font-size: 18px; font-weight: 500; margin-bottom: 16px; color: var(--text); }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+    .toc-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; text-decoration: none; color: var(--text); transition: background 0.15s; }
+    .toc-item:hover { background: var(--code-bg); }
+    .toc-badge { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 13px; font-weight: 600; color: white; flex-shrink: 0; }
+    .toc-text { font-size: 14px; }
+    .toc-time { font-size: 12px; color: var(--text-secondary); }
+
+    .chapter { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; margin: 24px 0; overflow: hidden; }
+    .chapter-header { padding: 24px 32px 20px; border-bottom: 1px solid var(--border); }
+    .chapter-num { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: white; margin-bottom: 8px; }
+    .chapter-header h2 { font-size: 22px; font-weight: 500; }
+    .chapter-header p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+    .chapter-body { padding: 24px 32px 32px; }
+
+    .exercise { margin: 20px 0; padding: 20px 24px; background: var(--bg); border-radius: 10px; border-left: 4px solid var(--accent); }
+    .exercise-title { font-size: 16px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .exercise-title .badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--accent); color: white; font-weight: 600; }
+
+    .step { margin: 12px 0; padding-left: 20px; position: relative; }
+    .step::before { content: attr(data-step); position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+
+    code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', 'Source Code Pro', monospace; font-size: 13px; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: 'JetBrains Mono', 'Source Code Pro', monospace; font-size: 13px; line-height: 1.6; margin: 12px 0; }
+    pre .comment { color: #6a9955; }
+    pre .keyword { color: #569cd6; }
+    pre .string { color: #ce9178; }
+    pre .function { color: #dcdcaa; }
+    pre .decorator { color: #d7ba7d; }
+    pre .variable { color: #9cdcfe; }
+    pre .prompt-label { color: #4ec9b0; }
+
+    .callout { padding: 14px 18px; border-radius: 8px; margin: 16px 0; font-size: 14px; border-left: 4px solid; }
+    .callout-warning { background: var(--warning-bg); border-color: var(--warning-border); }
+    .callout-danger { background: var(--danger-bg); border-color: var(--danger-border); }
+    .callout-success { background: var(--success-bg); border-color: var(--success-border); }
+    .callout-info { background: var(--info-bg); border-color: var(--info-border); }
+    .callout-title { font-weight: 600; margin-bottom: 4px; }
+
+    .insight-box { background: linear-gradient(135deg, #e8f0fe 0%, #f0e6ff 100%); border: 1px solid #c5cae9; border-radius: 8px; padding: 14px 18px; margin: 16px 0; font-size: 14px; }
+    .insight-box .insight-title { font-weight: 600; color: #5c6bc0; margin-bottom: 4px; }
+
+    .prompt-box { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+    .prompt-box .prompt-label { font-size: 12px; font-weight: 600; color: #e65100; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .prompt-box .prompt-text { font-size: 14px; color: #bf360c; font-style: italic; }
+
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .comparison-col { border-radius: 8px; padding: 16px; font-size: 13px; }
+    .comparison-before { background: var(--danger-bg); border: 1px solid var(--danger-border); }
+    .comparison-after { background: var(--success-bg); border: 1px solid var(--success-border); }
+    .comparison-label { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .comparison-before .comparison-label { color: var(--google-red); }
+    .comparison-after .comparison-label { color: var(--google-green); }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+    th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--code-bg); font-weight: 600; font-size: 13px; }
+
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 8px 0 8px 28px; position: relative; font-size: 14px; }
+    .checklist li::before { content: ''; position: absolute; left: 0; top: 10px; width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 3px; }
+
+    .architecture-diagram { background: var(--code-bg); border-radius: 8px; padding: 20px; margin: 16px 0; font-family: monospace; font-size: 13px; line-height: 1.4; white-space: pre; overflow-x: auto; }
+
+    .footer { text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 13px; }
+    .time-tag { display: inline-block; background: var(--code-bg); color: var(--text-secondary); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .vuln-tag { display: inline-block; background: var(--danger-bg); color: var(--google-red); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .verify-tag { display: inline-block; background: #ede7f6; color: #5e35b1; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+    @media (max-width: 600px) {
+      .comparison { grid-template-columns: 1fr; }
+      .meta-bar { flex-direction: column; align-items: center; }
+      .chapter-body, .chapter-header { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="container">
+    <div class="header-badge">Advanced Hands-on</div>
+    <h1>Antigravity 発展ハンズオン（agy CLI 深掘り）</h1>
+    <p>権限・サンドボックス・並列サブエージェント・スキル/プラグインで、エージェント運用を一段引き上げる</p>
+    <div class="meta-bar">
+      <div class="meta-item">&#129302; 発展編</div>
+      <div class="meta-item">&#9729; Cloud Workstations + Antigravity CLI</div>
+      <div class="meta-item">&#127919; 中級〜上級</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="callout callout-info" style="margin-top:28px;">
+    <div class="callout-title">この発展ハンズオンについて</div>
+    本ページは <a href="handson-guide.html">基礎ハンズオン</a>（Ch.0〜5）を完了した方向けの<strong>発展編</strong>です。基礎で作った同じ題材アプリ「<strong>お問い合わせ管理 API</strong>（Flask + SQLite）」をそのまま使い、<code>agy</code> CLI の上級機能を<strong>手を動かして</strong>体験します。各コマンド・パス・ショートカットの詳細は <a href="cli/index.html">CLI リファレンス（日本語要約）</a> も併せて参照してください。
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">「要確認」表記について <span class="verify-tag">要確認</span></div>
+    Antigravity CLI（<code>agy</code>）は新しいプロダクトで、<strong>コマンド名・フラグ・設定ファイルのパス・キーバインド・JSON のキー名</strong>などはバージョンによって変わる可能性があります。本ページの具体値は執筆時点の公式ドキュメントに基づきますが、変わりうる箇所には <span class="verify-tag">要確認</span> を付けています。実施前に <a href="https://antigravity.google/">antigravity.google</a> の最新ドキュメントをご確認ください。
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-title">共通の前提（作業ディレクトリ）</div>
+    すべてのモジュールは、基礎ハンズオンと同じワークスペース <code>gca-handson/antigravity/starter/</code>（または完成版 <code>completed/</code>）を <strong>File &rarr; Open Folder</strong> で開き、統合ターミナルで <code>agy</code> を起動した状態を前提とします。グローバル設定は <code>~/.gemini/antigravity-cli/settings.json</code>、ワークスペース設定は <code>.agents/</code> 配下です。
+  </div>
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h2>発展モジュール一覧</h2>
+  <div class="toc-grid">
+    <a href="#m1" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-red);">1</div>
+      <div><div class="toc-text">権限 &amp; サンドボックスで安全運用</div><div class="toc-time">必修</div></div>
+    </a>
+    <a href="#m2" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-blue);">2</div>
+      <div><div class="toc-text">-p ワンショットで CI / Git フック自動化</div><div class="toc-time">必修</div></div>
+    </a>
+    <a href="#m3" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-yellow); color:#333;">3</div>
+      <div><div class="toc-text">並列サブエージェントで一括改善</div><div class="toc-time">必修</div></div>
+    </a>
+    <a href="#m4" class="toc-item">
+      <div class="toc-badge" style="background:var(--google-green);">4</div>
+      <div><div class="toc-text">スキル / プラグインでチーム規約を配布</div><div class="toc-time">必修</div></div>
+    </a>
+    <a href="#m5" class="toc-item">
+      <div class="toc-badge" style="background:var(--teal);">5</div>
+      <div><div class="toc-text">MCP 連携</div><div class="toc-time">任意</div></div>
+    </a>
+    <a href="#m6" class="toc-item">
+      <div class="toc-badge" style="background:#7e57c2;">6</div>
+      <div><div class="toc-text">視覚デバッグ（ctrl+v）</div><div class="toc-time">任意</div></div>
+    </a>
+    <a href="#m7" class="toc-item">
+      <div class="toc-badge" style="background:#616161;">7</div>
+      <div><div class="toc-text">/fork で A/B 比較・/rewind で巻き戻し</div><div class="toc-time">任意</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- ===== MODULE 1: PERMISSIONS & SANDBOX ===== -->
+<div class="chapter" id="m1">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-red);">Module 1</div>
+    <h2>権限 &amp; サンドボックスで安全運用</h2>
+    <p>fine-grained permissions と Terminal Sandbox で、エージェントの「実行できる範囲」を設計する</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      エージェントが行うすべての操作は <code>action(target)</code> という<strong>権限リソース</strong>として表現され、<code>allow</code> / <code>deny</code> / <code>ask</code> の 3 リストで評価されます。優先順位は <strong>Deny &gt; Ask &gt; Allow</strong>。さらに <strong>Terminal Sandbox</strong>（Linux は <code>nsjail</code> / macOS は <code>sandbox-exec</code> / Windows は <code>AppContainer</code>）でコマンド実行を OS レベルで隔離できます。安全に「攻めた自動化」を行うための土台です。
+    </div>
+
+    <!-- 1-1 -->
+    <div class="exercise">
+      <div class="exercise-title">1-1. settings.json に権限ポリシーを書く <span class="badge">6分</span> <span class="verify-tag">要確認</span></div>
+      <div class="step" data-step="1">グローバル設定ファイルを開きます。CLI から <code>/open</code> で外部エディタに開くか、IDE で直接開きます：</div>
+<pre><span class="comment"># パスは ~/.gemini/antigravity-cli/settings.json</span>
+agy
+<span class="comment"># プロンプトで:</span>
+/open ~/.gemini/antigravity-cli/settings.json</pre>
+      <div class="step" data-step="2"><code>permissions</code> ブロックを次のように設定します。<code>deny</code> に破壊的コマンド、<code>allow</code> に日常的に使う安全なコマンド、判断が要るものは <code>ask</code> に置きます：</div>
+<pre><span class="comment">// ~/.gemini/antigravity-cli/settings.json</span>
+{
+  <span class="variable">"permissions"</span>: {
+    <span class="variable">"allow"</span>: [
+      <span class="string">"command(git)"</span>,
+      <span class="string">"command(npm run (build|lint|test))"</span>,
+      <span class="string">"read_url(google.com)"</span>
+    ],
+    <span class="variable">"deny"</span>: [
+      <span class="string">"command(rm -rf)"</span>,
+      <span class="string">"command(sudo)"</span>,
+      <span class="string">"write_file(.git/)"</span>
+    ],
+    <span class="variable">"ask"</span>: [<span class="string">"command(*)"</span>]
+  }
+}</pre>
+      <div class="callout callout-warning">
+        <div class="callout-title">優先順位は Deny &gt; Ask &gt; Allow</div>
+        上の例では <code>ask</code> に <code>command(*)</code> があり <code>allow</code> に <code>command(git)</code> があります。<strong>Ask は Allow より優先</strong>されるため、<code>allow</code> に挙げていないコマンドはすべて確認が入ります（<code>git</code> は allow されているので素通り）。一方 <code>deny</code> の <code>command(rm -rf)</code> / <code>command(sudo)</code> は<strong>常にブロック</strong>され、確認すら出ません。
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">マッチングの仕組み</div>
+        <code>command(...)</code> はトークン単位の前方一致で、各トークンが <code>^(?:pattern)$</code> のアンカー付き正規表現として評価されます。例えば <code>command(npm run (build|lint|test))</code> は <code>npm run build</code> / <code>npm run lint</code> / <code>npm run test</code> にマッチします。ファイル系（<code>read_file</code> / <code>write_file</code>）はワークスペース内が既定で auto-allow、ワークスペース外や URL（<code>read_url</code> / <code>execute_url</code>）は既定で <strong>Ask</strong> です。
+      </div>
+    </div>
+
+    <!-- 1-2 -->
+    <div class="exercise">
+      <div class="exercise-title">1-2. Terminal Sandbox を有効化する <span class="badge">4分</span> <span class="verify-tag">要確認</span></div>
+      <div class="step" data-step="1">同じ <code>settings.json</code> に、権限モードを <code>proceed-in-sandbox</code> に、サンドボックスを <code>true</code> にする設定を追記します：</div>
+<pre><span class="comment">// ~/.gemini/antigravity-cli/settings.json</span>
+{
+  <span class="variable">"toolPermission"</span>: <span class="string">"proceed-in-sandbox"</span>,
+  <span class="variable">"enableTerminalSandbox"</span>: <span class="keyword">true</span>
+}</pre>
+      <div class="step" data-step="2">設定を保存し、<code>agy</code> を起動し直します（Cloud Workstation の Linux 環境では <code>nsjail</code> で隔離されます）。</div>
+      <div class="callout callout-info">
+        <div class="callout-title">3 つの権限モード</div>
+        <ul style="margin:6px 0 0 16px; font-size:13px;">
+          <li><code>request-review</code>（既定）: すべての書き込み・コマンド・リモート通信の前に確認。</li>
+          <li><code>proceed-in-sandbox</code>: すべてのコマンドを<strong>サンドボックス内</strong>で実行。安全なものは自動実行、危険なものは確認。</li>
+          <li><code>strict</code>: 読み取り以外のすべてで確認（行単位の完全な透明性）。</li>
+        </ul>
+        <span class="verify-tag">要確認</span> モード名は <code>/permissions</code> パネルの表記（<code>always-proceed</code> など）と差異がある場合があります。実際の選択肢は <code>/permissions</code> で確認してください。
+      </div>
+    </div>
+
+    <!-- 1-3 -->
+    <div class="exercise">
+      <div class="exercise-title">1-3. わざと危険な指示を出してブロック/確認/隔離を体験する <span class="badge">5分</span></div>
+      <div class="step" data-step="1"><strong>deny を体験</strong>: <code>deny</code> に入れたコマンドをエージェントに依頼し、即座にブロックされることを確認します（実害はありません）：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">作業ディレクトリ内の一時ファイルを掃除したいので rm -rf ./tmp を実行してください。</div>
+      </div>
+      <div class="step" data-step="2"><code>command(rm -rf)</code> が <code>deny</code> にあるため、エージェントは<strong>実行できず</strong>、別の安全な方法（個別 <code>git clean</code> の提案など）に切り替えるはずです。</div>
+      <div class="step" data-step="3"><strong>ask を体験</strong>: <code>allow</code> に挙げていないコマンドを依頼し、確認カードが出ることを見ます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">requirements.txt の中身を pip で再インストールしてください。</div>
+      </div>
+      <div class="step" data-step="4"><strong>sandbox の隔離を体験</strong>: サンドボックス有効時、コマンド確認のプロンプトに「サンドボックスなしで実行」する選択肢が出ます。表示を観察してください：</div>
+<pre><span class="comment"># サンドボックス有効時のプロンプト例</span>
+Do you want to proceed?
+1. Yes
+2. Yes, and run without sandbox restrictions
+3. No</pre>
+      <div class="callout callout-warning">
+        <div class="callout-title">YOLO モードは使わないでください</div>
+        すべてを自動承認するモード（いわゆる「権限スキップ」）は、発展ハンズオンでも<strong>使わないで</strong>ください。「deny で守り、ask で確認し、allow で素早く」という<strong>設計</strong>こそがこのモジュールの学びです。
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">特定コマンドだけサンドボックス外に出す</div>
+        サンドボックスを有効にしつつ、信頼できる特定コマンドだけ隔離外で動かしたい場合は <code>unsandboxed(prefix)</code> を <code>allow</code> に追加します（例: <code>unsandboxed(git push)</code>）。これはサンドボックス有効時のみ意味を持ちます。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODULE 2: ONE-SHOT -p ===== -->
+<div class="chapter" id="m2">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-blue);">Module 2</div>
+    <h2>-p ワンショットで CI / Git フック自動化</h2>
+    <p>非対話の <code>-p</code> フラグで、エージェントをシェルパイプラインや Git フックに組み込む</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      <code>agy -p "..."</code> は対話 TUI を開かずに<strong>1 回だけプロンプトを実行</strong>して結果を標準出力に返します。Git フック・CI・スクリプトに組み込むことで、「コミットメッセージ草案」「差分レビュー」「リリースノート生成」などを自動化できます。
+    </div>
+
+    <!-- 2-1 -->
+    <div class="exercise">
+      <div class="exercise-title">2-1. ワンショットで差分からコミットメッセージを作る <span class="badge">4分</span></div>
+      <div class="step" data-step="1">基礎ハンズオンで <code>app.py</code> に何か変更を加えた状態（または小さな変更を <code>git add</code> した状態）で、ターミナルから直接実行します：</div>
+<pre><span class="comment"># 公式ドキュメント記載の例（そのまま使えます）</span>
+agy -p <span class="string">"Review this git diff and draft a conventional commit message"</span> --cwd $(pwd)</pre>
+      <div class="step" data-step="2">エージェントが差分を読み、Conventional Commits 形式（<code>feat:</code> / <code>fix:</code> など）のメッセージ案を標準出力に返します。気に入ったら手動でコミットに使います。</div>
+      <div class="insight-box">
+        <div class="insight-title"><code>--cwd</code> が効くポイント</div>
+        <code>--cwd $(pwd)</code> でワークスペースのルートを明示すると、エージェントは <code>AGENTS.md</code> や対象ファイルを正しく解決できます。フックやスクリプトから呼ぶときは、カレントディレクトリが意図と違うことがあるため<strong>常に明示</strong>するのが安全です。
+      </div>
+    </div>
+
+    <!-- 2-2 -->
+    <div class="exercise">
+      <div class="exercise-title">2-2. prepare-commit-msg フックに組み込む <span class="badge">6分</span> <span class="verify-tag">要確認</span></div>
+      <div class="step" data-step="1">Git の <code>prepare-commit-msg</code> フックを作り、コミット時にメッセージ草案を自動生成します。<code>.git/hooks/prepare-commit-msg</code> を作成します：</div>
+<pre><span class="comment">#!/usr/bin/env bash</span>
+<span class="comment"># .git/hooks/prepare-commit-msg</span>
+<span class="comment"># ステージ済み差分から Conventional Commit のメッセージ案を生成し、</span>
+<span class="comment"># コミットメッセージファイルの先頭に挿入する</span>
+COMMIT_MSG_FILE=<span class="variable">$1</span>
+
+<span class="comment"># ステージ済みの差分がある場合のみ実行</span>
+<span class="keyword">if</span> git diff --cached --quiet; <span class="keyword">then</span>
+  <span class="keyword">exit</span> 0
+<span class="keyword">fi</span>
+
+DRAFT=$(agy -p <span class="string">"Review the staged git diff and output only a single-line conventional commit message"</span> --cwd $(pwd))
+
+<span class="comment"># 既存メッセージの前に草案を差し込む</span>
+printf <span class="string">'%s\n\n%s\n'</span> <span class="string">"<span class="variable">$DRAFT</span>"</span> <span class="string">"$(cat <span class="variable">$COMMIT_MSG_FILE</span>)"</span> &gt; <span class="variable">$COMMIT_MSG_FILE</span></pre>
+      <div class="step" data-step="2">実行権限を付与します：</div>
+<pre>chmod +x .git/hooks/prepare-commit-msg</pre>
+      <div class="step" data-step="3">何か変更して <code>git add</code> し、<code>git commit</code> を実行します。エディタが開くと、先頭に草案メッセージが入っているはずです。</div>
+      <div class="callout callout-warning">
+        <div class="callout-title">フックでの権限・ネットワークに注意 <span class="verify-tag">要確認</span></div>
+        フック内の <code>agy -p</code> は対話できないため、<strong>確認待ち（ask）で止まると失敗</strong>します。フックで使うなら、必要な操作（差分読み取り程度）が <code>allow</code> 済みであることを確認してください。また実運用ではレイテンシも考慮し、巨大な差分ではタイムアウト対策を入れると安心です。
+      </div>
+    </div>
+
+    <!-- 2-3 -->
+    <div class="exercise">
+      <div class="exercise-title">2-3. リリースノートを自動生成する <span class="badge">4分</span></div>
+      <div class="step" data-step="1">直近のタグからの変更履歴を <code>-p</code> に渡し、リリースノートの下書きを作ります。パイプで履歴を渡すこともできます：</div>
+<pre><span class="comment"># 直近タグからのコミットを基にリリースノートを生成</span>
+git log $(git describe --tags --abbrev=0)..HEAD --oneline \
+  | agy -p <span class="string">"Summarize these commits into Markdown release notes grouped by Added / Changed / Fixed"</span> --cwd $(pwd) \
+  &gt; RELEASE_NOTES.md</pre>
+      <div class="step" data-step="2">生成された <code>RELEASE_NOTES.md</code> を確認し、必要に応じて手直しします。CI の「タグ push 時」ステップに組み込めば、リリースノート草案を自動で添付できます。</div>
+      <div class="insight-box">
+        <div class="insight-title">CI への組み込み</div>
+        <code>agy -p</code> は終了コードと標準出力を返すので、GitHub Actions / Cloud Build の 1 ステップとして扱えます。レビュー結果を PR コメントに投稿したり、生成物をアーティファクトとして保存したりと、既存のパイプラインに自然に挿し込めます。<span class="verify-tag">要確認</span>（CI 環境での認証方法は公式ドキュメントで確認）
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODULE 3: PARALLEL SUBAGENTS ===== -->
+<div class="chapter" id="m3">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-yellow); color:#333;">Module 3</div>
+    <h2>並列サブエージェントで一括改善</h2>
+    <p>主エージェントにサブエージェントを fan-out させ、複数の改善を並行して進める</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      Antigravity CLI は<strong>非同期マルチスレッド</strong>で動き、主エージェントが重い作業を<strong>サブエージェント</strong>や<strong>バックグラウンドタスク</strong>に委譲します。あなたは主画面で作業を続けながら、<code>/agents</code> パネルで進捗を監視し、承認が必要な箇所だけ素早くさばけます。
+    </div>
+
+    <!-- 3-1 -->
+    <div class="exercise">
+      <div class="exercise-title">3-1. 複数の改善を並列に依頼する <span class="badge">6分</span></div>
+      <div class="step" data-step="1">基礎ハンズオンで完成した <code>app.py</code>（対応履歴機能つき）に対し、独立した複数タスクを<strong>並列で</strong>進めるよう主エージェントに依頼します：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト</div>
+        <div class="prompt-text">次の3つを、独立したサブエージェントで並行して進めてください。<br>
+1. app.py の全関数に Google Style の docstring を付与する<br>
+2. /tickets と /tickets/&lt;id&gt;/responses のエンドポイントに対する pytest のテストを追加する<br>
+3. 変数名の揺れ（例: ticket_id と tid の混在）を snake_case に統一する<br>
+それぞれ完了したら検証し、結果を報告してください。</div>
+      </div>
+      <div class="step" data-step="2">主エージェントがタスクを分解し、サブエージェントを起動します。各サブエージェントには「Codebase Researcher」のような役割が割り当てられます。</div>
+      <div class="callout callout-info">
+        <div class="callout-title">なぜ並列が効くのか</div>
+        docstring 付与・テスト追加・命名統一は<strong>互いに独立</strong>しているため、直列で待つ必要がありません。長い処理を待つ間も、あなたは主スレッドで別のプロンプトを打てます。
+      </div>
+    </div>
+
+    <!-- 3-2 -->
+    <div class="exercise">
+      <div class="exercise-title">3-2. /agents と /tasks で監視する <span class="badge">5分</span></div>
+      <div class="step" data-step="1">プロンプトに <code>/agents</code> と入力して <strong>Agent Manager パネル</strong>を開きます。実行中・完了・失敗の各サブエージェントが、ID・役割・状態・現在のステップ付きで一覧表示されます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/agents</div>
+      </div>
+      <div class="step" data-step="2"><code>↑</code>/<code>↓</code> で対象サブエージェントを選び <code>Enter</code> で <strong>Subagent Detail View</strong> に入ると、内部の思考ログ・ツール呼び出し・実行出力まで読めます。<code>Esc</code> で一覧に戻ります。</div>
+      <div class="step" data-step="3">シェルコマンドやテスト実行などの<strong>非エージェント的なバックグラウンド処理</strong>は <code>/tasks</code> で監視します。stdout ログの確認や、暴走プロセスの安全な停止ができます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/tasks</div>
+      </div>
+    </div>
+
+    <!-- 3-3 -->
+    <div class="exercise">
+      <div class="exercise-title">3-3. 承認（ctrl+k）とテレポート（ctrl+j） <span class="badge">4分</span> <span class="verify-tag">要確認</span></div>
+      <div class="step" data-step="1">サブエージェントが承認の必要な操作（ファイル書き込み・テスト実行など）に到達すると、プロンプト直上に <strong>Fast Path Alert</strong>（例: <code>Subagent 12 asks to run "pytest"</code>）が表示されます。</div>
+      <div class="step" data-step="2"><strong>その場で承認</strong>: パネルを切り替えずに <code>ctrl+k</code> を押すと、保留中のアクションを即座に承認できます。</div>
+      <div class="step" data-step="3"><strong>テレポートして承認</strong>: <code>ctrl+j</code> を押すと、承認待ちの次のサブエージェントの Detail View へ「テレポート」します。確認/却下したら <code>Esc</code> で元のスレッドに戻ります。</div>
+      <div class="callout callout-warning">
+        <div class="callout-title">キーバインドは要確認 <span class="verify-tag">要確認</span></div>
+        承認は <code>ctrl+k</code>、テレポートは <code>ctrl+j</code> が基本ですが、ドキュメントによっては <code>alt+j</code> 表記も見られます。実際の割り当ては <code>/keybindings</code> で確認・変更できます。
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">監視 → 承認のリズムを作る</div>
+        並列実行の価値は「待たないこと」です。<code>/agents</code> で全体像を掴み、Fast Path Alert が出たら <code>ctrl+k</code> で即承認、深く見たいときだけ <code>ctrl+j</code> でテレポート、という<strong>リズム</strong>を身につけると、複数改善を一気に回せます。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODULE 4: SKILLS & PLUGINS ===== -->
+<div class="chapter" id="m4">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--google-green);">Module 4</div>
+    <h2>スキル / プラグインでチーム規約を配布</h2>
+    <p>スキルを <code>/</code> コマンド化し、プラグインとして skills/agents/rules/MCP/hooks を一括配布する</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      <strong>スキル</strong>は frontmatter 付きの Markdown で、登録すると自動的に <code>/&lt;name&gt;</code> スラッシュコマンドになります。<strong>プラグイン</strong>は skills / agents / rules / MCP 定義 / hooks を 1 つの配布可能なバンドルにまとめた仕組みです。チームの規約や定型作業を「インストールするだけ」で全員に配れます。
+    </div>
+
+    <!-- 4-1 -->
+    <div class="exercise">
+      <div class="exercise-title">4-1. code-review スキルを作って /code-review で実行 <span class="badge">6分</span></div>
+      <div class="step" data-step="1">ワークスペースルート（<code>antigravity/starter/</code>）に <code>.agents/skills/</code> ディレクトリを作り、<code>code-review.md</code> を作成します：</div>
+<pre>mkdir -p .agents/skills</pre>
+      <div class="step" data-step="2"><code>.agents/skills/code-review.md</code> に frontmatter（<code>name</code> / <code>description</code>）と指示を書きます。<code>name</code> がそのまま <code>/</code> コマンド名になります：</div>
+<pre><span class="comment"># .agents/skills/code-review.md</span>
+---
+name: code-review
+description: お問い合わせ管理 API のコードを規約とセキュリティ観点でレビューする
+---
+
+あなたはこのリポジトリのレビュアーです。AGENTS.md の規約に従い、
+変更（または指定ファイル）を次の観点でレビューしてください:
+
+1. SQL: f-string や % 演算子で SQL を組み立てていないか（必ずパラメータ化クエリ）
+2. バリデーション: 文字列フィールドの最大長・許可リスト検証があるか
+3. エラーハンドリング: {"error": "..."} 形式と適切な HTTP ステータスか
+4. docstring: 全関数に Google Style の docstring があるか
+
+指摘は「ファイル:行 / 重大度 / 修正案」の形式で簡潔に出力してください。</pre>
+      <div class="step" data-step="3">このディレクトリで <code>agy</code> を起動するとスキルがコンパイルされ、<code>/code-review</code> が使えるようになります。<code>/skills</code> で登録状況を確認できます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/code-review</div>
+      </div>
+      <div class="callout callout-info">
+        <div class="callout-title">ワークスペース or グローバル</div>
+        <code>.agents/skills/</code> に置いたスキルは<strong>リポジトリと一緒に git 管理</strong>でき、チームで共有されます。全ワークスペースで使いたい個人用スキルは <code>~/.gemini/antigravity-cli/skills/</code> に置くと、どのディレクトリで <code>agy</code> を起動しても <code>/</code> コマンドとして読み込まれます。
+      </div>
+    </div>
+
+    <!-- 4-2 -->
+    <div class="exercise">
+      <div class="exercise-title">4-2. プラグインの構造を理解する <span class="badge">4分</span></div>
+      <div class="step" data-step="1">プラグインはインストールするとグローバル設定パスにステージされます。標準的なレイアウトは次のとおりです：</div>
+      <div class="architecture-diagram">~/.gemini/antigravity-cli/plugins/&lt;plugin_name&gt;/
+├── plugin.json          # 必須: パッケージのマーカーファイル
+├── mcp_config.json      # 任意: MCP サーバー定義
+├── hooks.json           # 任意: pre/post ツールイベントフック
+├── skills/              # 任意: スキル
+├── agents/              # 任意: サブエージェント定義
+└── rules/               # 任意: コードベースルール</div>
+      <div class="step" data-step="2">先ほどの <code>code-review.md</code> を <code>skills/</code> に入れ、<code>rules/</code> に <code>AGENTS.md</code> 相当の規約を、<code>hooks.json</code> にフォーマッタ実行などを束ねれば、<strong>チーム規約一式</strong>を 1 つのプラグインとして配布できます。</div>
+      <div class="insight-box">
+        <div class="insight-title">スキル単体との違い</div>
+        スキルは「1 つの <code>/</code> コマンド」を配るのに向きます。プラグインは <strong>skills / agents / rules / MCP / hooks をまとめて</strong>配るバンドルで、「このプロジェクトに参加したら、これを入れるだけ」という<strong>オンボーディングの単位</strong>になります。
+      </div>
+    </div>
+
+    <!-- 4-3 -->
+    <div class="exercise">
+      <div class="exercise-title">4-3. plugin サブコマンドで管理する <span class="badge">5分</span></div>
+      <div class="step" data-step="1"><code>agy plugin</code>（複数形 <code>plugins</code> も可）サブコマンドで、プラグインの一覧・インストール・有効化/無効化・アンインストールを行います：</div>
+<pre><span class="comment"># インストール済みプラグインの一覧</span>
+agy plugin list
+
+<span class="comment"># ローカル（またはリモート）パッケージをインストール</span>
+agy plugin install /path/to/local/plugin
+
+<span class="comment"># 一時的に無効化 / 再有効化（アセットは残る）</span>
+agy plugin disable <span class="variable">&lt;plugin_name&gt;</span>
+agy plugin enable <span class="variable">&lt;plugin_name&gt;</span>
+
+<span class="comment"># 完全に削除（ディレクトリとレジストリを掃除）</span>
+agy plugin uninstall <span class="variable">&lt;plugin_name&gt;</span></pre>
+      <div class="step" data-step="2">インストール後、<code>/skills</code> や <code>/hooks</code>、<code>/mcp</code> でプラグインが提供するコンポーネントがロードされているか確認します。</div>
+      <div class="callout callout-warning">
+        <div class="callout-title">読み込みの優先順位 <span class="verify-tag">要確認</span></div>
+        スキル・ルールは グローバル → プロジェクト（<code>.agents/</code>）の順で適用されます。同名の <code>/</code> コマンドがある場合の優先順位や、フックの実行順序はバージョンで変わりうるため、<code>/skills</code> / <code>/hooks</code> パネルで実際のロード状況を確認してください。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODULE 5: MCP (OPTIONAL) ===== -->
+<div class="chapter" id="m5">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:var(--teal);">Module 5（任意）</div>
+    <h2>MCP 連携</h2>
+    <p>Model Context Protocol で、エージェントにローカル API や DB ツールを安全に接続する</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      <strong>MCP（Model Context Protocol）</strong>は、モデルがローカル API・ファイルパーサ・独自ツールに安全に接続するためのオープン標準です。Antigravity CLI は<strong>ローカルプロセス</strong>と<strong>リモートホスト</strong>の両方の MCP サーバーをサポートします。
+    </div>
+
+    <!-- 5-1 -->
+    <div class="exercise">
+      <div class="exercise-title">5-1. ワークスペースに MCP サーバーを定義する <span class="badge">5分</span></div>
+      <div class="step" data-step="1">ワークスペース固有の MCP 設定は <code>.agents/mcp_config.json</code> に置きます（グローバルは <code>~/.gemini/antigravity-cli/mcp_config.json</code>）。題材アプリの SQLite を読む例：</div>
+<pre><span class="comment">// .agents/mcp_config.json</span>
+{
+  <span class="variable">"mcpServers"</span>: {
+    <span class="variable">"sqlite-explorer"</span>: {
+      <span class="variable">"command"</span>: <span class="string">"node"</span>,
+      <span class="variable">"args"</span>: [<span class="string">"/usr/local/bin/sqlite-mcp-server.js"</span>],
+      <span class="variable">"env"</span>: {
+        <span class="variable">"SQLITE_DB_PATH"</span>: <span class="string">"/var/data/app.db"</span>
+      }
+    }
+  }
+}</pre>
+      <div class="step" data-step="2"><code>/mcp</code> で <strong>MCP Manager Overlay</strong> を開き、サーバーの状態（active / disconnected / loading）を確認します。必要なら設定を再読み込みします：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/mcp</div>
+      </div>
+      <div class="callout callout-warning">
+        <div class="callout-title">リモート接続は serverUrl 必須</div>
+        リモートの SSE / websocket ベースの MCP 接続を宣言する場合は、必ず <code>serverUrl</code> フィールドを定義してください。レガシーな <code>url</code> / <code>httpUrl</code> は<strong>サポートされません</strong>。
+      </div>
+      <div class="insight-box">
+        <div class="insight-title">権限との連携</div>
+        MCP ツールの実行も権限エンジンの対象です。<code>mcp(server/tool)</code> や <code>mcp(*)</code> を <code>allow</code> / <code>deny</code> / <code>ask</code> に書けます（例: <code>mcp(sql/execute_mutation)</code> を <code>ask</code> にして書き込み系だけ確認を入れる）。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODULE 6: VISUAL DEBUG (OPTIONAL) ===== -->
+<div class="chapter" id="m6">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#7e57c2;">Module 6（任意）</div>
+    <h2>視覚デバッグ（ctrl+v）</h2>
+    <p>スクリーンショットをプロンプトに貼り、UI 崩れをエージェントに診断・修正させる</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      UI の崩れ・レンダリングバグ・レイアウトの不整合は、文章で説明するより<strong>画像を見せる方が速い</strong>ことがあります。スクリーンショットや録画をコピーし、プロンプトボックスで <code>ctrl+v</code> を押すと、エージェントがそのメディアを参照して原因を診断します。
+    </div>
+
+    <!-- 6-1 -->
+    <div class="exercise">
+      <div class="exercise-title">6-1. チケット詳細画面の崩れを画像で直す <span class="badge">6分</span></div>
+      <div class="step" data-step="1">ウェブプレビューで <code>/tickets/1/view</code>（対応履歴つきの詳細ページ）を開きます。意図的に CSS を 1 行壊すか、表示が崩れている箇所のスクリーンショットを撮ります。</div>
+      <div class="step" data-step="2">画像をコピーした状態で、<code>agy</code> のプロンプトボックスにフォーカスし <code>ctrl+v</code> で添付します。続けて指示を書きます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力するプロンプト（画像添付つき）</div>
+        <div class="prompt-text">添付のスクリーンショットのとおり、対応履歴の「内部メモ」バッジが本文に重なって表示が崩れています。@templates/ticket_detail.html のレイアウトを修正してください。</div>
+      </div>
+      <div class="step" data-step="3">エージェントが画像を参照して原因（CSS の重なり等）を特定し、テンプレートの修正を提案します。承認してプレビューで再確認します。</div>
+      <div class="insight-box">
+        <div class="insight-title">@ ファイル参照と組み合わせる</div>
+        画像（何が崩れているか）と <code>@templates/ticket_detail.html</code>（どこを直すか）を<strong>同時に渡す</strong>と、エージェントは探索範囲を絞り込めます。視覚情報とファイル参照の併用が、視覚デバッグの精度を上げるコツです。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODULE 7: FORK & REWIND (OPTIONAL) ===== -->
+<div class="chapter" id="m7">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:#616161;">Module 7（任意）</div>
+    <h2>/fork で A/B 比較・/rewind で巻き戻し</h2>
+    <p>セッションを分岐して実装案を比較し、行き詰まったら安全な地点へ戻す</p>
+  </div>
+  <div class="chapter-body">
+
+    <div class="callout callout-info">
+      <div class="callout-title">このモジュールのねらい</div>
+      実装方針に迷ったら、セッションを破棄せずに <code>/fork</code> で<strong>並行セッションに分岐</strong>して試せます。ビルドエラーが続くなど行き詰まったら <code>/rewind</code>（別名 <code>/undo</code>）で<strong>安定していた地点まで巻き戻せます</strong>。
+    </div>
+
+    <!-- 7-1 -->
+    <div class="exercise">
+      <div class="exercise-title">7-1. /fork で実装 A/B を比較する <span class="badge">6分</span></div>
+      <div class="step" data-step="1">安定した状態（例: 基礎ハンズオン完了直後）でベースラインのスレッドを作ります。そこから <code>/fork</code> で複製した並行セッションを立ち上げます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/fork</div>
+      </div>
+      <div class="step" data-step="2">分岐先で<strong>案 A</strong>を試します。例えばチケット検索の実装を変えてみます：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">分岐セッションでのプロンプト（案 A）</div>
+        <div class="prompt-text">/tickets/search を SQLite の LIKE ではなく FTS5 全文検索インデックスで実装し直してください。</div>
+      </div>
+      <div class="step" data-step="3">うまくいかなければ <code>/resume</code>（別名 <code>/switch</code>）で安定したメインのスレッドへ戻り、<strong>案 B</strong>（例: 既存 LIKE のまま正規化を強化）を試します。両者の差分を見比べて採用案を決めます。</div>
+      <div class="insight-box">
+        <div class="insight-title">破棄せずに試せる安心感</div>
+        <code>/fork</code> は「失敗しても元に戻れる」ため、思い切った実装を試しやすくなります。A/B どちらも実物のコードで比較できるのが、口頭の議論との大きな違いです。
+      </div>
+    </div>
+
+    <!-- 7-2 -->
+    <div class="exercise">
+      <div class="exercise-title">7-2. /rewind で巻き戻す <span class="badge">4分</span></div>
+      <div class="step" data-step="1">エージェントが連続して変更を加えた結果ビルドが壊れたとします。セッションを捨てずに、会話スレッドを直前の安定チェックポイントまで戻します：</div>
+      <div class="prompt-box">
+        <div class="prompt-label">CLI に入力</div>
+        <div class="prompt-text">/rewind</div>
+      </div>
+      <div class="step" data-step="2">巻き戻し後、壊れる前の状態から別のアプローチで再挑戦します。途中で方針がずれていると気づいたら、<code>esc</code> でその場でターンを中断するのも有効です。</div>
+      <div class="callout callout-success">
+        <div class="callout-title">発展ハンズオンのまとめ</div>
+        <strong>権限/サンドボックスで安全を設計</strong>し（M1）、<strong><code>-p</code> で自動化</strong>し（M2）、<strong>並列サブエージェントで一気に改善</strong>し（M3）、<strong>スキル/プラグインでチームに展開</strong>する（M4）。さらに <strong>MCP</strong>（M5）・<strong>視覚デバッグ</strong>（M6）・<strong>/fork・/rewind</strong>（M7）で表現の幅が広がります。基礎で身につけた「計画→承認→実行→検証」を、これらの上級機能で<strong>スケール</strong>させてください。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>Google Cloud &mdash; Antigravity 発展ハンズオン（agy CLI 深掘り） &middot; <a href="handson-guide.html">基礎ハンズオン</a> / <a href="cli/index.html">CLI リファレンス</a></p>
+</div>
+
+</div>
+</body>
+</html>

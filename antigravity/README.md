@@ -18,6 +18,8 @@ Google Cloud（**Gemini Enterprise Agent Platform**）認証のもと、**Cloud 
 
 **[ハンズオンガイドを開く](https://nozoyoshida.github.io/gca-handson/antigravity/docs/handson-guide.html)**
 
+**[Antigravity CLI リファレンス（日本語要約）](https://nozoyoshida.github.io/gca-handson/antigravity/docs/cli/index.html)** — 公式 CLI ドキュメント（`agy`）の日本語まとめ＋ハンズオン活用ポイント＋追加ネタ
+
 ## ディレクトリ構成
 
 ```

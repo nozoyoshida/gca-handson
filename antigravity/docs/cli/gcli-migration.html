@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemini CLI からの移行 — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>Gemini CLI からの移行</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/gcli-migration">antigravity.google/docs/gcli-migration</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>レガシーな構成の変換、Gemini CLI の拡張機能のネイティブプラグインとしてのインポート、カスタムスキルのパスの調整、Model Context Protocol 構成の再フォーマットを行います。</p>
+
+<h2>概要</h2>
+<p>Antigravity CLI は、Gemini CLI で普及した中核的な開発者体験の構成要素との後方互換性を維持しています。スムーズなアップグレードを実現するために、CLI は自動オンボーディング変換と、明示的な CLI 移行コマンドのシーケンスの両方を提供します。</p>
+
+<h2>初回起動時のオンボーディング</h2>
+<p>レガシーな構成を含む環境で <code>agy</code> を初めて実行すると、CLI は既存のプロファイルを自動的に検出します。インタラクティブなチェックリストが表示され、どのアセットを移行するかを選択するよう促されます。</p>
+<ol>
+  <li><strong>自動変換</strong>: 変換したい拡張機能とグローバル構成を選択します。</li>
+  <li><strong>キーリングへの保存</strong>: CLI は、アクティブなセッショントークンを、オペレーティングシステムのネイティブなキーリングストレージへ安全に移行します。</li>
+  <li><strong>設定の整合</strong>: デフォルトの表示パラメータとレンダリングバッファが、新しい設定プロファイルへ自動的にマッピングされます。</li>
+</ol>
+
+<div class="callout callout-info"><div class="t">メモ</div> <strong>部分的な互換性</strong>: ワークスペースのスキル、ルール、MCP サーバーのサポートは維持されますが、Gemini CLI の一部のカスタマイズされたターミナルテーマや実験的なビジュアルオーバーレイはサポートされない場合があります。</div>
+
+<h2>拡張機能のプラグインへの変換</h2>
+<p>Gemini CLI の登場以降、業界では <strong>plugins</strong>（プラグイン）という用語が標準化されました。次のコマンドを実行することで、レガシーな Gemini 拡張機能をネイティブな Antigravity プラグインへ手動で変換できます。</p>
+<pre><code>agy plugin import gemini</code></pre>
+<p>このユーティリティは、レガシーなローカルディレクトリを検索し、拡張機能のマニフェストを解析して、ファイルをネイティブなレイアウトブロックへ変換します。</p>
+
+<h3>期待されるインポート出力</h3>
+<pre><code>[ok]   conductor-tools
+       - skills     : skipped (none detected)
+       - agents     : skipped (none detected)
+       ✔ commands   : 4 legacy commands converted to skills
+       - mcpServers : skipped (none detected)
+[ok]   google-workspace
+       ✔ skills     : 5 skills processed
+       - agents     : skipped (none detected)
+       ✔ commands   : 2 legacy commands converted to skills
+       ✔ mcpServers : 1 server definition migrated to mcp_config.json</code></pre>
+
+<h2>コンテキストファイルとワークスペースのルール</h2>
+<p>両方の CLI プラットフォームは同一のワークスペースコンテキストルールを利用します。既存のルールドキュメントを変更する必要はありません。</p>
+<ul>
+  <li><strong>ワークスペースのローカルコンテキスト</strong>: エージェントは引き続き、アクティブなディレクトリ内の <code>GEMINI.md</code> および <code>AGENTS.md</code> ファイルで定義されたルール制約を解析・適用します。</li>
+  <li><strong>グローバルな開発者コンテキスト</strong>: エージェントは <code>~/.gemini/GEMINI.md</code> にあるグローバルな制約を自動的に参照・適用します。</li>
+</ul>
+
+<h2>更新されたスキルのパス</h2>
+<p>グローバルに共有されるスキルはユーザーのホームディレクトリに残りますが、ワークスペース固有のローカルスキルの対象フォルダパスは更新されました。</p>
+<table>
+<thead>
+<tr><th>構成</th><th>Gemini CLI</th><th>Antigravity CLI</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>グローバル共有パス</strong></td><td><code>~/.gemini/skills/</code></td><td><code>~/.gemini/antigravity-cli/skills/</code></td></tr>
+<tr><td><strong>ワークスペースのプロジェクトパス</strong></td><td><code>.gemini/skills/</code></td><td><code>.agents/skills/</code></td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-warn"><div class="t">注意</div> <strong>要対応</strong>: プロジェクトに <code>.gemini/skills/</code> で定義されたカスタムのワークスペーススキルがある場合、Antigravity エージェントがそれらをアクティブなスラッシュコマンドとして認識できるように、フォルダを手動で <code>.agents/skills/</code> へリネームまたは移動する必要があります。</div>
+
+<h2>MCP 構成のフォーマット変更</h2>
+<p>Antigravity CLI は、Model Context Protocol サーバーを主要な設定構成の中にネストするのではなく、専用の軽量な JSON プロファイルへ分離します。</p>
+
+<h3>ディレクトリのマッピング</h3>
+<ul>
+  <li><strong>レガシーな Gemini 構成</strong>: サーバーは <code>~/.gemini/settings.json</code> 内にインラインで宣言されていました。</li>
+  <li><strong>Antigravity CLI の構成</strong>: サーバーはスタンドアロンの <code>mcp_config.json</code> プロファイル内に定義されます。
+    <ul>
+      <li>グローバルサーバー: <code>~/.gemini/config/mcp_config.json</code></li>
+      <li>ワークスペースサーバー: <code>.agents/mcp_config.json</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3>必要なスキーマの更新</h3>
+<p>リモートの websocket または SSE サーバー定義を手動で移行する際は、URI のキーパラメータを現在の標準に合わせて更新します。</p>
+<ul>
+  <li><strong>レガシーなスキーマキー</strong>: <code>url</code> または <code>httpUrl</code></li>
+  <li><strong>現在のスキーマキー</strong>: <code>serverUrl</code></li>
+</ul>
+<pre><code>{
+  "mcpServers": {
+    "remote-indexer": {
+      "serverUrl": "https://mcp.internal.enterprise.com/sse",
+      "env": {
+        "AUTH_TOKEN": "secure_alpha_token"
+      }
+    }
+  }
+}</code></pre>
+
+<h2>次のステップ</h2>
+<p>新しい表示パラメータの設定を始め、セットアップ時の問題のトラブルシューティングを行いましょう。</p>
+<ul>
+  <li><strong><a href="cli-settings.html">設定・レンダリング・キーバインド（Settings, Rendering &amp; Keybindings）</a></strong>: キーボードのホットキー、テーマ、画面バッファをカスタマイズします。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-troubleshooting">Troubleshooting（cli-troubleshooting）</a></strong>: 認証のロックアウトやパスの問題を解決する方法を学びます。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-reference">CLI Reference（cli-reference）</a></strong>: 標準的なパラメータの一覧とスラッシュコマンドの対応表にアクセスします。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

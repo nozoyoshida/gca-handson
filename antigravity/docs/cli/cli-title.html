@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ウィンドウタイトル — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>ウィンドウタイトル</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-title">antigravity.google/docs/cli-title</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>動的なウィンドウタイトルの設定、カスタムスクリプト構成のマッピング、JSON 状態出力の整形を行い、ターミナルヘッダーをカスタマイズします。</p>
+
+<h2>概要</h2>
+<p>ターミナルウィンドウタイトル機能は、エージェントの詳細、アクティブなワークスペースのベース名、アクティブな会話のパラメータを、ターミナルエミュレータのタイトルバーに表示します。これにより、ターミナルウィンドウが最小化されていたりフォーカスされていなかったりする場合でも、エージェントの進捗を監視できます。</p>
+
+<h2>対話型の切り替え</h2>
+<ul>
+  <li><strong>構文</strong>:
+    <pre><code>/title [on|off]</code></pre>
+  </li>
+  <li>プロンプトボックスで <code>/title</code> と入力して <span class="kbd">Enter</span> を押すと、機能のオン・オフが切り替わります。</li>
+  <li><code>/title on</code> または <code>/title off</code> と入力すると、状態を明示的に設定できます。</li>
+</ul>
+
+<h2>カスタムタイトルスクリプト</h2>
+<p>ウィンドウタイトルの整形をカスタマイズするために、アクティブな TUI 状態の詳細をカスタムシェルスクリプトへ渡すことができます。</p>
+
+<h3>設定</h3>
+<p><code>~/.gemini/antigravity-cli/settings.json</code> ファイルに <code>title</code> 設定ブロックを追加します。</p>
+<pre><code>{
+  "title": {
+    "type": "command",
+    "command": "~/.gemini/antigravity-cli/title.sh"
+  }
+}</code></pre>
+<p>エージェントの状態が変化するたびに、TUI はあなたのコマンドスクリプトを実行し、詳細な状態 JSON ペイロードをスクリプトの <code>stdin</code> に直接パイプし、<code>stdout</code> から整形済みの文字列を読み取って、ターミナルウィンドウタイトルを更新します。印字不可能な文字や ANSI エスケープシーケンスは、レンダリング前に自動的に取り除かれます。</p>
+
+<h3>JSON 状態ペイロードのスキーマ</h3>
+<p>JSON 状態ペイロードは、カスタムステータスラインスクリプトに送られるものと同一です。<code>cwd</code>、<code>conversation_id</code>、<code>agent_state</code>、<code>vcs</code> の詳細などを表す詳細なプロパティが含まれます。完全なプロパティ一覧は <strong><a href="cli-statusline.html">ステータスラインのスキーマ</a></strong> を参照してください。</p>
+
+<h3>サンプルスクリプト</h3>
+<p>完全でレイアウト適応型のスクリプトを、公式の <a href="https://github.com/google-antigravity/antigravity-cli/blob/main/examples/title/title.sh">GitHub 上の title.sh の例</a> からダウンロードできます。このスクリプトはアクティブなワークスペースフォルダのベース名を抽出し、ライブのエージェント状態と会話セッションのプレフィックスを含む構造化されたターミナルタイトルを描画します。</p>
+<p>スクリプトを <code>~/.gemini/antigravity-cli/title.sh</code> に保存し、実行可能にします。</p>
+<pre><code>chmod +x ~/.gemini/antigravity-cli/title.sh</code></pre>
+
+<h2>関連項目</h2>
+<ul>
+  <li><strong><a href="cli-statusline.html">ステータスラインのカスタマイズ</a></strong>: 動的な TUI ステータスバーをカスタマイズします。</li>
+  <li><strong><a href="cli-settings.html">設定（settings.json）</a></strong>: キーボードホットキーとバッファをカスタマイズします。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-sandbox">権限とサンドボックス</a></strong>: 安全なディレクトリ権限を管理します。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

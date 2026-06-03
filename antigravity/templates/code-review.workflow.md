@@ -1,8 +1,16 @@
-# /code-review — セキュリティ重視のコードレビュー（Workflow 雛形）
+# /code-review — セキュリティ重視のコードレビュー（コードレビュー Skill 雛形）
 
-> Antigravity の Workflow 定義（`/code-review` で起動）。Ch.2 でこの内容を
-> `.agents/workflows/code-review.md` にコピーして使います。
-> ※ Workflow の正式なファイル配置・記法は Antigravity 公式ドキュメントで確認してください。
+> Antigravity の Skill 定義。Ch.2 でこの内容を `.agents/skills/code-review.md` に
+> コピーして使います。ファイル先頭に以下の Frontmatter（`name: code-review` /
+> `description: ...`）を置くと、自動的に `/code-review` スラッシュコマンドとして
+> 登録されます。
+>
+> ```yaml
+> ---
+> name: code-review
+> description: セキュリティ重視のコードレビュー（差分を規約とセキュリティ基準で点検）
+> ---
+> ```
 
 ## 目的
 現在の変更（`git diff`）を、チームのコーディング規約とセキュリティ基準に照らしてレビューする。

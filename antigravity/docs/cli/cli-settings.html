@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>設定（settings.json） — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>設定（settings.json）</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-settings">antigravity.google/docs/cli-settings</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<p>永続的な設定の保存、キーボードショートカットのカスタマイズ、ターミナルの表示バッファの切り替え、実行時の CLI パラメータ上書きの管理を行います。</p>
+
+<h2>設定（preferences）のセットアップ</h2>
+<p>Antigravity CLI は、ユーザー設定を最小限かつ将来互換性のある JSON 設定プロファイルとして保存します。</p>
+
+<h3>設定ファイルの場所</h3>
+<p>永続的な設定は、プレーンな JSON 形式で次の場所に保存されます。</p>
+<pre><code>~/.gemini/antigravity-cli/settings.json</code></pre>
+<p>CLI は <strong>スパース永続化（sparse persistence）</strong> を採用しており、システムのデフォルト値と異なる値だけをディスクに書き込みます。これにより設定ファイルはクリーンかつ最小限に保たれ、将来のアップデートとの完全な前方互換性が維持されます。</p>
+
+<h3>対話型の設定パネル</h3>
+<p>生の JSON ファイルを開かずに、アクティブなターミナルセッション内で直接設定を編集するには、次の手順を実行します。</p>
+<ol>
+  <li>プロンプトパネルで <code>/config</code>（またはエイリアスの <code>/settings</code>）と入力し、<span class="kbd">Enter</span> を押します。</li>
+  <li>フルスクリーンの <strong>設定エディタオーバーレイ（Settings Editor Overlay）</strong> が開きます。</li>
+  <li><span class="kbd">↑</span> / <span class="kbd">↓</span> で利用可能なオプション間を移動します。</li>
+  <li>ハイライトされたパラメータ上で <span class="kbd">Enter</span> を押すと、状態の切り替え、またはテキスト入力フィールドの表示が行われます。</li>
+  <li><span class="kbd">Esc</span> を押すと変更を保存してエディタを閉じます。</li>
+</ol>
+
+<h2>コマンドラインによる上書き</h2>
+<p>CLI のコマンドフラグを使うことで、個々のターミナルセッションに限って永続的な設定を一時的に上書きできます。</p>
+<pre><code>agy --sandbox=false --notifications=false</code></pre>
+<p>上書きフラグが有効な場合、対話型の <code>/config</code> メニューでは、変更された設定の横に警告インジケータが表示されます。</p>
+<pre><code>! Tool Permission: strict (overridden by command flag)</code></pre>
+<p>これらのセッション中もディスク上の永続値を編集することは可能ですが、CLI はセッションを閉じるまでアクティブな実行時フラグの上書きを優先します。</p>
+
+<h2>表示（レンダリング）モード</h2>
+<p>TUI は、ターミナルの機能と接続レイテンシに応じて、2 つの表示モードのいずれかで動作します。</p>
+
+<table>
+  <thead>
+    <tr><th>モード</th><th>設定値</th><th>概要</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Alt-screen モード</td>
+      <td><code>always</code></td>
+      <td>ターミナルの代替バッファを使って専用の表示画面を開き、没入感のある独立したアプリ風インターフェースを構成します。</td>
+    </tr>
+    <tr>
+      <td>Inline モード</td>
+      <td><code>never</code></td>
+      <td>標準の stdout パイプライン内に出力を逐次レンダリングします。</td>
+    </tr>
+    <tr>
+      <td>自動検出</td>
+      <td><code>default</code></td>
+      <td>環境を自動検出し、高機能なローカルシェルでは Alt-Screen、SSH 上や非対話セッションでは Inline モードに切り替えます。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Alt-screen モード（<code>always</code>）</h3>
+<ul>
+  <li><strong>主な特徴</strong>: 統合スクロールバック、マウスホイールによるスクロール対応、カスタム描画のスクロールバー、終了時のクリーンなターミナル状態の復元。</li>
+  <li><strong>適した用途</strong>: 高機能なターミナルエミュレータ（iTerm2、Ghostty、WezTerm など）での標準的なローカル開発セッション。</li>
+</ul>
+
+<h3>Inline モード（<code>never</code>）</h3>
+<ul>
+  <li><strong>主な特徴</strong>: セッション履歴全体をエミュレータのネイティブなスクロールバックバッファ内に保持し、マウス入力をキャプチャせず、標準的なコマンド出力とシームレスに併存します。</li>
+  <li><strong>適した用途</strong>: リモートの SSH ターミナル、<code>tmux</code> や <code>screen</code> などのターミナルマルチプレクサ、低帯域のリモートセッション。</li>
+</ul>
+
+<div class="callout callout-info">
+  <div class="t">メモ：アダプティブレンダリング</div>
+  Alt-Screen モードを <code>default</code> に設定すると、TUI が環境を自動検出します。高機能なローカルシェルでは Alt-Screen をデフォルトとし、SSH 経由や非対話セッションで実行している場合は Inline モードへフォールバックします。
+</div>
+
+<h2>カスタムステータスラインとターミナルタイトル</h2>
+<p>高度な TUI 環境連携のために、アクティブなメトリクスの切り替えや、カスタムスクリプトによる動的なステータスバーの生成・ターミナルウィンドウタイトルの変更を行えます。</p>
+<ul>
+  <li><strong><a href="cli-statusline.html">ステータスラインのカスタマイズ</a></strong>: ステータスインジケータパネルの管理方法と、カスタム整形されたステータスラインシェルスクリプトの構築方法を解説します。</li>
+  <li><strong><a href="cli-title.html">ターミナルタイトルのカスタマイズ</a></strong>: ウィンドウタイトル出力の切り替え方法と、ライブのエージェント状態をウィンドウヘッダーへ送り込む方法を解説します。</li>
+</ul>
+
+<h2>キーバインドの設定</h2>
+<p>TUI のほぼすべてのキーボードショートカットは、キーを特定のワークスペースコマンドにマッピングすることでカスタマイズできます。</p>
+
+<h3>キーバインドファイルの場所</h3>
+<p>カスタムマップは、メインの設定プロファイルと同じ場所に保存されます。</p>
+<pre><code>~/.gemini/antigravity-cli/keybindings.json</code></pre>
+
+<h3>フォーマットとカスタマイズ</h3>
+<p>この JSON 構造は、1 つの TUI コマンドアクションをホットキーシーケンスの配列にマッピングします。</p>
+<pre><code>{
+  "cli.clear_screen": ["ctrl+l"],
+  "prompt.insert_newline": ["shift+enter", "ctrl+j"],
+  "edit.open_editor": ["ctrl+g"]
+}</code></pre>
+<p>デフォルトのホットキーを完全に無効化するには、そのアクションを空の配列 <code>[]</code> にマッピングします。JSON スキーマが不正または無効な場合、CLI は該当するアクションについてシステムデフォルトにフォールバックし、残りの有効なマッピングを読み込みます。</p>
+
+<div class="callout callout-warn">
+  <div class="t">注意：保護されたキー</div>
+  <code>cli.exit</code>（<code>Ctrl+D</code> / <code>Ctrl+C</code>）や <code>cli.enter</code>（<code>Enter</code>）といった重要なナビゲーションショートカットはシステムによって保護されており、無効化できません。
+</div>
+
+<h3>デフォルトへの復元</h3>
+<p>すべてのキーをシステムデフォルトに戻すには、キーバインドプロファイルを削除するだけです。</p>
+<pre><code>rm ~/.gemini/antigravity-cli/keybindings.json</code></pre>
+
+<h2>次のステップ</h2>
+<p>環境の設定が完了したら、セキュリティ制御と拡張オプションを確認しましょう。</p>
+<ul>
+  <li><strong><a href="https://antigravity.google/docs/cli-sandbox">権限とサンドボックス</a></strong>: 安全な実行封じ込め境界を管理します。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-plugins">プラグインとスキル</a></strong>: 独自のカスタムスキルを作成し、レガシープラグインをインポートします。</li>
+  <li><strong><a href="https://antigravity.google/docs/cli-reference">CLI リファレンス</a></strong>: すべての設定オプション、コマンド、デフォルトのキーマップを一覧できるクイックリファレンスにアクセスします。</li>
+</ul>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

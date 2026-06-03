@@ -1,8 +1,12 @@
-# /code-review — セキュリティ重視のコードレビュー
+---
+name: code-review
+description: セキュリティ重視のコードレビュー（差分を規約とセキュリティ基準で点検）
+---
 
-> Antigravity の Workflow 定義（`/code-review` で起動）。
-> ※ Workflow の正式なファイル配置・記法は Antigravity 公式ドキュメントで確認してください
->   （`.agents/workflows/` は本ハンズオン時点での想定パスです）。
+# code-review — セキュリティ重視のコードレビュー
+
+> Antigravity の Skill 定義。このファイルを `.agents/skills/code-review.md` に置くと
+> 自動的に `/code-review` スラッシュコマンドとして登録される。
 
 ## 目的
 現在の変更（`git diff`）を、チームのコーディング規約とセキュリティ基準に照らしてレビューする。
@@ -15,7 +19,7 @@
 - SQL に f-string / % / .format() でユーザー入力を埋め込んでいないか（→ パラメータ化クエリ）
 - すべてのユーザー入力にバリデーションがあるか（最大長・HTML 除去・enum 許可リスト）
 - 秘密鍵・パスワードのハードコードがないか（→ 環境変数）
-- debug=True のまま本番に出ていないか
+- debug=True のまま本番に出ていないか（→ 環境変数で制御）
 
 ### コード品質
 - 全関数に Google Style の docstring があるか

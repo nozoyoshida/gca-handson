@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ハンズオンでの agy 活用ポイント — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>ハンズオンでの agy 活用ポイント（洗い出し）</h1>
+  <div class="src">対象: <a href="../handson-guide.html">antigravity/docs/handson-guide.html</a>／根拠: 公式 CLI ドキュメント要約</div>
+</div></header>
+
+<main class="container doc">
+  <p>既存の Antigravity ハンズオン各章に、<code>agy</code> CLI の<strong>スラッシュコマンド</strong>と<strong>ベストプラクティス</strong>を自然に組み込める箇所を洗い出しました。あわせて、現行ガイドの記述が公式ドキュメントと食い違う「要修正点」も整理しています。</p>
+
+  <h2>1. 章別 活用マップ</h2>
+  <table>
+    <thead><tr><th>章</th><th>自然に使える agy の機能・コマンド</th><th>ねらい</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Ch.0 環境準備</strong></td>
+        <td><code>?</code>（コマンド一覧）／<code>/config</code>（設定パネル：verbosity を low に）／<code>/model</code>（モデル選択）／<code>/permissions</code>（自律レベル選択）</td>
+        <td>最初に CLI の全体像とコマンド体系を掴ませる。ノイズ低減と権限の初期設定をここで済ませる。</td>
+      </tr>
+      <tr>
+        <td><strong>Ch.1 CLI 基本</strong></td>
+        <td><code>@</code>（ファイルパス補完）／<code>!</code>（ターミナル直実行）／<code>Esc</code>（ターン中断）/<code>esc esc</code>（入力クリア）／<code>/rewind</code>(<code>/undo</code>)／<code>/fork</code>／<code>/resume</code></td>
+        <td>「計画→承認→実行→検証」に加え、<strong>中断・巻き戻し・分岐</strong>という CLI ならではのセッション操作を体験させる。app.py を汚さない運用にも直結。</td>
+      </tr>
+      <tr>
+        <td><strong>Ch.2 Context Engineering</strong></td>
+        <td><code>AGENTS.md</code>（ワークスペース直下、起動時に自動読込）／<code>@</code> でコンテキスト付与／<strong>「探索→計画→実行」</strong>のフェーズ分割</td>
+        <td>AGENTS.md は公式ベストプラクティスそのもの。Before/After 比較に最適。<span class="verify">要修正</span> コードレビュー自動化は <code>/code-review</code> ではなく <strong>Skill（<code>/skills</code>）</strong>で表現する（下記 3 章）。</td>
+      </tr>
+      <tr>
+        <td><strong>Ch.3 Agentic Coding</strong></td>
+        <td><strong>探索→計画→実行</strong>（実装計画アーティファクト）／<strong>検証ループ</strong>（テスト/ <code>curl</code> を agent に実行させる）／<code>/agents</code>・<code>/tasks</code>（進捗監視）／<code>/rewind</code>（失敗時の巻き戻し）</td>
+        <td>単発実装でも「先に計画を出させてレビュー→承認→実行→検証」を徹底。検証ループは公式の最重要プラクティス。</td>
+      </tr>
+      <tr>
+        <td><strong>Ch.4 セキュア開発</strong></td>
+        <td><strong>権限エンジン</strong>（<code>permissions</code> の <code>allow/deny/ask</code>、例: <code>deny: command(rm -rf), command(sudo)</code>）／<strong>ターミナルサンドボックス</strong>（<code>enableTerminalSandbox</code> / <code>proceed-in-sandbox</code>）</td>
+        <td><strong>最良の親和性</strong>。「安全な AI 開発」という章テーマと、agy の権限/サンドボックスが直結。脆弱性の修正に加え、<em>エージェント自身の実行を安全に縛る</em>体験を足せる。</td>
+      </tr>
+      <tr>
+        <td><strong>Ch.5 Cloud Run</strong></td>
+        <td><code>-p</code> ワンショット（例: コミットメッセージ生成を git hook 化）／検証ループ（デプロイ後に公開 URL を <code>curl</code>）／<code>command(gcloud …)</code> の権限制御</td>
+        <td>「実装→出荷」を自動化文脈に拡張。デプロイ後の動作確認を agent の検証ループに組み込む。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. 公式ベストプラクティスと章の対応</h2>
+  <table>
+    <thead><tr><th>ベストプラクティス（公式）</th><th>ハンズオンでの活用箇所</th></tr></thead>
+    <tbody>
+      <tr><td>検証ループを作る（テスト/ビルドを agent に実行させ反復）</td><td>Ch.3 実装直後／Ch.5 デプロイ後の <code>curl</code> 確認</td></tr>
+      <tr><td>探索 → 計画 → 実行 のフェーズ分割</td><td>Ch.3 の中心。Ch.4 修正でも「まず脆弱性を説明させる→計画→修正」</td></tr>
+      <tr><td>コンテキストを与える（<code>@</code>、<code>ctrl+v</code> でスクショ添付）</td><td>Ch.1〜4 の <code>@app.py</code>。UI 不具合のデバッグ例に <code>ctrl+v</code> を追加可</td></tr>
+      <tr><td>ルールファイル（<code>GEMINI.md</code> / <code>AGENTS.md</code>）</td><td>Ch.2 の中心（現行どおり <code>AGENTS.md</code> でOK）</td></tr>
+      <tr><td>権限を構造化（<code>request-review</code> / <code>proceed-in-sandbox</code> / <code>strict</code>）</td><td>Ch.0 で初期設定、Ch.4 で深掘り</td></tr>
+      <tr><td>セッション管理（<code>esc</code> / <code>/rewind</code> / <code>/fork</code> / <code>/resume</code>）</td><td>Ch.1 で体験</td></tr>
+      <tr><td>自動化（<code>agy -p</code>、並列サブエージェント）</td><td>Ch.5 の git hook 例／追加ハンズオン案（part 3）</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. 現行ガイドの要修正点（公式ドキュメントとの相違）</h2>
+  <div class="callout callout-warn">
+    <div class="t">背景</div>
+    既存ガイドはプレビュー段階の推測（<span class="verify">要確認</span> 表記）を含んでいました。公式 CLI ドキュメントの取得により、以下は事実に基づいて修正可能になりました。
+  </div>
+  <table>
+    <thead><tr><th>該当箇所</th><th>現状（推測）</th><th>公式準拠の修正案</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Ch.2 / Ch.4 / 附録 B のコードレビュー自動化</td>
+        <td><code>.agents/workflows/code-review.md</code> を置いて <code>/code-review</code> で起動</td>
+        <td>修正済み: 正しくは <strong>Skill</strong> として表現する。<code>.agents/skills/code-review.md</code> に Frontmatter（<code>name:</code> / <code>description:</code>）付きの Markdown を置くと、<strong>自動的に <code>/code-review</code> スラッシュコマンドとして登録</strong>される（全ワークスペース共有なら <code>~/.gemini/antigravity-cli/skills/</code> に配置）。先の <code>.agents/workflows/</code> というパスは誤りだったが、<code>/code-review</code> 自体は有効。</td>
+      </tr>
+      <tr>
+        <td>Ch.0 の GEAP 認証</td>
+        <td><code>agy login</code> ＋ <code>agy config set project/location</code></td>
+        <td>公式 CLI ドキュメントは Google アカウントでのサインイン（<code>/logout</code> でログアウト）を示し、<strong>プロジェクト/リージョンを指定する CLI フラグは記載されていない</strong>。エンタープライズ（GEAP）固有のプロジェクト紐付けは引き続き <span class="verify">要確認</span> として扱い、断定を避ける。</td>
+      </tr>
+      <tr>
+        <td>Ch.4 補足の「URL 許可リスト」</td>
+        <td>「<span class="verify">要確認</span>」と記載</td>
+        <td>確定: 権限アクション <code>read_url(domain)</code> / <code>execute_url(domain)</code> が該当。既定は <strong>Ask</strong>。これでプロンプトインジェクション対策を具体化できる。</td>
+      </tr>
+      <tr>
+        <td>附録 B チートシート</td>
+        <td>推測コマンド中心</td>
+        <td>実在コマンドへ更新済み（<code>/config</code> <code>/permissions</code> <code>/model</code> <code>/agents</code> <code>/tasks</code> <code>/skills</code> <code>/mcp</code> <code>/rewind</code> <code>/fork</code> <code>/resume</code>、<code>@ ! ?</code>、<code>ctrl+g/ctrl+v/ctrl+k</code>、<code>-p</code>、<code>permissions</code>/<code>enableTerminalSandbox</code>）。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. 推奨アクション</h2>
+  <ul>
+    <li>ハンズオンガイドの先頭・各章から本 <a href="index.html">CLI リファレンス</a>へリンクし、詳細はそちらへ誘導（実施済み）。</li>
+    <li>附録 B チートシートを実在コマンドへ更新（実施済み）。</li>
+    <li>コードレビュー自動化を <strong>Skill</strong> ベースに再構成（<code>completed/.agents/workflows/code-review.md</code> → Skill 形式）。影響範囲が複数ファイルのため、別途実施を推奨。</li>
+    <li>Ch.4 に「<strong>権限/サンドボックスでエージェント実行を安全に縛る</strong>」演習を追加（part 3 の案 B を参照）。</li>
+  </ul>
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>

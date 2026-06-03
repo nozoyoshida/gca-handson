@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>機能一覧（Features） — Antigravity CLI リファレンス</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc-header"><div class="container">
+  <a class="home" href="index.html">← Antigravity CLI リファレンス（目次へ）</a>
+  <h1>機能一覧（Features）</h1>
+  <div class="src">出典: <a href="https://antigravity.google/docs/cli-features">antigravity.google/docs/cli-features</a>（公式ドキュメントの日本語要約）</div>
+</div></header>
+<main class="container doc">
+
+<h2>プラグイン（Plugins）</h2>
+<h3>プラグインの仕組み</h3>
+<p>プラグインは名前空間付きのバンドルで、スキル、エージェント、ルール、MCP サーバー、フックを 1 つのデプロイ可能なユニットとしてまとめられます。</p>
+<p>プラグインをインストールすると、CLI はそのファイルをホームディレクトリ配下の <code>~/.gemini/antigravity-cli/plugins/&lt;plugin_name&gt;/</code> に配置（ステージング）します。Antigravity Agent は、配置されたこれらのカスタマイズを自動的に検出して読み込みます。</p>
+<pre><code>~/.gemini/antigravity-cli/
+├── plugins/
+│   └── &lt;plugin_name&gt;/
+│       ├── plugin.json         # Required marker file
+│       ├── mcp_config.json     # Optional MCP server definitions
+│       ├── hooks.json          # Optional event hooks definition
+│       ├── skills/             # Optional skills
+│       ├── agents/             # Optional subagents
+│       └── rules/              # Optional rules
+└── import_manifest.json        # Tracking manifest</code></pre>
+<h3>プラグインコンポーネントへのアクセス</h3>
+<p>ステージングされて読み込まれた後は、CLI 内でスラッシュコマンドを使ってプラグインのコンポーネントを操作できます。</p>
+
+<h2>ターミナルサンドボックス（Terminal Sandbox）</h2>
+<p>ターミナルサンドボックスは軽量なセキュリティ隔離の仕組みで、エージェントがローカルのシェルコマンドを実行する際に、破壊的なファイル操作や許可されていないアウトバウンドのネットワークリクエストからホストシステムを保護します。</p>
+<p>重い仮想マシンやコンテナを動かすのではなく、CLI はネイティブな OS の機能（Linux では <code>nsjail</code>、macOS では <code>sandbox-exec</code>、Windows では <code>AppContainer</code>）を活用して、起動オーバーヘッドなしで厳格な封じ込め境界を適用します。</p>
+<h3>設定</h3>
+<p>サンドボックスの挙動は、<code>settings.json</code> ファイル（<code>~/.gemini/antigravity-cli/settings.json</code> にあります）で設定できます。</p>
+<pre><code>{
+  "enableTerminalSandbox": true
+}</code></pre>
+<ul>
+  <li><strong><code>enableTerminalSandbox</code></strong>（boolean、デフォルト: <code>false</code>）: すべてのローカルエージェントプロセスに対して、一般的な実行封じ込めの障壁を有効にします。</li>
+</ul>
+<h3>インタラクティブな承認</h3>
+<p>エージェントが確認を必要とするターミナルコマンドを提案すると、CLI のプロンプトは設定に応じて動的に変化します。</p>
+<ul>
+  <li><strong>サンドボックスが有効な場合</strong>: 単一の信頼できるコマンドについて一時的に封じ込め境界を回避したいときのために、確認プロンプトには <strong>Yes, and run without sandbox restrictions</strong> という専用の選択肢が含まれます。</li>
+  <li><strong>サンドボックスが無効な場合</strong>: 特定の、潜在的に危険なコマンドを安全境界内で強制的に実行したいときのために、プロンプトには <strong>Yes, and run in sandbox</strong> という選択肢が含まれます。</li>
+</ul>
+
+<h2>CLI スラッシュコマンドリファレンス</h2>
+<p>Antigravity CLI は、プロンプトボックスに直接入力するさまざまなスラッシュコマンドをサポートしており、会話の管理、設定の構成、エージェントの機能の確認などを行えます。</p>
+
+<h3>主要なスラッシュコマンド（Core Slash Commands）</h3>
+<table>
+<thead>
+<tr><th>コマンド</th><th>カテゴリ</th><th>用途</th></tr>
+</thead>
+<tbody>
+<tr><td><strong><code>/resume</code></strong>（エイリアス <code>/switch</code>）</td><td>会話</td><td>会話ピッカーを開いてセッションを再開または切り替える。</td></tr>
+<tr><td><strong><code>/rewind</code></strong>（エイリアス <code>/undo</code>）</td><td>会話</td><td>会話履歴を以前のチェックポイントまで巻き戻す。</td></tr>
+<tr><td><strong><code>/rename &lt;name&gt;</code></strong></td><td>会話</td><td>追跡しやすいように、現在の会話スレッドの名前を変更する。</td></tr>
+<tr><td><strong><code>/permissions</code></strong></td><td>設定</td><td>エージェントの自律レベル（<code>request-review</code>、<code>always-proceed</code>、<code>strict</code>）を選択する。</td></tr>
+<tr><td><strong><code>/model</code></strong></td><td>設定</td><td>デフォルトの推論モデルを選択する（セッションをまたいで保持される）。</td></tr>
+<tr><td><strong><code>/keybindings</code></strong></td><td>設定</td><td>インタラクティブなキーボードショートカットエディタを開く。</td></tr>
+<tr><td><strong><code>/statusline</code></strong></td><td>設定</td><td>CLI のステータスバーに表示されるリアルタイムインジケータをカスタマイズする。</td></tr>
+<tr><td><strong><code>/tasks</code></strong></td><td>ツールと監視</td><td>実行中のバックグラウンドタスクを監視・ログ表示・終了する。</td></tr>
+<tr><td><strong><code>/skills</code></strong></td><td>ツールと監視</td><td>ローカルおよびグローバルのカプセル化されたエージェントワークフローを閲覧する。</td></tr>
+<tr><td><strong><code>/mcp</code></strong></td><td>ツールと監視</td><td>Model Context Protocol サーバーを設定・管理するパネルを開く。</td></tr>
+<tr><td><strong><code>/open &lt;path&gt;</code></strong></td><td>ユーティリティ</td><td>ファイルを優先する外部エディタですぐに開く。</td></tr>
+<tr><td><strong><code>/usage</code></strong></td><td>ユーティリティ</td><td>ターミナル内でインラインのインタラクティブなヘルプマニュアルを開く。</td></tr>
+<tr><td><strong><code>/logout</code></strong></td><td>アカウント</td><td>Google セッションからログアウトし、キャッシュされた認証情報を消去する。</td></tr>
+</tbody>
+</table>
+
+<h3><code>settings.json</code> による高度なカスタマイズ</h3>
+<p>パワーユーザー向けに、いくつかのスラッシュコマンドは <code>~/.gemini/antigravity-cli/settings.json</code> 設定による詳細なカスタマイズに対応しています。</p>
+<ul>
+  <li><strong>きめ細かい権限</strong>: グローバルなレベルの代わりに、許可/拒否する特定のコマンドを定義します。
+<pre><code>"permissions": {
+  "allow": ["command(git)", "command(npm test)"],
+  "deny": ["command(rm -rf)"]
+}</code></pre>
+  </li>
+  <li><strong>カスタムのステータスラインとウィンドウタイトル</strong>: ライブのエージェントメタデータ（CWD、アクティブモデル、トークン使用量、状態などを含む JSON 形式）を独自のシェルスクリプトへ直接パイプして、動的なステータスバーやターミナルのウィンドウタイトルを生成できます。</li>
+</ul>
+
+<h2>Antigravity CLI のサブエージェント（Subagents）</h2>
+<p>Antigravity CLI は非同期のサブエージェントフレームワークを備えており、メインエージェントが並行作業の委譲、バックグラウンドでの調査、システムテストの実行を、アクティブな会話をブロックせずに行えます。</p>
+<h3>サブエージェントとは</h3>
+<p>サブエージェントは独立した並行エージェントセッションで、特定のバックグラウンドタスクをメインの会話と並行して処理するために設計されています。</p>
+<ul>
+  <li><strong>目的</strong>: メインエージェントは、ドキュメントの検索、ビルドの実行、修正の検証といったバックグラウンド操作を行うために、自動的にサブエージェントを生成します。</li>
+  <li><strong>機能</strong>: サブエージェントは、コード検索、ファイル編集、ターミナルコマンド、Web 検索などのツールにフルアクセスして、割り当てられたタスクを完了します。
+    <ul>
+      <li>メインエージェントは、サブエージェントがどのツールと権限を得るか（MCP ツールを使えるか、ファイルを書き込めるかを含む）を決定します。</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>エージェントの管理: <code>/agents</code> パネル</h3>
+<p>Antigravity CLI は、実行中のサブエージェントを表示・管理し、アクションを承認するためのインタラクティブなターミナル UI を提供します。</p>
+<ul>
+  <li><strong>アクセス</strong>: プロンプトに <code>/agents</code> と入力すると、サブエージェントパネルが開きます。</li>
+  <li><strong>概要</strong>: パネルには、アクティブおよび完了したサブエージェントの一覧が表示され、ステータス（running、done、killed など）や現在実行中のステップといった概要レベルの詳細が示されます。</li>
+</ul>
+
+<div class="callout callout-info"><div class="t">メモ</div> パネルからサブエージェントを選択すると、フルスクリーンの詳細ビューが開きます。このビューには、サブエージェントの会話の全体像（ステップ、思考、ツール実行ログを含む）が表示されます。</div>
+
+<h4>ツールの確認と承認</h4>
+<p>サブエージェントが、ユーザーの権限を必要とするツール（ローカルコマンドの実行やファイルの書き込みなど）を実行しようとすると、そのリクエストが提示されます。承認は次の 2 つの方法で管理できます。</p>
+<ol>
+  <li><strong>詳細ビューでの承認</strong><br>
+    サブエージェント詳細ビューには、保留中のすべての承認を含むインタラクションセクションがあり、リクエストを選択的に承認または拒否できます。
+    <div class="callout callout-tip"><div class="t">ヒント</div> <strong>ヒント</strong>: キーボードショートカット <code>ctrl+j</code> を使うと、メインの会話から、承認待ちの次のサブエージェントの詳細ビューへ直接「テレポート」できます。</div>
+  </li>
+  <li><strong>Fast Path アラート</strong><br>
+    作業の流れを保てるように、サブエージェントが権限を要求すると、Antigravity CLI はプロンプトボックスのすぐ上に Fast Path アラートを表示します。
+    <div class="callout callout-tip"><div class="t">ヒント</div> <strong>ヒント</strong>: メインの会話から離れることなく、<code>ctrl+k</code> を使って保留中のサブエージェントの権限を即座に承認できます。</div>
+  </li>
+</ol>
+
+</main>
+<footer class="doc-footer">Antigravity CLI ドキュメント 日本語要約 — 最新・正確な情報は公式ドキュメントを参照してください</footer>
+</body>
+</html>
