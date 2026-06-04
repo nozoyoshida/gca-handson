@@ -10,6 +10,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# 最小権限: ソースの読み取りのみ（書き込み・PR 操作等は不要）
+permissions:
+  contents: read
+
 jobs:
   starter:
     name: starter 起動検証 (${{ matrix.app }})
