@@ -1,0 +1,97 @@
+name: handson-ci
+
+# ハンズオン再現性チェック（issue #6）
+# - starter: クリーン環境で venv 構築〜`python app.py` が起動し応答するか
+# - completed: `gunicorn app:app`（Cloud Run 本番構成）が起動し応答するか
+# - docs: 相対リンク切れの検出
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  starter:
+    name: starter 起動検証 (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [gca, antigravity]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"   # completed/Dockerfile の python:3.12-slim に合わせる
+      - name: venv 構築 + 依存インストール（README どおり）
+        working-directory: ${{ matrix.app }}/starter
+        run: |
+          python -m venv .venv
+          ./.venv/bin/pip install --upgrade pip
+          ./.venv/bin/pip install -r requirements.txt
+      - name: python app.py 起動スモーク
+        working-directory: ${{ matrix.app }}/starter
+        run: |
+          set -euo pipefail
+          # WERKZEUG_RUN_MAIN=true で debug リローダの fork を抑止し単一プロセス化
+          # （CI ではファイル監視が不要で、kill $PID を確実にするため）
+          WERKZEUG_RUN_MAIN=true ./.venv/bin/python app.py &
+          APP_PID=$!
+          trap 'kill $APP_PID 2>/dev/null || true' EXIT
+          ok=0
+          for _ in $(seq 1 30); do
+            if curl -sf -o /dev/null http://127.0.0.1:5000/; then ok=1; break; fi
+            sleep 1
+          done
+          test "$ok" = "1" || { echo "起動タイムアウト"; exit 1; }
+          curl -sf -o /dev/null -w "GET /        -> %{http_code}\n" http://127.0.0.1:5000/
+          curl -sf -o /dev/null -w "GET /tickets -> %{http_code}\n" http://127.0.0.1:5000/tickets
+
+  completed:
+    name: completed gunicorn 検証 (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [gca, antigravity]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: venv 構築 + 依存インストール
+        working-directory: ${{ matrix.app }}/completed
+        run: |
+          python -m venv .venv
+          ./.venv/bin/pip install --upgrade pip
+          ./.venv/bin/pip install -r requirements.txt
+      - name: gunicorn app:app 起動スモーク（Cloud Run 本番構成）
+        working-directory: ${{ matrix.app }}/completed
+        env:
+          PORT: "8080"
+        run: |
+          set -euo pipefail
+          ./.venv/bin/gunicorn --bind ":$PORT" --workers 1 --threads 8 --timeout 0 app:app &
+          APP_PID=$!
+          trap 'kill $APP_PID 2>/dev/null || true' EXIT
+          ok=0
+          for _ in $(seq 1 30); do
+            if curl -sf -o /dev/null "http://127.0.0.1:$PORT/"; then ok=1; break; fi
+            sleep 1
+          done
+          test "$ok" = "1" || { echo "起動タイムアウト"; exit 1; }
+          # import 時 init_db が走り、GUI/一覧/対応履歴が応答することを確認
+          curl -sf -o /dev/null -w "GET /                     -> %{http_code}\n" "http://127.0.0.1:$PORT/"
+          curl -sf -o /dev/null -w "GET /tickets              -> %{http_code}\n" "http://127.0.0.1:$PORT/tickets"
+          curl -sf -o /dev/null -w "GET /tickets/1/responses  -> %{http_code}\n" "http://127.0.0.1:$PORT/tickets/1/responses"
+
+  links:
+    name: docs リンク切れ検査
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 相対リンク・参照ファイルの存在検査
+        run: python .github/scripts/check_links.py

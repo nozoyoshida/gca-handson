@@ -186,7 +186,7 @@
 
   <div class="callout callout-warning" style="margin-top:28px;">
     <div class="callout-title">はじめに：本ガイドの「要確認」表記について <span class="verify-tag">要確認</span></div>
-    Antigravity 2.0 と Gemini Enterprise Agent Platform（GEAP）は比較的新しい製品で、CLI の導入コマンド・認証フラグ・<code>.agents/</code> のパス・モデル名などの<strong>具体値は変わる可能性</strong>があります。本ガイドでは確実な土台（Cloud Workstations のブラウザ IDE / ウェブプレビュー、エージェントの「計画→承認→実行→検証」、<code>AGENTS.md</code>、<code>curl</code> 検証、Cloud Run デプロイ）をベースに記述し、ツール固有の具体値には <span class="verify-tag">要確認</span> を付けています。<strong>実施前に公式ドキュメント（antigravity.google / cloud.google.com）で最新手順をご確認ください。</strong> なお、<code>agy</code> CLI のコマンド詳細は <a href="cli/index.html">CLI リファレンス（日本語要約）</a> にまとめています。
+    Antigravity 2.0 と Gemini Enterprise Agent Platform（Vertex AI の進化版。<strong>GEAP</strong> は本ガイドの略記で、Google 公式の略語ではありません）は比較的新しい製品で、CLI の導入コマンド・認証フラグ・<code>.agents/</code> のパス・モデル名などの<strong>具体値は変わる可能性</strong>があります。本ガイドでは確実な土台（Cloud Workstations のブラウザ IDE / ウェブプレビュー、エージェントの「計画→承認→実行→検証」、<code>AGENTS.md</code>、<code>curl</code> 検証、Cloud Run デプロイ）をベースに記述し、ツール固有の具体値には <span class="verify-tag">要確認</span> を付けています。<strong>実施前に公式ドキュメント（antigravity.google / cloud.google.com）で最新手順をご確認ください。</strong> なお、<code>agy</code> CLI のコマンド詳細は <a href="cli/index.html">CLI リファレンス（日本語要約）</a> にまとめています。
   </div>
 
 <!-- ===== TOC ===== -->
@@ -263,17 +263,20 @@
 
     <!-- Step 2 -->
     <h4 style="margin-top:16px;">Step 2: Antigravity CLI のセットアップと GEAP 認証 <span class="verify-tag">要確認</span></h4>
-    <div class="step" data-step="1">Antigravity CLI（<code>agy</code>）が未インストールの場合はインストールします（理想は管理者がカスタムイメージにプリイン済み &mdash; 附録 A）。<code>~/.local/bin</code> は永続ディスク上なので、一度入れれば次回以降も残ります。</div>
-<pre><span class="comment"># ※ 公式の最新インストール手順は antigravity.google で要確認</span>
+    <div class="step" data-step="1">Antigravity CLI（<code>agy</code>）が未インストールの場合はインストールします（理想は管理者がカスタムイメージにプリイン済み &mdash; 附録 A）。公式インストーラ（antigravity.google 配信）が <code>agy</code> バイナリを <code>~/.local/bin</code> に配置します（永続ディスク上なので次回以降も残ります）。<code>agy</code> は実行中にバックグラウンドで自動更新されます。</div>
+<pre><span class="comment"># 公式インストーラ（macOS / Linux）</span>
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 agy --version</pre>
-    <div class="step" data-step="2">Antigravity CLI を組織の Google Cloud（GEAP）で認証します。ワークステーションは<strong>ヘッドレス</strong>なので、表示された URL を別タブのブラウザで開き、コードをターミナルに貼り付けます。GEAP の<strong>プロジェクト ID とリージョン</strong>を指定します。</div>
-<pre><span class="comment"># ※ コマンド名・フラグは要確認（例）</span>
-agy login
-<span class="comment"># 表示された URL をブラウザで開き、コードをターミナルに貼り付け</span>
-<span class="comment"># GEAP のプロジェクトとリージョンを指定（例）</span>
-agy config set project <span class="variable">YOUR_GEAP_PROJECT_ID</span>
-agy config set location <span class="variable">us-central1</span></pre>
+    <div class="step" data-step="2">Antigravity CLI を組織の Google Cloud（Gemini Enterprise Agent Platform）で認証します。ワークステーションは<strong>ヘッドレス</strong>なので、CLI が SSH / リモートセッションを自動検出し、表示された URL を別タブのブラウザで開いてワンタイムコードを貼り付ける流れになります（専用フラグは不要）。<strong>プロジェクトはログイン時に指定</strong>します。</div>
+<pre><span class="comment"># ログイン（初回はウィザードで「Google Cloud プロジェクトを使う」を選択）</span>
+<span class="comment"># プロジェクトをフラグで指定する形式：</span>
+agy auth login --project <span class="variable">YOUR_GEAP_PROJECT_ID</span>
+<span class="comment"># ロケーションはログイン時に選択（global / eu / us のいずれか）</span>
+<span class="comment"># プロジェクト / ロケーションの変更は /logout 後に再ログインして選び直す</span></pre>
+    <div class="callout callout-warning" style="margin-top:8px;">
+      <div class="callout-title">コマンド・フラグは <code>agy auth login --help</code> で確認 <span class="verify-tag">要確認</span></div>
+      認証コマンドは <code>agy auth login</code> です（旧表記の <code>agy login</code> / <code>agy config set project|location</code> は公式ソースで確認できませんでした）。ロケーションは <code>us-central1</code> のような細粒度リージョンではなく <code>global</code> / <code>eu</code> / <code>us</code> の 3 エンドポイントです。公式ドキュメント（antigravity.google）は JS レンダリングのため自動取得が難しく、正確なフラグは実機の <code>agy auth login --help</code> と <code>/help</code> で確認してください。
+    </div>
     <div class="callout callout-warning">
       <div class="callout-title">ローカル PC との違い</div>
       デスクトップ版 Antigravity は自動でブラウザを開きますが、Cloud Workstation のターミナルはヘッドレスです。<strong>「URL 表示 → 別タブで開く → コードを貼り戻す」</strong>のヘッドレス OAuth フローになります。
@@ -492,7 +495,7 @@ Flask と SQLite を使用したチケット管理 REST API です。
       <div class="step" data-step="2">保存します。エージェントは次のタスクから自動的にこのファイルを読み込みます。</div>
       <div class="callout callout-info">
         <div class="callout-title">AGENTS.md の階層 <span class="verify-tag">要確認</span></div>
-        グローバル（ユーザー設定ディレクトリ）→ プロジェクトルートの <code>AGENTS.md</code> → サブディレクトリ、の順で適用されます。会社全体の規約をグローバルに、プロジェクト固有のルールをルートに置くことで、チーム全体で一貫した出力が得られます。
+        Antigravity は v1.20.3 以降、ネイティブの <code>GEMINI.md</code> に加えて <code>AGENTS.md</code>（クロスツール標準）も読み込みます。スコープはグローバル（<code>~/.gemini/</code>）→ プロジェクトルートの <code>AGENTS.md</code> → サブディレクトリ の順です。会社全体の規約をグローバルに、プロジェクト固有のルールをルートに置くことで、チーム全体で一貫した出力が得られます。<strong>注意:</strong> サブディレクトリの <code>AGENTS.md</code> は既定で無効で、Settings → Agent →「Load nested AGENTS.md files」で有効化します（有効時もルートを上書きせず補完）。競合時の優先順位は System Rules → <code>GEMINI.md</code> → <code>AGENTS.md</code> → ワークスペースの rules フォルダ、とされます（この優先順位は公式 JS ドキュメントで未確認のため要確認）。
       </div>
     </div>
 
@@ -799,7 +802,7 @@ flowchart LR
       B2["PII マスキング"]
       B3["不正 URL ブロック"]
     end
-    B --> C["Antigravity\n(GEAP)"]
+    B --> C["Antigravity<br/>(GEAP)"]
     C --> D
     subgraph D["Model Armor - 出力"]
       direction TB
@@ -880,8 +883,8 @@ flowchart LR
   --region asia-northeast1 \
   --allow-unauthenticated</pre>
       <div class="callout callout-info">
-        <div class="callout-title">エージェントに任せることもできます <span class="verify-tag">要確認</span></div>
-        CLI に「<em>このアプリを Cloud Run の asia-northeast1 リージョンに、未認証アクセスを許可してデプロイして</em>」と依頼すると、エージェントがターミナルで <code>gcloud run deploy</code> を実行し、URL を読み戻します（実行時に許可を求められます）。Cloud Run の MCP サーバー経由でのデプロイも可能とされています（公式手順は要確認）。
+        <div class="callout-title">エージェントに任せることもできます</div>
+        CLI に「<em>このアプリを Cloud Run の asia-northeast1 リージョンに、未認証アクセスを許可してデプロイして</em>」と依頼すると、エージェントが<strong>公式の Cloud Run MCP サーバー</strong>（OSS: <code>@google-cloud/cloud-run-mcp</code>、またはマネージドのリモート MCP サーバー）の <code>deploy-local-folder</code> などのツールを呼び出してデプロイし、URL を読み戻します（実行時に許可を求められます）。このデプロイは <strong>Cloud Build API・Google Cloud クライアントライブラリ経由</strong>で行われ、<code>gcloud run deploy</code> をシェル実行するわけではありません（同等の手動コマンドは上の <code>gcloud run deploy --source .</code>）。<span class="verify-tag">要確認</span> 公式 codelab では同フローを「Gemini CLI」で説明しているため、<code>agy</code> 固有の呼称・操作は実機でご確認ください。
       </div>
       <div class="step" data-step="2">完了後、出力の最後に <code>Service URL: https://inquiry-system-xxxxx.run.app</code> が表示されます。</div>
     </div>
@@ -1016,14 +1019,15 @@ flowchart LR
   <div class="chapter-body">
 
     <div class="callout callout-warning">
-      <div class="callout-title">手順・ロール名は公式ドキュメントで要確認 <span class="verify-tag">要確認</span></div>
-      以下は概略です。GEAP の有効化方法・IAM ロール名・API サービス名などは、実施時点の公式ドキュメントで確認してください。
+      <div class="callout-title">ロール名・API は下記の確定値を参照（一部 要確認） <span class="verify-tag">要確認</span></div>
+      Cloud Workstations のカスタムイメージ手順は公式ドキュメントで確認済みです。GEAP（Gemini Enterprise Agent Platform）の有効化と IAM ロールも下記に確定値を記載しましたが、エンドユーザー向け Gemini Enterprise アプリ等とは別系統のため、実施時点の公式ドキュメントでの最終確認を推奨します。
     </div>
 
-    <h4>1. Gemini Enterprise Agent Platform（GEAP）</h4>
+    <h4>1. Gemini Enterprise Agent Platform（GEAP ＝ 本ガイドの略記）</h4>
     <ul style="margin: 4px 0 12px 20px; font-size: 14px;">
-      <li>組織で GEAP を有効化し、開発者にシート / アクセスを割り当てる <span class="verify-tag">要確認</span></li>
-      <li>開発者は Antigravity CLI から自分の Google Cloud ID でサインインし、GEAP のプロジェクト + リージョンを指定する</li>
+      <li>エージェント基盤の API <code>aiplatform.googleapis.com</code> を有効化（有効化には <code>roles/serviceusage.serviceUsageAdmin</code> が必要）。開発者には <strong>Agent Platform User</strong>（<code>roles/aiplatform.user</code>）を付与</li>
+      <li>有料シート（Gemini Code Assist Standard / Enterprise）の割り当ては Google Cloud コンソールの「Admin for Gemini」ページで行う（Antigravity 自体は現状プレビューで無償利用枠あり）</li>
+      <li>開発者は Antigravity CLI から自分の Google Cloud ID でサインインし、ログイン時にプロジェクトとロケーション（<code>global</code> / <code>eu</code> / <code>us</code>）を選択する</li>
     </ul>
 
     <h4>2. Cloud Workstations</h4>
@@ -1044,7 +1048,7 @@ gcloud workstations create ws-user01 \
   --cluster=handson-cluster --config=handson-config --region=asia-northeast1</pre>
     <div class="callout callout-success">
       <div class="callout-title">理想: カスタムイメージに Antigravity CLI / gcloud をプリインストール</div>
-      Google 提供のベースイメージ（Code OSS）を拡張し、<code>agy</code> や追加ツールを焼き込んだカスタムイメージを Artifact Registry に push してコンフィグで指定すると、受講者は Ch.0 の導入手順を省けます。<code>/home</code> は実行時にマウントされ上書きされるため、初期化は <code>/etc/workstation-startup.d/</code> のスタートアップスクリプトで行います。<span class="verify-tag">要確認</span>
+      Google 提供のベースイメージ（Code OSS）を拡張し、<code>agy</code> や追加ツールを焼き込んだカスタムイメージを Artifact Registry に push してコンフィグで指定すると、受講者は Ch.0 の導入手順を省けます。<code>/home</code> は永続ディスクが実行時にマウントされ<strong>ビルド時の変更が上書きされる</strong>ため、<code>/home</code> 依存の初期化は <code>/etc/workstation-startup.d/</code> のスタートアップスクリプト（3 桁の数値プレフィックス &gt;200 で実行順を制御、root 実行）で行います。
     </div>
     <ul style="margin: 4px 0 12px 20px; font-size: 14px;">
       <li>各受講者に <code>roles/workstations.user</code>（自分で作成させる場合は <code>roles/workstations.workstationCreator</code> も）を付与</li>
@@ -1079,7 +1083,7 @@ gcloud workstations create ws-user01 \
       公式 CLI ドキュメントを日本語要約した <a href="cli/index.html">Antigravity CLI リファレンス</a> に各コマンドの詳細をまとめています。最新の正確な情報は <a href="https://antigravity.google/docs/cli-using">公式ドキュメント</a> でご確認ください。
     </div>
 
-<pre><span class="comment"># インストール / バージョン確認（公式手順は要確認）</span>
+<pre><span class="comment"># インストール / バージョン確認（公式インストーラ）</span>
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 agy --version
 
@@ -1087,16 +1091,19 @@ agy --version
 agy
 
 <span class="comment"># 一発実行（CI / git hook 向け）</span>
-agy -p "コミット前の差分をレビューして" --cwd $(pwd)
+agy -p "コミット前の差分をレビューして"
 
-<span class="comment"># プロンプト内ショートカット</span>
-<span class="comment">#   @ パス補完  ! ターミナル直実行  ? ヘルプ  esc esc 入力クリア  Esc 中断  ctrl+v 画像添付</span>
+<span class="comment"># ── 確認済み（公式 CHANGELOG / README）──────────────</span>
+<span class="comment"># フラグ:       -p（非対話実行）  --model（モデル指定）</span>
+<span class="comment"># サブコマンド:  agy models / agy changelog / agy plugin / agy update</span>
+<span class="comment"># スラッシュ:    /settings /permissions /resume /diff /usage /quota</span>
+<span class="comment">#              /credits /statusline /help /logout /changelog /add-dir</span>
+<span class="comment"># キーバインド:  ctrl+r(Artifact Review)  ctrl+k(承認)  ctrl+o</span>
+<span class="comment">#              ctrl+d(終了)  ctrl+delete  alt+j</span>
 
-<span class="comment"># よく使うスラッシュコマンド</span>
-/config (=/settings)   設定パネル          /permissions  自律レベル
-/model  モデル選択       /agents サブエージェント    /tasks バックグラウンド
-/skills スキル           /mcp    MCP         /rewind (=/undo)  巻き戻し
-/fork   分岐             /resume (=/switch) 再開     /clear 新規</pre>
+<span class="comment"># ── 要確認（公式ソース未確認。Claude Code / Gemini CLI 由来の可能性）──</span>
+<span class="comment"># --cwd, /model /agents /tasks /skills /rewind /undo /fork /switch /clear,</span>
+<span class="comment"># プロンプト内 @ ! ? esc, ctrl+v(画像添付) は実機の /help で確認してください</span></pre>
 
     <table>
       <thead><tr><th>ファイル / 仕組み</th><th>役割</th></tr></thead>

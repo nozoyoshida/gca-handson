@@ -43,7 +43,7 @@ def validate_ticket_input(data, require_all=True):
 
     if 'title' in data or require_all:
         title = data.get('title', '')
-        if not title or not title.strip():
+        if not isinstance(title, str) or not title.strip():
             return None, 'title は必須です'
         title = strip_html_tags(title.strip())
         if len(title) > MAX_TITLE_LENGTH:
@@ -52,7 +52,7 @@ def validate_ticket_input(data, require_all=True):
 
     if 'description' in data or require_all:
         description = data.get('description', '')
-        if not description or not description.strip():
+        if not isinstance(description, str) or not description.strip():
             return None, 'description は必須です'
         description = strip_html_tags(description.strip())
         if len(description) > MAX_DESCRIPTION_LENGTH:
@@ -114,14 +114,6 @@ def init_db():
             FOREIGN KEY (ticket_id) REFERENCES tickets(id)
         )
     ''')
-    db.execute('''
-        CREATE TABLE IF NOT EXISTS sla_policies (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            priority TEXT NOT NULL UNIQUE,
-            response_deadline_hours INTEGER NOT NULL,
-            resolution_deadline_hours INTEGER NOT NULL
-        )
-    ''')
 
     count = db.execute('SELECT COUNT(*) FROM customers').fetchone()[0]
     if count == 0:
@@ -144,16 +136,6 @@ def init_db():
         db.executemany(
             'INSERT INTO tickets (title, description, status, priority, customer_id, assignee) VALUES (?, ?, ?, ?, ?, ?)',
             tickets
-        )
-
-        sla_policies = [
-            ('high', 1, 4),
-            ('medium', 4, 24),
-            ('low', 24, 72),
-        ]
-        db.executemany(
-            'INSERT INTO sla_policies (priority, response_deadline_hours, resolution_deadline_hours) VALUES (?, ?, ?)',
-            sla_policies
         )
 
     db.commit()
@@ -315,6 +297,8 @@ def update_ticket(ticket_id):
 def update_status(ticket_id):
     """PATCH /tickets/<id>/status チケットのステータスを変更する。"""
     data = request.get_json()
+    if data is None:
+        return jsonify({'error': 'リクエストボディが必要です'}), 400
     new_status = data.get('status', '')
 
     if new_status not in VALID_STATUSES:
@@ -405,88 +389,6 @@ def create_response(ticket_id):
     response = db.execute('SELECT * FROM responses WHERE id = ?', (cursor.lastrowid,)).fetchone()
     db.close()
     return jsonify(dict(response)), 201
-
-
-# ----- SLA Routes -----
-
-@app.route('/tickets/<int:ticket_id>/sla-status', methods=['GET'])
-def get_sla_status(ticket_id):
-    """GET /tickets/<id>/sla-status チケットの SLA ステータスを取得する。"""
-    db = get_db()
-    ticket = db.execute('SELECT * FROM tickets WHERE id = ?', (ticket_id,)).fetchone()
-    if ticket is None:
-        db.close()
-        return jsonify({'error': 'チケットが見つかりません'}), 404
-
-    policy = db.execute(
-        'SELECT * FROM sla_policies WHERE priority = ?',
-        (ticket['priority'],)
-    ).fetchone()
-
-    first_response = db.execute(
-        'SELECT created_at FROM responses WHERE ticket_id = ? ORDER BY created_at ASC LIMIT 1',
-        (ticket_id,)
-    ).fetchone()
-
-    # 経過時間を計算（時間単位）
-    elapsed = db.execute(
-        "SELECT (julianday('now') - julianday(?)) * 24 as hours",
-        (ticket['created_at'],)
-    ).fetchone()
-
-    db.close()
-
-    elapsed_hours = elapsed['hours'] if elapsed else 0
-    response_deadline = policy['response_deadline_hours'] if policy else 24
-    resolution_deadline = policy['resolution_deadline_hours'] if policy else 72
-
-    response_breached = first_response is None and elapsed_hours > response_deadline
-    resolution_breached = ticket['status'] != 'closed' and elapsed_hours > resolution_deadline
-
-    return jsonify({
-        'ticket_id': ticket_id,
-        'priority': ticket['priority'],
-        'elapsed_hours': round(elapsed_hours, 1),
-        'response_deadline_hours': response_deadline,
-        'resolution_deadline_hours': resolution_deadline,
-        'first_response_at': first_response['created_at'] if first_response else None,
-        'response_breached': response_breached,
-        'resolution_breached': resolution_breached,
-    })
-
-
-@app.route('/tickets/overdue', methods=['GET'])
-def get_overdue_tickets():
-    """GET /tickets/overdue SLA 違反のチケット一覧を取得する。"""
-    db = get_db()
-    tickets = db.execute(
-        "SELECT * FROM tickets WHERE status != 'closed'"
-    ).fetchall()
-
-    overdue = []
-    for ticket in tickets:
-        policy = db.execute(
-            'SELECT * FROM sla_policies WHERE priority = ?',
-            (ticket['priority'],)
-        ).fetchone()
-        if policy is None:
-            continue
-
-        elapsed = db.execute(
-            "SELECT (julianday('now') - julianday(?)) * 24 as hours",
-            (ticket['created_at'],)
-        ).fetchone()
-
-        elapsed_hours = elapsed['hours'] if elapsed else 0
-        if elapsed_hours > policy['resolution_deadline_hours']:
-            overdue.append({
-                **dict(ticket),
-                'elapsed_hours': round(elapsed_hours, 1),
-                'resolution_deadline_hours': policy['resolution_deadline_hours'],
-            })
-
-    db.close()
-    return jsonify(overdue)
 
 
 # gunicorn などの WSGI サーバー経由（Cloud Run 本番）でもテーブルが作成されるよう、

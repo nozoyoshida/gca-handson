@@ -441,17 +441,17 @@ git log $(git describe --tags --abbrev=0)..HEAD --oneline \
 
     <!-- 3-3 -->
     <div class="exercise">
-      <div class="exercise-title">3-3. 承認（ctrl+k）とテレポート（ctrl+j） <span class="badge">4分</span> <span class="verify-tag">要確認</span></div>
+      <div class="exercise-title">3-3. 承認（ctrl+k）と承認待ちの移動 <span class="badge">4分</span> <span class="verify-tag">要確認</span></div>
       <div class="step" data-step="1">サブエージェントが承認の必要な操作（ファイル書き込み・テスト実行など）に到達すると、プロンプト直上に <strong>Fast Path Alert</strong>（例: <code>Subagent 12 asks to run "pytest"</code>）が表示されます。</div>
       <div class="step" data-step="2"><strong>その場で承認</strong>: パネルを切り替えずに <code>ctrl+k</code> を押すと、保留中のアクションを即座に承認できます。</div>
-      <div class="step" data-step="3"><strong>テレポートして承認</strong>: <code>ctrl+j</code> を押すと、承認待ちの次のサブエージェントの Detail View へ「テレポート」します。確認/却下したら <code>Esc</code> で元のスレッドに戻ります。</div>
+      <div class="step" data-step="3"><strong>承認待ちの間を移動</strong>: 公式 CHANGELOG のキーバインド一覧には <code>ctrl+k</code> のほか <code>alt+j</code> があります（承認待ちのサブエージェント間の移動に使えるとされますが、<code>alt+j</code> の正確な機能は公式に明記されていません &mdash; 要確認）。確認/却下したら <code>Esc</code> で元のスレッドに戻ります。なお <code>ctrl+j</code> は公式のキーバインド一覧には含まれていません。</div>
       <div class="callout callout-warning">
         <div class="callout-title">キーバインドは要確認 <span class="verify-tag">要確認</span></div>
-        承認は <code>ctrl+k</code>、テレポートは <code>ctrl+j</code> が基本ですが、ドキュメントによっては <code>alt+j</code> 表記も見られます。実際の割り当ては <code>/keybindings</code> で確認・変更できます。
+        公式 CHANGELOG（v1.0.2）のショートカット一覧は <code>ctrl+r</code> / <code>ctrl+o</code> / <code>alt+j</code> / <code>ctrl+k</code> で、承認は <code>ctrl+k</code> が確定です。<code>ctrl+j</code> はこの一覧に含まれず（「テレポート」の説明は AI 要約由来の誤りの可能性）、<code>alt+j</code> の正確な機能も公式には未記載です。実際の割り当ては <code>/keybindings</code> または <code>/help</code> のショートカットタブで確認してください。
       </div>
       <div class="insight-box">
         <div class="insight-title">監視 → 承認のリズムを作る</div>
-        並列実行の価値は「待たないこと」です。<code>/agents</code> で全体像を掴み、Fast Path Alert が出たら <code>ctrl+k</code> で即承認、深く見たいときだけ <code>ctrl+j</code> でテレポート、という<strong>リズム</strong>を身につけると、複数改善を一気に回せます。
+        並列実行の価値は「待たないこと」です。<code>/agents</code> で全体像を掴み、Fast Path Alert が出たら <code>ctrl+k</code> で即承認、深く見たいときだけ Detail View で内容を確認、という<strong>リズム</strong>を身につけると、複数改善を一気に回せます。
       </div>
     </div>
 
